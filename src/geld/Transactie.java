@@ -20,9 +20,9 @@ public class Transactie {
     final private Referentie referentie;
 
     public Transactie(boolean af, int bedrag, Referentie referentie) {
-        if ( referentie == null
-                || ( (referentie instanceof Kookdag) && bedrag < 0 )
-                || ( !(referentie instanceof Kookdag) && bedrag <= 0 ) ) {
+        if (referentie == null
+                || ((referentie instanceof Kookdag) && bedrag < 0)
+                || (!(referentie instanceof Kookdag) && bedrag <= 0)) {
             throw new IllegalArgumentException();
         }
         this.af = af;
@@ -40,5 +40,19 @@ public class Transactie {
 
     public Referentie getReferentie() {
         return referentie;
+    }
+
+    public static class Record {
+
+        final private Transactie transactie;
+        final private RekeningHouder van;
+        final private RekeningHouder naar;
+
+        public Record(Transactie transactie, RekeningHouder van, RekeningHouder naar) {
+            this.transactie = transactie;
+            this.van = van;
+            this.naar = naar;
+        }
+
     }
 }

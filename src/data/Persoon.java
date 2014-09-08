@@ -6,13 +6,13 @@
 package data;
 
 import data.types.HasNaam;
-import geld.RekeningHouderI;
+import geld.RekeningHouderSimple;
 
 /**
  *
  * @author Dennis
  */
-public class Persoon extends RekeningHouderI implements HasNaam{
+public class Persoon extends RekeningHouderSimple implements HasNaam{
 
     protected Boolean kwijtschelden = null;
 

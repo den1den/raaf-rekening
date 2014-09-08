@@ -15,8 +15,9 @@ import data.memory.Memory;
 import file.manager.DataManager;
 import file.manager.FormatFactory;
 import geld.Policy;
-import geld.RekeningHouderContantI;
-import geld.TRecord;
+import geld.RekeningHouderContant;
+import geld.Transactie;
+import geld.two.Transactie$Record;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -24,8 +25,8 @@ import java.util.Map;
 import java.util.Set;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import util.diplay.PrintStreamResult;
 import util.diplay.Result;
+import util.diplay.ResultPrintStream;
 
 /**
  *
@@ -61,17 +62,17 @@ public class RaafBeheer {
     private final DataManager files;
     private final Policy policy;
     private final FormatFactory formats;
-    private final RekeningHouderContantI raafRekening;
-    private final RekeningHouderContantI kookRekening;
+    private final RekeningHouderContant raafRekening;
+    private final RekeningHouderContant kookRekening;
     private final Result result;
 
     RaafBeheer(int version) {
         formats = new FormatFactory(version);
         files = new DataManager(formats, false);
-        raafRekening = new RekeningHouderContantI("RaafRekening");
-        kookRekening = new RekeningHouderContantI("KookLijstRekening");
+        raafRekening = new RekeningHouderContant("RaafRekening");
+        kookRekening = new RekeningHouderContant("KookLijstRekening");
         policy = new Policy(version, raafRekening, kookRekening);
-        result = new PrintStreamResult(version);
+        result = new ResultPrintStream(version);
     }
 
     void testing() {
@@ -95,16 +96,16 @@ public class RaafBeheer {
 
         policy.verrekenKookdagen(kookdagen, kookSchuldDelers);
 
-        result.showDepts(memory.personen.getAll(), kookRekening);
+        result.showSchuld(memory.personen.getAll(), kookRekening);
         System.exit(0);
         
         
-        List<TRecord> fs = policy.verrekenBewoonPeriodes(bewoonPeriodes);
+        List<Transactie.Record> fs = policy.verrekenBewoonPeriodes(bewoonPeriodes);
         fs.addAll(policy.verrekenBonnetjes(bonnetjes));
         fs.addAll(policy.verwerkAfschriften(afschriften, bonnetjes));
 
         //result.showFactuurs(fs);
-        result.showBalances(memory.personen.getAll());
+        
         result.showDetailed(memory.personen.get("Dennis"));
     }
 

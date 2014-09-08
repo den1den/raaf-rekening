@@ -6,13 +6,13 @@
 package data;
 
 import data.types.HasNaam;
-import geld.RekeningHouderI;
+import geld.RekeningHouderSimple;
 
 /**
  *
  * @author Dennis
  */
-public class Winkel extends RekeningHouderI implements HasNaam{
+public class Winkel extends RekeningHouderSimple implements HasNaam{
 
     
     AankoopCat defaultAankoopCat;

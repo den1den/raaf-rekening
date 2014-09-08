@@ -3,21 +3,44 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 package geld;
 
-/**
- *
- * @author Dennis
- */
-public interface RekeningHouderContant extends RekeningHouder {
 
-    RekeningHouder getContant();
+public class RekeningHouderContant extends RekeningHouderSimple implements RekeningHouderContantInterface{
 
-    public void pin(int bedrag);
+    public RekeningHouderContant(String naam) {
+        super(naam);
+    }
 
-    public void stort(int bedrag);
+    RekeningHouder contant = new ContantRekening();
+    
+    @Override
+    public RekeningHouder getContant() {
+        return contant;
+    }
 
     @Override
-    public int getSchuld(RekeningHouder rh);
+    public void pin(int bedrag) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 
+    @Override
+    public void stort(int bedrag) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public int getTotaalSchuld(RekeningHouder rh) {
+        return getSchuld(rh) + contant.getSchuld(rh);
+    }
+
+    private class ContantRekening extends RekeningHouder {
+
+        @Override
+        public String getNaam() {
+            return RekeningHouderContant.this.naam + " contant";
+        }
+    }
+    
 }

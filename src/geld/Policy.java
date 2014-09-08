@@ -15,6 +15,7 @@ import data.Winkel;
 import data.memory.Memory;
 import data.types.HasBedrag;
 import data.types.HasDate;
+import geld.Transactie.Record;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -29,7 +30,6 @@ import java.util.logging.Logger;
 import tijd.Datum;
 import tijd.Interval;
 import tijd.Time;
-import util.diplay.PrintStreamResult;
 
 /**
  *
@@ -116,9 +116,9 @@ public class Policy {
         }
     }
 
-    public List<TRecord> verrekenBewoonPeriodes(
+    public List<Record> verrekenBewoonPeriodes(
             Collection<BewoonPeriode> bewoonPeriodes) {
-        List<TRecord> records = new LinkedList<>();
+        List<Record> records = new LinkedList<>();
         for (BewoonPeriode bewoonPeriode : bewoonPeriodes) {
             Persoon persoon = bewoonPeriode.getPersoon();
             for (BewoonPeriode.SubPeriode subPeriode : bewoonPeriode) {
@@ -129,18 +129,18 @@ public class Policy {
         return records;
     }
 
-    public List<TRecord> verrekenBonnetjes(
+    public List<Record> verrekenBonnetjes(
             Set<Bonnetje> bonnetjes) {
-        List<TRecord> records = new LinkedList<>();
+        List<Record> records = new LinkedList<>();
         for (Bonnetje bonnetje : bonnetjes) {
             raafrekeneing.addSchuld(bonnetje.getPersoon(), bonnetje.getBedrag(), bonnetje);
         }
         return records;
     }
 
-    public Collection<TRecord> verwerkAfschriften(Collection<Afschrift> afschriften,
+    public Collection<Record> verwerkAfschriften(Collection<Afschrift> afschriften,
             Collection<Bonnetje> bonnetjes) {
-        Collection<TRecord> records = new LinkedList<>();
+        Collection<Record> records = new LinkedList<>();
         ArrayList<Bonnetje> bonnetjes1 = new ArrayList<>(bonnetjes);
         Collections.sort(bonnetjes1, Bonnetje.getByDate());
         for (Afschrift afschrift : afschriften) {
@@ -156,7 +156,7 @@ public class Policy {
     final private String UPC_NAAM = "UPC";
     final private Winkel WINKEL_UNKNOWN = new Winkel("Niet bekend", null, null);
 
-    private <RL extends List<Bonnetje> & RandomAccess> TRecord verwerkAfschrift(
+    private <RL extends List<Bonnetje> & RandomAccess> Record verwerkAfschrift(
             Afschrift afschrift,
             RL bonnetjes) {
         Incasso ING_INCASSO = memory.incassos.get(ING_NAAM);
