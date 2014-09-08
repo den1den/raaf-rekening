@@ -6,6 +6,8 @@
 
 package geld;
 
+import java.util.List;
+
 
 public class RekeningHouderSimple extends RekeningHouder {
     final String naam;
@@ -18,5 +20,4 @@ public class RekeningHouderSimple extends RekeningHouder {
     public String getNaam() {
         return naam;
     }
-    
 }

@@ -11,6 +11,7 @@ import geld.Referentie;
 import geld.RekeningHouder;
 import geld.RekeningHouderInterface;
 import geld.Transactie;
+import geld.Transactie.Record;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,6 +20,7 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import util.MyTxtTable;
+import util.MyTxtTable.MyTxtTableHeader;
 import util.SchuldenComparator;
 
 
@@ -43,14 +45,19 @@ final int version;
         List<String[]> rows = new LinkedList<>();
         String[] header;
 
-        if (version < 3) {
-            header = new String[]{"bedrag", "datum", "referentie", "saldo"};
-        } else {
-            header = new String[]{"bedrag", "datum", "referentie", "Code", "saldo"};
+        if(version <= 3){
+            throw new UnsupportedClassVersionError("This class is to new "+getClass());
         }
+        
+        header = new String[]{"bedrag", "datum", "referentie", "Code", "saldo"};
 
         rows.add(header);
-        for (Transactie t : rekeninghouder.getTransacties(rekeninghouder)) {
+        List<Record> transacties = rekeninghouder.getAllTransacties();
+        if(transacties == null){
+            rows.add(new String[]{"Geen transacties gevonden..."});
+        }else
+        for (Record r : transacties) {
+            Transactie t = r.getTransactie();
             String[] row;
             int index = 0;
 
@@ -81,7 +88,7 @@ final int version;
             row[++index] = String.valueOf(saldo);
             rows.add(row);
         }
-        stream.print(new MyTxtTable.MyTxtTableHeader(rows));
+        stream.println(new MyTxtTableHeader(rows).toString());
     }
 
     @Override

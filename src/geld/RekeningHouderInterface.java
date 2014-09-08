@@ -6,6 +6,7 @@
 package geld;
 
 import data.types.HasNaam;
+import geld.Transactie.Record;
 import java.util.List;
 
 /**
@@ -25,5 +26,12 @@ public interface RekeningHouderInterface extends HasNaam {
 
     void add(boolean af, RekeningHouderInterface aan, int bedrag, Referentie referentie);
 
-    List<Transactie> getTransacties(RekeningHouderInterface r);
+    /**
+     * 
+     * @param r
+     * @return != null
+     */
+    List<Transactie> getTransactiesCopy(RekeningHouderInterface r);
+    
+    List<Record> getAllTransacties();
 }

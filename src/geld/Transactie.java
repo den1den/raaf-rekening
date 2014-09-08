@@ -45,13 +45,17 @@ public class Transactie {
     public static class Record {
 
         final private Transactie transactie;
-        final private RekeningHouder van;
-        final private RekeningHouder naar;
+        final private RekeningHouderInterface van;
+        final private RekeningHouderInterface naar;
 
-        public Record(Transactie transactie, RekeningHouder van, RekeningHouder naar) {
+        public Record(Transactie transactie, RekeningHouderInterface van, RekeningHouderInterface naar) {
             this.transactie = transactie;
             this.van = van;
             this.naar = naar;
+        }
+
+        public Transactie getTransactie() {
+            return transactie;
         }
 
     }

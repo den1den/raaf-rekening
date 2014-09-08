@@ -28,8 +28,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import tijd.Datum;
-import tijd.Interval;
-import tijd.Time;
+import util.diplay.ResultPrintStream;
 
 /**
  *
@@ -112,7 +111,7 @@ public class Policy {
             if (total != 0) {
                 throw new Error();
             }
-            new PrintStreamResult(3).showDepts(memory.personen.getAll(), kookRekening);
+            new ResultPrintStream(version).showSchuld(memory.personen.getAll(), kookRekening);
         }
     }
 

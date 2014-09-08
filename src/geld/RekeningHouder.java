@@ -3,33 +3,26 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package geld;
 
+import geld.Transactie.Record;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-
 public abstract class RekeningHouder implements RekeningHouderInterface {
 
-    private final Map<RekeningHouderInterface, List<Transactie>> schuldTransacties;
-    private final Map<RekeningHouderInterface, Integer> schuldBedrag;
+    private final ProtectedImplementation pi;
 
     public RekeningHouder() {
-        this.schuldTransacties = new HashMap<>(2);
-        this.schuldBedrag = new HashMap<>(2);
+        pi = new ProtectedImplementation(2);
     }
 
     @Override
     public final int getSchuld(RekeningHouderInterface rh) {
-        Integer schuld = schuldBedrag.get(rh);
-        if (schuld == null) {
-            return 0;
-        } else {
-            return schuld;
-        }
+        return pi.schuld(rh);
     }
 
     @Override
@@ -40,29 +33,18 @@ public abstract class RekeningHouder implements RekeningHouderInterface {
 
     @Override
     public void add(boolean af, RekeningHouderInterface aan, int bedrag, Referentie referentie) {
-        List<Transactie> transacties = getNotNullList(aan);
-        transacties.add(new Transactie(af, bedrag, referentie));
-        int newBedrag;
-        if (af) {
-            newBedrag = getSchuld(aan) - bedrag;
-        } else {
-            newBedrag = getSchuld(aan) + bedrag;
-        }
-        schuldBedrag.put(aan, newBedrag);
+        Transactie t = new Transactie(af, bedrag, referentie);
+        pi.put(aan, t);
     }
 
-    private List<Transactie> getNotNullList(RekeningHouderInterface rh) {
-        List<Transactie> ls = getTransacties(rh);
-        if (ls == null) {
-            ls = new LinkedList<>();
-            schuldTransacties.put(rh, ls);
-        }
-        return ls;
-    }
-    
     @Override
-    public final List<Transactie> getTransacties(RekeningHouderInterface r){
-        return schuldTransacties.get(r);
+    public final List<Transactie> getTransactiesCopy(RekeningHouderInterface r) {
+        List<Transactie> get = pi.getTransacties(r);
+        if (get == null) {
+            return new ArrayList<>(0);
+        } else {
+            return new ArrayList<>(get);
+        }
     }
 
     @Override
@@ -70,5 +52,72 @@ public abstract class RekeningHouder implements RekeningHouderInterface {
         this.add(true, aan, bedrag, referentie);
         aan.add(false, this, bedrag, referentie);
     }
-    
+
+    @Override
+    public String toString() {
+        return getNaam();
+    }
+
+    @Override
+    public List<Record> getAllTransacties() {
+        return pi.getAllTransacties();
+    }
+
+    private class ProtectedImplementation {
+
+        private ProtectedImplementation(int size) {
+            this.transacties = new HashMap<>(size);
+            this.schulden = new HashMap<>(size);
+            this.allTransacties = new LinkedList<>();
+        }
+
+        private final Map<RekeningHouderInterface, List<Transactie>> transacties;
+        private final Map<RekeningHouderInterface, Integer> schulden;
+        private final List<Record> allTransacties;
+
+        private int schuld(RekeningHouderInterface rh) {
+            Integer schuld = schulden.get(rh);
+            if (schuld == null) {
+                return 0;
+            } else {
+                return schuld;
+            }
+        }
+
+        private List<Transactie> createTransacties(RekeningHouderInterface r) {
+            List<Transactie> list = getTransacties(r);
+            if (list == null) {
+                list = new LinkedList<>();
+                transacties.put(r, list);
+            }
+            return list;
+        }
+
+        private List<Transactie> getTransacties(RekeningHouderInterface r) {
+            return transacties.get(r);
+        }
+
+        private void put(RekeningHouderInterface aan, Transactie t) {
+            List<Transactie> ts = createTransacties(aan);
+            ts.add(t);
+
+            int newBedrag;
+            Record record;
+            if (t.isAf()) {
+                record = new Record(t, RekeningHouder.this, aan);
+                newBedrag = schuld(aan) - t.getBedrag();
+            } else {
+                record = new Record(t, aan, RekeningHouder.this);
+                newBedrag = schuld(aan) + t.getBedrag();
+            }
+            schulden.put(aan, newBedrag);
+
+            allTransacties.add(record);
+        }
+
+        private List<Record> getAllTransacties() {
+            return allTransacties;
+        }
+
+    }
 }

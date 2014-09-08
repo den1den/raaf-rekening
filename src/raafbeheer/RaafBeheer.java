@@ -17,7 +17,6 @@ import file.manager.FormatFactory;
 import geld.Policy;
 import geld.RekeningHouderContant;
 import geld.Transactie;
-import geld.two.Transactie$Record;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -38,7 +37,7 @@ public class RaafBeheer {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        int version = 3;
+        int version = 4;
 
         RaafBeheer raafBeheer = new RaafBeheer(version);
         if (args.length > 0 && args[0].equalsIgnoreCase("testing")) {
