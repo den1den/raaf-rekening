@@ -5,6 +5,7 @@
  */
 package util.diplay.gui.graph;
 
+import geld.Transactie;
 import java.awt.Color;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -18,6 +19,11 @@ import java.util.List;
  * @author Dennis
  */
 public class DataSet<X, Y> {
+
+    public static DataSet createFrom(List<Transactie.Record> list) {
+        Class y = Transactie.Record.class;
+        return histogram(y, list);
+    }
 
     String titel;
     Color color;

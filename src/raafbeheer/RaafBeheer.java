@@ -96,7 +96,6 @@ public class RaafBeheer {
         policy.verrekenKookdagen(kookdagen, kookSchuldDelers);
 
         result.showSchuld(memory.personen.getAll(), kookRekening);
-        System.exit(0);
         
         
         List<Transactie.Record> fs = policy.verrekenBewoonPeriodes(bewoonPeriodes);

@@ -5,6 +5,7 @@
  */
 package util.diplay.gui.graph;
 
+import geld.Transactie;
 import java.util.Date;
 
 /**

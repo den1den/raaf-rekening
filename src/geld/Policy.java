@@ -61,6 +61,7 @@ public class Policy {
         for (Kookdag kookdag : allDagen) {
             verrekenKookdag(kookdag, kookSchuldDelers);
         }
+        new ResultPrintStream(version).showSchuld(memory.personen.getAll(), kookRekening);
     }
     private final RekeningHouder kookRekening;
 
@@ -111,7 +112,6 @@ public class Policy {
             if (total != 0) {
                 throw new Error();
             }
-            new ResultPrintStream(version).showSchuld(memory.personen.getAll(), kookRekening);
         }
     }
 
@@ -316,6 +316,7 @@ public class Policy {
         //return van.betaald(naar, bedrag, datum, referentie);
         //return van.moetBetalen(naar, bedrag, datum, referentie);
         //return van.betaal(naar, bedrag, referentie, datum)
+        throw new UnsupportedOperationException("Not yet");
     }
 
     private boolean isMededelingRaRe(String mededeling) {
