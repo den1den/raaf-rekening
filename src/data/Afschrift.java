@@ -5,11 +5,10 @@
  */
 package data;
 
-import data.types.HasDate;
-import geld.Referentie;
 import geld.ReferentieHasDate;
 import geld.RekeningHouder;
 import tijd.Datum;
+import tijd.Time;
 
 /**
  *
@@ -85,11 +84,6 @@ public class Afschrift
         return mededeling;
     }
 
-    @Override
-    public Datum getDate() {
-        return datum;
-    }
-
     public void setVanRHouder(RekeningHouder vanRHouder) {
         if (vanRHouder == null) {
             throw new IllegalArgumentException();
@@ -114,5 +108,15 @@ public class Afschrift
             b = bedrag;
         }
         return "Afschrift: " + datum + " " + b + " " + getMededeling();
+    }
+
+    @Override
+    public Datum getDate() {
+     return datum;   
+    }
+
+    @Override
+    public Time getTime() {
+        return datum;
     }
 }

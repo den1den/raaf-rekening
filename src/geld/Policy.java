@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 import tijd.Datum;
 import tijd.Interval;
 import tijd.Time;
+import util.diplay.PrintStreamResult;
 
 /**
  *
@@ -104,13 +105,14 @@ public class Policy {
 
                 } else if (!persoon.kwijtschelden()) {
                     verreken = prijs * (m.getValue());
-                    verantwoordelijk.addSchuld(kookRekening, total, kookdag);
+                    verantwoordelijk.addSchuld(kookRekening, verreken, kookdag);
                     total -= verreken;
                 }
             }
             if (total != 0) {
                 throw new Error();
             }
+            new PrintStreamResult(3).showDepts(memory.personen.getAll(), kookRekening);
         }
     }
 

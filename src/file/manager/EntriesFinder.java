@@ -6,6 +6,8 @@
 
 package file.manager;
 
+import java.nio.file.Paths;
+
 /**
  *
  * @author Dennis
@@ -13,6 +15,11 @@ package file.manager;
 public class EntriesFinder {
     static String simpleBasePath(){
         String usrDomain = System.getenv("USERDOMAIN");
+        String curr = Paths.get("").toAbsolutePath().toString();
+        
+        if(!curr.isEmpty()){
+            return curr + "\\files\\RaafEntries";
+        }
         if (usrDomain != null && usrDomain.equalsIgnoreCase("LaptopDennis")) {
             return "C:\\Users\\Dennis\\Dropbox\\RaafEntries";
         } else {

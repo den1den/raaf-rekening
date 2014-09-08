@@ -24,4 +24,10 @@ public class RekeningHouderI extends Rekening implements RekeningHouder {
     public String getNaam() {
         return naam;
     }
+    
+    @Override
+    public void addSchuld(RekeningHouder aan, int bedrag, Referentie referentie) {
+        this.add(true, aan, bedrag, referentie);
+        aan.add(false, this, bedrag, referentie);
+    }
 }

@@ -10,7 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class Rekening implements RekeningI {
+public abstract class Rekening implements RekeningI {
 
     private final Map<RekeningHouder, List<Transactie>> schuldTransacties;
     private final Map<RekeningHouder, Integer> schuldBedrag;
@@ -21,7 +21,7 @@ public class Rekening implements RekeningI {
     }
 
     @Override
-    public int getSchuld(RekeningHouder rh) {
+    public final int getSchuld(RekeningHouder rh) {
         Integer schuld = schuldBedrag.get(rh);
         if (schuld == null) {
             return 0;
@@ -31,33 +31,35 @@ public class Rekening implements RekeningI {
     }
 
     @Override
-    public void addSchuld(RekeningHouder aan, int bedrag, Referentie referentie) {
-        add(true, aan, bedrag, referentie);
+    public void payBack(RekeningHouder aan, int bedrag, Referentie referentie) {
+        add(false, aan, bedrag, referentie);
+        aan.add(true, aan, bedrag, referentie);
     }
 
     @Override
-    public void payBack(RekeningHouder aan, int bedrag, Referentie referentie) {
-        add(false, aan, bedrag, referentie);
-    }
-
-    private void add(boolean af, RekeningHouder aan, int bedrag, Referentie referentie) {
+    public void add(boolean af, RekeningHouder aan, int bedrag, Referentie referentie) {
         List<Transactie> transacties = getNotNullList(aan);
         transacties.add(new Transactie(af, bedrag, referentie));
         int newBedrag;
         if (af) {
-            newBedrag = schuldBedrag.get(aan) - bedrag;
+            newBedrag = getSchuld(aan) - bedrag;
         } else {
-            newBedrag = schuldBedrag.get(aan) + bedrag;
+            newBedrag = getSchuld(aan) + bedrag;
         }
         schuldBedrag.put(aan, newBedrag);
     }
 
     private List<Transactie> getNotNullList(RekeningHouder rh) {
-        List<Transactie> ls = schuldTransacties.get(rh);
+        List<Transactie> ls = getTransacties(rh);
         if (ls == null) {
             ls = new LinkedList<>();
             schuldTransacties.put(rh, ls);
         }
         return ls;
+    }
+    
+    @Override
+    public final List<Transactie> getTransacties(RekeningHouder r){
+        return schuldTransacties.get(r);
     }
 }

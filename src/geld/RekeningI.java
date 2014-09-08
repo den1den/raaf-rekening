@@ -5,6 +5,8 @@
  */
 package geld;
 
+import java.util.List;
+
 /**
  *
  * @author Dennis
@@ -16,4 +18,9 @@ interface RekeningI {
     void payBack(RekeningHouder aan, int bedrag, Referentie referentie);
 
     int getSchuld(RekeningHouder rh);
+
+    void add(boolean af, RekeningHouder aan, int bedrag, Referentie referentie);
+
+    List<Transactie> getTransacties(RekeningHouder r);
+    
 }

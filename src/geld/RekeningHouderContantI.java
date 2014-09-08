@@ -36,11 +36,6 @@ public class RekeningHouderContantI extends RekeningHouderI implements RekeningH
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
-    public int getSchuld(RekeningHouder rh) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
     private class ContantRekening extends Rekening implements RekeningHouder {
 
         @Override

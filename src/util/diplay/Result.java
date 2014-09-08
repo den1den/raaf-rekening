@@ -16,11 +16,12 @@ import java.util.Collection;
  * @author Dennis
  */
 public abstract class Result {
-    abstract public <R extends RekeningHouder> void showBalances(Collection<R> collection);
     
     abstract public <R extends RekeningHouder> void showDetailed(R rekeninghouder);
 
     abstract public void showTransacties(Collection<Transactie> factuurs);
     
     protected final DecimalFormat FORMAT = new DecimalFormat();
+
+    public abstract <R extends RekeningHouder> void showDepts(Collection<R> collection, RekeningHouder van);
 }

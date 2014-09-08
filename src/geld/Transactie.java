@@ -20,13 +20,25 @@ public class Transactie {
     final private Referentie referentie;
 
     public Transactie(boolean af, int bedrag, Referentie referentie) {
-        if (bedrag <= 0 || referentie == null) {
-            throw new IllegalArgumentException();
-        } else if (referentie instanceof Kookdag && (bedrag < 0)) {
+        if ( referentie == null
+                || ( (referentie instanceof Kookdag) && bedrag < 0 )
+                || ( !(referentie instanceof Kookdag) && bedrag <= 0 ) ) {
             throw new IllegalArgumentException();
         }
         this.af = af;
         this.bedrag = bedrag;
         this.referentie = referentie;
+    }
+
+    public boolean isAf() {
+        return af;
+    }
+
+    public int getBedrag() {
+        return bedrag;
+    }
+
+    public Referentie getReferentie() {
+        return referentie;
     }
 }
