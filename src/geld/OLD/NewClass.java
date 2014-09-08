@@ -11,5 +11,5 @@ package geld.OLD;
  * @author Dennis
  */
 public class NewClass {
-    
+    String geld;
 }
