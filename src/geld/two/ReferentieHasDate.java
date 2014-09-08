@@ -4,12 +4,19 @@
  * and open the template in the editor.
  */
 
-package data.types;
+package geld.two;
+
+import geld.*;
+import data.types.HasDate;
+import tijd.Datum;
 
 /**
  *
  * @author Dennis
  */
-public interface HasRekening {
-    public String getRekening();
+public interface ReferentieHasDate extends HasDate, Referentie{
+
+    @Override
+    public Datum getDate();
+    
 }

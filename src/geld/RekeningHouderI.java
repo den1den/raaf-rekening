@@ -26,7 +26,7 @@ public class RekeningHouderI extends Rekening implements RekeningHouder {
     }
     
     @Override
-    public void addSchuld(RekeningHouder aan, int bedrag, Referentie referentie) {
+    public void addSchuld(Rekening aan, int bedrag, Referentie referentie) {
         this.add(true, aan, bedrag, referentie);
         aan.add(false, this, bedrag, referentie);
     }

@@ -36,12 +36,7 @@ public class RekeningHouderContantI extends RekeningHouderI implements RekeningH
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    private class ContantRekening extends Rekening implements RekeningHouder {
-
-        @Override
-        public String getNaam() {
-            return RekeningHouderContantI.this.getNaam() + " contant";
-        }
+    private class ContantRekening extends RekeningHouderI implements RekeningHouder {
     }
     
 }

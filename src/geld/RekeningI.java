@@ -13,14 +13,14 @@ import java.util.List;
  */
 interface RekeningI {
 
-    void addSchuld(RekeningHouder aan, int bedrag, Referentie referentie);
+    void addSchuld(Rekening aan, int bedrag, Referentie referentie);
 
-    void payBack(RekeningHouder aan, int bedrag, Referentie referentie);
+    void payBack(Rekening aan, int bedrag, Referentie referentie);
 
-    int getSchuld(RekeningHouder rh);
+    int getSchuld(Rekening rh);
 
-    void add(boolean af, RekeningHouder aan, int bedrag, Referentie referentie);
+    void add(boolean af, Rekening aan, int bedrag, Referentie referentie);
 
-    List<Transactie> getTransacties(RekeningHouder r);
+    List<Transactie> getTransacties(Rekening r);
     
 }

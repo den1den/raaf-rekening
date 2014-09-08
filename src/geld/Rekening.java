@@ -12,8 +12,8 @@ import java.util.Map;
 
 public abstract class Rekening implements RekeningI {
 
-    private final Map<RekeningHouder, List<Transactie>> schuldTransacties;
-    private final Map<RekeningHouder, Integer> schuldBedrag;
+    private final Map<Rekening, List<Transactie>> schuldTransacties;
+    private final Map<Rekening, Integer> schuldBedrag;
 
     public Rekening() {
         this.schuldTransacties = new HashMap<>(2);
@@ -21,7 +21,7 @@ public abstract class Rekening implements RekeningI {
     }
 
     @Override
-    public final int getSchuld(RekeningHouder rh) {
+    public final int getSchuld(Rekening rh) {
         Integer schuld = schuldBedrag.get(rh);
         if (schuld == null) {
             return 0;
@@ -31,13 +31,13 @@ public abstract class Rekening implements RekeningI {
     }
 
     @Override
-    public void payBack(RekeningHouder aan, int bedrag, Referentie referentie) {
+    public void payBack(Rekening aan, int bedrag, Referentie referentie) {
         add(false, aan, bedrag, referentie);
         aan.add(true, aan, bedrag, referentie);
     }
 
     @Override
-    public void add(boolean af, RekeningHouder aan, int bedrag, Referentie referentie) {
+    public void add(boolean af, Rekening aan, int bedrag, Referentie referentie) {
         List<Transactie> transacties = getNotNullList(aan);
         transacties.add(new Transactie(af, bedrag, referentie));
         int newBedrag;
@@ -49,7 +49,7 @@ public abstract class Rekening implements RekeningI {
         schuldBedrag.put(aan, newBedrag);
     }
 
-    private List<Transactie> getNotNullList(RekeningHouder rh) {
+    private List<Transactie> getNotNullList(Rekening rh) {
         List<Transactie> ls = getTransacties(rh);
         if (ls == null) {
             ls = new LinkedList<>();
@@ -59,7 +59,7 @@ public abstract class Rekening implements RekeningI {
     }
     
     @Override
-    public final List<Transactie> getTransacties(RekeningHouder r){
+    public final List<Transactie> getTransacties(Rekening r){
         return schuldTransacties.get(r);
     }
 }
