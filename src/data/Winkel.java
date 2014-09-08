@@ -31,8 +31,4 @@ public class Winkel extends RekeningHouderI implements HasNaam{
             new Error("ehh? eerst: " + defaultAankoopCat + " en nu dit: " + defaultCat + " (Nothing done)").printStackTrace();
         }
     }
-    
-    public int totaalGekochtBij(){
-        return getSaldo();
-    }
 }

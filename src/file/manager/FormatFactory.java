@@ -10,6 +10,7 @@ import data.Afschrift;
 import data.BewoonPeriode;
 import data.BierBonnetje;
 import data.Bonnetje;
+import data.GeregistreerdeBetaling;
 import data.Incasso;
 import data.Kookdag;
 import data.Persoon;
@@ -60,20 +61,20 @@ public class FormatFactory {
         bierBonnetjes = createBierBonnetjes();
     }
 
-    public final Format<Persoon, Void> personen;
-    public final Format<Afschrift, Set<Afschrift>> afschriften;
-    public final Format<Bonnetje, Set<Bonnetje>> bonnetjes;
-    public final Format<Kookdag, List<Kookdag>> kookdagen;
-    public final Format<Memory, Memory> memoryFormat;
-    public final Format<BewoonPeriode, Set<BewoonPeriode>> bewoonPeriodes;
-    public final Format<IntegerParsable, IntegerParsable> raafRekening;
-    public final Format<Persoon, Map<Persoon, Persoon>> kookSchuldDelers;
-    public final Format<BierBonnetje, Set<BierBonnetje>> bierBonnetjes;
+    public final Format<Set<GeregistreerdeBetaling>> personen;
+    public final Format<Set<Afschrift>> afschriften;
+    public final Format<Set<Bonnetje>> bonnetjes;
+    public final Format<List<Kookdag>> kookdagen;
+    public final Format<Memory> memoryFormat;
+    public final Format<Set<BewoonPeriode>> bewoonPeriodes;
+    public final Format<IntegerParsable> raafRekening;
+    public final Format<Map<Persoon, Persoon>> kookSchuldDelers;
+    public final Format<Set<BierBonnetje>> bierBonnetjes;
 
-    private Format<Persoon, Void> createPersoon() {
+    private Format<Set<GeregistreerdeBetaling>> createPersoon() {
         String[] header;
         MyFilenameFilter filenameFilter;
-        Parser<Persoon, Void> parser;
+        SetParser<GeregistreerdeBetaling> parser;
 
         if (version >= 2) {
             header = new String[]{"Naam", "Kwijtschelden", "Betaald"};
@@ -84,10 +85,15 @@ public class FormatFactory {
         filenameFilter = new MyFilenameFilter("personen");
 
         if (version >= 2) {
-            parser = parserFactory.new VoidParser<Persoon>() {
+            parser = parserFactory.new SetParser<GeregistreerdeBetaling>() {
 
                 @Override
-                protected void parseLine(String[] strings) {
+                protected int getParseLevel() {
+                    return 10;
+                }
+
+                @Override
+                protected GeregistreerdeBetaling parseLine(String[] strings) {
                     String naam;
                     boolean kwijtschelden;
                     int betaald;
@@ -122,22 +128,15 @@ public class FormatFactory {
                     } else if (p.kwijtschelden() != kwijtschelden) {
                         throw new MyParseException(0);
                     }
-
-                    if (betaald != 0) {
-                        p.bij(null, betaald, ReferentieSimple.REFERENTIE_CONTANT);
-                    }
-                }
-
-                @Override
-                protected int getParseLevel() {
-                    return 10;
+                    
+                    return GeregistreerdeBetaling.getContant(null);
                 }
             };
         } else {
-            parser = parserFactory.new VoidParser<Persoon>() {
+            parser = parserFactory.new SetParser<GeregistreerdeBetaling>() {
 
                 @Override
-                protected void parseLine(String[] strings) {
+                protected GeregistreerdeBetaling parseLine(String[] strings) {
                     String naam;
                     boolean kwijtschelden;
 
@@ -157,6 +156,7 @@ public class FormatFactory {
                     } else if (p.kwijtschelden() != kwijtschelden) {
                         throw new MyParseException(0);
                     }
+                    return null;
                 }
 
                 @Override
@@ -169,10 +169,10 @@ public class FormatFactory {
         return new Format<>(filenameFilter, header, parser);
     }
 
-    private Format<Afschrift, Set<Afschrift>> createAfschrift() {
+    private Format<Set<Afschrift>> createAfschrift() {
         String[] header;
         MyFilenameFilter filenameFilter;
-        Parser<Afschrift, Set<Afschrift>> parser;
+        SetParser<Afschrift> parser;
 
         header = new String[]{"Datum", "Naam / Omschrijving", "Rekening", "Tegenrekening", "Code", "Af Bij", "Bedrag (EUR)", "MutatieSoort", "Mededelingen"};
         filenameFilter = new MyFilenameFilter("ing");
@@ -237,17 +237,17 @@ public class FormatFactory {
         return new Format<>(filenameFilter, header, parser);
     }
 
-    private Format<Bonnetje, Set<Bonnetje>> createBonnetjes() {
+    private Format<Set<Bonnetje>> createBonnetjes() {
         String[] header;
         MyFilenameFilter filenameFilter;
-        Parser<Bonnetje, Set<Bonnetje>> parser;
+        SetParser<Bonnetje> parser;
 
         header = new String[]{"CSVID", "Bedrag (centen)", "Gekocht door", "Pas (eindigd op)", "Datum (dmy)", "Winkel", "Spullen", "..."};
         filenameFilter = new MyFilenameFilter("bonnetjes");
         parser = parserFactory.new SetParser<Bonnetje>() {
             final StringParser<Integer> intParser = StringParser.INTEGER;
             final StringParser<Datum> dateParser = StringParser.getFastestDayParser();
-            
+
             private int id;
             private int bedrag;
             private Persoon persoon;
@@ -291,10 +291,10 @@ public class FormatFactory {
                 }
 
                 //verfijnen
-                if(!winkelNaam.isEmpty()){
+                if (!winkelNaam.isEmpty()) {
                     winkel = memoryInstance.winkels.get(winkelNaam);
                 }
-                if(!persoonNaam.isEmpty()){
+                if (!persoonNaam.isEmpty()) {
                     persoon = memoryInstance.personen.get(persoonNaam);
                 }
                 if (persoon == null) {
@@ -308,10 +308,10 @@ public class FormatFactory {
         return new Format<>(filenameFilter, header, parser);
     }
 
-    private Format<Kookdag, List<Kookdag>> createKookdagen() {
+    private Format< List<Kookdag>> createKookdagen() {
         String[] header;
         MyFilenameFilter filenameFilter;
-        Parser<Kookdag, List<Kookdag>> parser;
+        ListParser<Kookdag> parser;
 
         header = new String[]{"n", "Prijs (in centen)", "Kok", "Meeters", "..."};
         filenameFilter = MyFilenameFilter.getMeervoudCombo(
@@ -414,14 +414,19 @@ public class FormatFactory {
         return new Format<>(filenameFilter, header, parser);
     }
 
-    private Format<Memory, Memory> createMemory() {
+    private Format<Memory> createMemory() {
         String[] header;
         MyFilenameFilter filenameFilter;
-        Parser<Memory, Memory> parser;
+        Parser<Memory> parser;
 
         header = new String[]{"Type", "various", "(winkel categorie)", "(winkel andere namen)"};
         filenameFilter = new MyFilenameFilter("memory");
         parser = parserFactory.new SingleParser<Memory>( 
+             
+             
+             
+             
+             
              
              
              
@@ -498,10 +503,10 @@ private static final String typePersoon = "nickname";
         return new Format<>(filenameFilter, header, parser);
     }
 
-    private Format<BewoonPeriode, Set<BewoonPeriode>> createBewoonPeriodes() {
+    private Format<Set<BewoonPeriode>> createBewoonPeriodes() {
         String[] header;
         MyFilenameFilter filenameFilter;
-        Parser<BewoonPeriode, Set<BewoonPeriode>> parser;
+        SetParser<BewoonPeriode> parser;
 
         header = new String[]{"Naam", "Periode (van)", "Periode (tot)", "..."};
         filenameFilter = new MyFilenameFilter("bewoners");
@@ -548,22 +553,16 @@ private static final String typePersoon = "nickname";
         return new Format<>(filenameFilter, header, parser);
     }
 
-    private Format<IntegerParsable, IntegerParsable> createRekening() {
+    private Format<IntegerParsable> createRekening() {
         String[] header;
         MyFilenameFilter filenameFilter;
-        Parser<IntegerParsable, IntegerParsable> parser;
+        Parser<IntegerParsable> parser;
 
         header = null;
         filenameFilter = new MyFilenameFilter("bewoners");
-        parser = parserFactory.new SingleParser<IntegerParsable>( 
-             
-             
-             
-             
-             
-            new IntegerParsable()) {
-
-            @Override
+        parser = parserFactory.new SingleParser<IntegerParsable>(
+                 
+            new IntegerParsable()) {@Override
             protected void parseLine(String[] strings) {
                 if (strings.length != 2) {
                     throw new MyParseException.Length();
@@ -583,10 +582,10 @@ private static final String typePersoon = "nickname";
         return new Format<>(filenameFilter, header, parser);
     }
 
-    private Format<Persoon, Map<Persoon, Persoon>> createKookSchuldDelers() {
+    private Format<Map<Persoon, Persoon>> createKookSchuldDelers() {
         String[] header;
         MyFilenameFilter filenameFilter;
-        Parser<Persoon, Map<Persoon, Persoon>> parser;
+        ParserFactory.MapParser<Persoon> parser;
 
         header = new String[]{"Betaalt voor", "Persoon", "..."};
         filenameFilter = new MyFilenameFilter("kookSchuldDelen");
@@ -609,10 +608,10 @@ private static final String typePersoon = "nickname";
         return new Format<>(filenameFilter, header, parser);
     }
 
-    private Format<BierBonnetje, Set<BierBonnetje>> createBierBonnetjes() {
+    private Format<Set<BierBonnetje>> createBierBonnetjes() {
         String[] header;
         MyFilenameFilter filenameFilter;
-        Parser<BierBonnetje, Set<BierBonnetje>> parser;
+        SetParser<BierBonnetje> parser;
 
         header = null;
         filenameFilter = new MyFilenameFilter("bierBonnetjes");

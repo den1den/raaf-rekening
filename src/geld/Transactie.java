@@ -15,46 +15,18 @@ import tijd.Datum;
  */
 public class Transactie {
 
-    final private Datum datum;
-    final private int bedrag;
     final private boolean af;
+    final private int bedrag;
     final private Referentie referentie;
 
-    public Transactie(Bonnetje bonnetje, boolean af) {
-        this(bonnetje.getDate(), bonnetje.getBedrag(), af, bonnetje);
-    }
-
-    public Transactie(Datum datum, int bedrag, boolean af, Referentie referentie) {
-        if (bedrag < 0 ||
-                (bedrag == 0 && !(referentie instanceof Kookdag))) {
-            throw new IllegalArgumentException("Geen transactie!");
-        }
-        if (referentie == null) {
+    public Transactie(boolean af, int bedrag, Referentie referentie) {
+        if (bedrag <= 0 || referentie == null) {
+            throw new IllegalArgumentException();
+        } else if (referentie instanceof Kookdag && (bedrag < 0)) {
             throw new IllegalArgumentException();
         }
-        this.datum = datum;
-        this.bedrag = bedrag;
         this.af = af;
+        this.bedrag = bedrag;
         this.referentie = referentie;
-    }
-
-    Transactie getOposite() {
-        return new Transactie(datum, bedrag, !af, referentie);
-    }
-
-    public int getBedrag() {
-        return bedrag;
-    }
-
-    public Datum getDatum() {
-        return datum;
-    }
-
-    public Referentie getReferentie() {
-        return referentie;
-    }
-
-    public boolean isAf() {
-        return af;
     }
 }

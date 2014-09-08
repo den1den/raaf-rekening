@@ -99,12 +99,12 @@ public class Policy {
                 if (persoon.equals(kok)) {
                     verreken = kookdag.getBedrag()
                             - kokPrijs - prijs * (m.getValue() - 1);
-                    kookRekening.moetBetalen(verantwoordelijk, verreken, null, kookdag);
+                    kookRekening.addSchuld(verantwoordelijk, verreken, kookdag);
                     total += verreken;
 
                 } else if (!persoon.kwijtschelden()) {
                     verreken = prijs * (m.getValue());
-                    kookRekening.krijgtVan(verantwoordelijk, verreken, null, kookdag);
+                    verantwoordelijk.addSchuld(kookRekening, total, kookdag);
                     total -= verreken;
                 }
             }
@@ -119,15 +119,9 @@ public class Policy {
         List<TRecord> records = new LinkedList<>();
         for (BewoonPeriode bewoonPeriode : bewoonPeriodes) {
             Persoon persoon = bewoonPeriode.getPersoon();
-            Interval periode = bewoonPeriode.getInterval();
-
-            Time datum = periode.getBegin().nextMonth();
-
-            while (datum.before(periode.getEnd())) {
+            for (BewoonPeriode.SubPeriode subPeriode : bewoonPeriode) {
                 final int bedrag = 2000;
-                Referentie referentie = bewoonPeriode;
-                records.add(persoon.moetBetalen(raafrekeneing, bedrag, datum.getDatum(), referentie));
-                datum = datum.nextMonth();
+                persoon.addSchuld(raafrekeneing, bedrag, subPeriode);
             }
         }
         return records;
@@ -137,8 +131,7 @@ public class Policy {
             Set<Bonnetje> bonnetjes) {
         List<TRecord> records = new LinkedList<>();
         for (Bonnetje bonnetje : bonnetjes) {
-            TRecord tr = raafrekeneing.moetBetalen(bonnetje.getPersoon(), bonnetje.getBedrag(), bonnetje.getDate(), bonnetje);
-            records.add(tr);
+            raafrekeneing.addSchuld(bonnetje.getPersoon(), bonnetje.getBedrag(), bonnetje);
         }
         return records;
     }
@@ -319,7 +312,7 @@ public class Policy {
         int bedrag = afschrift.getBedrag();
         Datum datum = afschrift.getDate();
 
-        return van.betaald(naar, bedrag, datum, referentie);
+        //return van.betaald(naar, bedrag, datum, referentie);
         //return van.moetBetalen(naar, bedrag, datum, referentie);
         //return van.betaal(naar, bedrag, referentie, datum);
     }

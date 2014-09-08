@@ -6,6 +6,8 @@
 
 package geld;
 
+import tijd.Time;
+
 
 public class ReferentieSimple implements Referentie {
 final String referentie;
@@ -22,4 +24,9 @@ final String referentie;
     }
     
     public static final Referentie REFERENTIE_CONTANT = new ReferentieSimple("Contant");
+
+    @Override
+    public Time getTime() {
+        return null;
+    }
 }

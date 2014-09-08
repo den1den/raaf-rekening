@@ -5,14 +5,19 @@
  */
 package data;
 
-import geld.ReferentieByToString;
+import data.BewoonPeriode.SubPeriode;
+import geld.Referentie;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import tijd.Datum;
 import tijd.Interval;
+import tijd.Time;
 
 /**
  *
  * @author Dennis
  */
-public class BewoonPeriode extends ReferentieByToString{
+public class BewoonPeriode implements Iterable<SubPeriode> {
 
     final Persoon persoon;
     final Interval interval;
@@ -21,7 +26,6 @@ public class BewoonPeriode extends ReferentieByToString{
         this.persoon = persoon;
         this.interval = interval;
     }
-
 
     @Override
     public String toString() {
@@ -36,4 +40,42 @@ public class BewoonPeriode extends ReferentieByToString{
         return interval;
     }
 
+    @Override
+    public Iterator<SubPeriode> iterator() {
+        return new Iterator<SubPeriode>() {
+            Time begin = interval.getBegin();
+            Time end = begin.nextMonth();
+
+            @Override
+            public boolean hasNext() {
+                return end.before(interval.getEnd());
+            }
+
+            @Override
+            public SubPeriode next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+                SubPeriode sub = new SubPeriode(new Interval(begin, end));
+                begin = end;
+                end = end.nextMonth();
+                return sub;
+            }
+        };
+    }
+
+    public class SubPeriode implements Referentie{
+
+        final Interval subInterval;
+
+        public SubPeriode(Interval subInterval) {
+            this.subInterval = subInterval;
+        }
+
+        @Override
+        public Time getTime() {
+            return subInterval.getEnd();
+        }
+
+    }
 }

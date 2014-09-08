@@ -5,14 +5,16 @@
  */
 package data;
 
-import geld.ReferentieByToString;
+import geld.ReferentieHasDate;
 import java.util.Map;
+import tijd.Datum;
+import tijd.Time;
 
 /**
  *
  * @author Dennis
  */
-public class Kookdag extends ReferentieByToString{
+public class Kookdag implements ReferentieHasDate{
     public final int id;
     private final int totaalBedrag;
     private final Persoon kok;
@@ -54,5 +56,15 @@ public class Kookdag extends ReferentieByToString{
             tot += p;
         }
         return tot;
+    }
+
+    @Override
+    public Time getTime() {
+        return null;
+    }
+
+    @Override
+    public Datum getDate() {
+        return null;
     }
 }

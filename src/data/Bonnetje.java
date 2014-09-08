@@ -6,26 +6,20 @@
 package data;
 
 import data.types.HasBedrag;
-import data.types.HasDate;
-import geld.ReferentieByToString;
+import geld.ReferentieHasDate;
 import java.util.Comparator;
 import java.util.List;
 import tijd.Datum;
+import tijd.Time;
 
 /**
  *
  * @author Dennis
  */
-public class Bonnetje extends ReferentieByToString implements HasDate, HasBedrag{
+public class Bonnetje implements ReferentieHasDate, HasBedrag{
 
     public static Comparator<Bonnetje> getByDate() {
-        return new Comparator<Bonnetje>() {
-
-            @Override
-            public int compare(Bonnetje o1, Bonnetje o2) {
-                return o1.datum.compareTo(o2.datum);
-            }
-        };
+        return (Bonnetje o1, Bonnetje o2) -> o1.datum.compareTo(o2.datum);
     }
 
     final private int id;
@@ -63,6 +57,11 @@ public class Bonnetje extends ReferentieByToString implements HasDate, HasBedrag
 
     @Override
     public Datum getDate() {
+        return datum;
+    }
+
+    @Override
+    public Time getTime() {
         return datum;
     }
 

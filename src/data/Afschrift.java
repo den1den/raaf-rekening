@@ -7,6 +7,7 @@ package data;
 
 import data.types.HasDate;
 import geld.Referentie;
+import geld.ReferentieHasDate;
 import geld.RekeningHouder;
 import tijd.Datum;
 
@@ -14,8 +15,8 @@ import tijd.Datum;
  *
  * @author Dennis
  */
-public class Afschrift 
-        implements HasDate, Referentie {
+public class Afschrift
+        implements ReferentieHasDate {
 
     private final Datum datum;
     private final String van;
@@ -26,10 +27,11 @@ public class Afschrift
     private final int bedrag;
     private final String mutatieSoort;
     private final String mededeling;
-    
+
     private RekeningHouder vanRHouder;
+
     /**
-     * 
+     *
      * @param datum
      * @param van
      * @param vanRekening
@@ -41,7 +43,7 @@ public class Afschrift
      * @param mededeling
      */
     public Afschrift(Datum datum, String van, String vanRekening, String dezeRekening, String code, boolean af, int bedrag, String mutatieSoort, String mededeling) {
-        if (datum == null || van == null || vanRekening == null || dezeRekening==null ||code == null || mutatieSoort == null || mededeling == null) {
+        if (datum == null || van == null || vanRekening == null || dezeRekening == null || code == null || mutatieSoort == null || mededeling == null) {
             throw new IllegalArgumentException();
         }
         this.datum = datum;
@@ -84,11 +86,6 @@ public class Afschrift
     }
 
     @Override
-    public String getRef() {
-        return toString();
-    }
-
-    @Override
     public Datum getDate() {
         return datum;
     }
@@ -111,11 +108,11 @@ public class Afschrift
     @Override
     public String toString() {
         int b;
-        if(isAf()){
+        if (isAf()) {
             b = -bedrag;
-        }else{
+        } else {
             b = bedrag;
         }
-        return "Afschrift: "+datum+" "+b+" "+getMededeling();
+        return "Afschrift: " + datum + " " + b + " " + getMededeling();
     }
 }

@@ -13,16 +13,9 @@ import tijd.Datum;
  *
  * @author Dennis
  */
-public interface RekeningHouder extends HasNaam, Rekening {
+public interface RekeningHouder extends HasNaam, RekeningI {
 
     @Override
     public String getNaam();
     
-    void leen(RekeningHouder rh, Transactie t);
-    
-    void betaal(RekeningHouder rh, Transactie t);
-    
-    void betaalVoor(RekeningHouder th, Transactie t);
-    
-    void ontvang(RekeningHouder rh, Transactie t);
 }

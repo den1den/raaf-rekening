@@ -9,28 +9,11 @@ package geld;
 
 public class RekeningHouderContantI extends RekeningHouderI implements RekeningHouderContant{
 
-    final private RekeningHouder contant;
+    final private ContantRekening contant;
     
     public RekeningHouderContantI(String naam) {
         super(naam);
-        contant = new ContantRekening(naam);
-    }
-
-    @Override
-    public void pin(Transactie t) {
-        super.af(t);
-        contant.bij(t.getOposite());
-    }
-
-    @Override
-    public void stort(Transactie t) {
-        super.bij(t);
-        contant.bij(t.getOposite());
-    }
-
-    @Override
-    public int getTotaal() {
-        return saldo + contant.getSaldo();
+        contant = new ContantRekening();
     }
 
     @Override
@@ -38,10 +21,31 @@ public class RekeningHouderContantI extends RekeningHouderI implements RekeningH
         return contant;
     }
 
-    private class ContantRekening extends RekeningHouderI implements RekeningHouder {
+    @Override
+    public String getNaam() {
+        return super.getNaam(); //To change body of generated methods, choose Tools | Templates.
+    }
 
-        ContantRekening(String naam) {
-            super(naam + " contant");
+    @Override
+    public void pin(int bedrag) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void stort(int bedrag) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public int getSchuld(RekeningHouder rh) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    private class ContantRekening extends Rekening implements RekeningHouder {
+
+        @Override
+        public String getNaam() {
+            return RekeningHouderContantI.this.getNaam() + " contant";
         }
     }
     

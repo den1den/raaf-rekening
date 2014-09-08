@@ -9,7 +9,7 @@ import data.Bonnetje;
 import tijd.Datum;
 
 
-public class RekeningHouderI extends RekeningI implements RekeningHouder {
+public class RekeningHouderI extends Rekening implements RekeningHouder {
 
     final String naam;
 
@@ -23,42 +23,5 @@ public class RekeningHouderI extends RekeningI implements RekeningHouder {
     @Override
     public String getNaam() {
         return naam;
-    }
-
-    @Override
-    public TRecord moetBetalenAan(Bonnetje bonnetje) {
-        return moetBetalen(bonnetje.getPersoon(), bonnetje);
-    }
-
-    @Override
-    public TRecord moetBetalen(RekeningHouder rekeningHouder, Bonnetje bonnetje) {
-        return moetBetalen(rekeningHouder, bonnetje.getBedrag(), bonnetje.getDate(), bonnetje);
-    }
-
-    @Override
-    public TRecord moetBetalen(RekeningHouder rekeningHouder, int bedrag, Datum date, Referentie referentie) {
-        Transactie moetB = new Transactie(date, bedrag, true, referentie);
-        TRecord tr = new TRecord(moetB, this, rekeningHouder);
-        
-        this.putSchuld(rekeningHouder, moetB);
-        rekeningHouder.putSchuld(this, moetB.getOposite());
-        
-        return tr;
-    }
-
-    @Override
-    public TRecord krijgtVan(RekeningHouder rekeningHouder, int bedrag, Datum date, Referentie referentie) {
-        return rekeningHouder.moetBetalen(this, bedrag, date, referentie);
-    }
-
-    @Override
-    public TRecord betaald(RekeningHouder naar, int bedrag, Datum datum, Referentie referentie){
-        Transactie betaal = new Transactie(datum, bedrag, false, referentie);
-        TRecord tr = new TRecord(betaal, this, naar);
-        
-        this.bij(betaal);
-        naar.af(betaal.getOposite());
-        
-        return tr;
     }
 }

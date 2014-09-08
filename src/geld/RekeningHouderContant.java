@@ -10,10 +10,14 @@ package geld;
  * @author Dennis
  */
 public interface RekeningHouderContant extends RekeningHouder {
+
     RekeningHouder getContant();
-    public void pin(Transactie t);
 
-    public void stort(Transactie t);
+    public void pin(int bedrag);
 
-    public int getTotaal();
+    public void stort(int bedrag);
+
+    @Override
+    public int getSchuld(RekeningHouder rh);
+
 }

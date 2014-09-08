@@ -9,6 +9,7 @@ package geld;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import tijd.Time;
 
 
 public class ReferentieMultiple implements Referentie {
@@ -34,6 +35,11 @@ final ArrayList<Referentie> other;
             ref += ", " + it.next().getRef();
         }
         return ref;
+    }
+
+    @Override
+    public Time getTime() {
+         throw new UnsupportedOperationException();
     }
     
 }

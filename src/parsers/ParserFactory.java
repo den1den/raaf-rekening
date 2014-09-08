@@ -36,7 +36,12 @@ public class ParserFactory {
         return memory;
     }
 
-    public abstract class Parser<P, To> {
+    /**
+     * To parse Strings arrays into objects.
+     * @param <P> 
+     * @param <To> the output format in Raafrekening
+     */
+    public abstract class Parser<To> {
 
         protected To instance;
 
@@ -79,7 +84,7 @@ public class ParserFactory {
         abstract protected void parseData(StringsData data);
     }
     
-    public abstract class SimpleParser<P, To> extends Parser<P, To>{
+    public abstract class SimpleParser<To> extends Parser<To>{
         @Override
         protected void parseData(StringsData data){
             int lineNumber = 0;
@@ -96,7 +101,7 @@ public class ParserFactory {
         abstract protected void parseLine(String[] strings);
     }
 
-    public abstract class SingleParser<P> extends Parser<P, P> {
+    public abstract class SingleParser<P> extends Parser<P> {
 
         public SingleParser(P instance) {
             this.instance = instance;
@@ -126,7 +131,7 @@ public class ParserFactory {
     }
 
     abstract class CollectionParser<P, C extends Collection<P>>
-            extends Parser<P, C> {
+            extends Parser<C> {
 
         @Override
         final protected void parseData(StringsData data) {
@@ -162,7 +167,7 @@ public class ParserFactory {
         }
     }
     
-    public abstract class MapParser<P> extends SimpleParser<P, Map<P, P>>{
+    public abstract class MapParser<P> extends SimpleParser<Map<P, P>>{
 
         @Override
         protected Map<P, P> init(int size) {
@@ -171,7 +176,7 @@ public class ParserFactory {
         
     }
 
-    public abstract class VoidParser<P> extends SimpleParser<P, Void> {
+    public abstract class VoidParser<P> extends SimpleParser<Void> {
 
         @Override
         protected Void init(int size) {
