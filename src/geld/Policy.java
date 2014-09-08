@@ -314,7 +314,7 @@ public class Policy {
 
         //return van.betaald(naar, bedrag, datum, referentie);
         //return van.moetBetalen(naar, bedrag, datum, referentie);
-        //return van.betaal(naar, bedrag, referentie, datum);
+        //return van.betaal(naar, bedrag, referentie, datum)
     }
 
     private boolean isMededelingRaRe(String mededeling) {
