@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import util.diplay.PrintStreamResult;
@@ -96,6 +98,15 @@ public class RaafBeheer {
         policy.verrekenKookdagen(kookdagen, kookSchuldDelers);
 
         result.showBalances(memory.personen.getAll());
+        
+        synchronized(this){
+            System.out.println("Tot hier de kookdagen... (wait 5 sec.)");
+            try {
+                wait(5000);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(RaafBeheer.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
         
         List<TRecord> fs = policy.verrekenBewoonPeriodes(bewoonPeriodes);
         fs.addAll(policy.verrekenBonnetjes(bonnetjes));
