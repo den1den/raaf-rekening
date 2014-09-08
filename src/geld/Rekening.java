@@ -14,19 +14,5 @@ import tijd.Datum;
  */
 public interface Rekening {
 
-    void putSchuld(RekeningHouder van, Transactie t);
-
-    void bij(Datum datum, int bedrag, Referentie referentie);
-
-    void bij(Transactie t);
-
-    void af(Transactie t);
-
-    void af(Datum datum, int bedrag, Referentie referentie);
-
-    int getSaldo();
-
-    List<Transactie> getTransacties();
-
-    List<Transactie> getTransactiesEnSchulden();
+    
 }

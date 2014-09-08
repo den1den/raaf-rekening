@@ -17,14 +17,12 @@ public interface RekeningHouder extends HasNaam, Rekening {
 
     @Override
     public String getNaam();
-
-    public TRecord moetBetalenAan(Bonnetje bonnetje);
-
-    public TRecord moetBetalen(RekeningHouder rekeningHouder, Bonnetje bonnetje);
-
-    public TRecord moetBetalen(RekeningHouder rekeningHouder, int bedrag, Datum date, Referentie referentie);
-
-    public TRecord krijgtVan(RekeningHouder rekeningHouder, int bedrag, Datum date, Referentie referentie);
-
-    public TRecord betaald(RekeningHouder naar, int bedrag, Datum datum, Referentie referentie);
+    
+    void leen(RekeningHouder rh, Transactie t);
+    
+    void betaal(RekeningHouder rh, Transactie t);
+    
+    void betaalVoor(RekeningHouder th, Transactie t);
+    
+    void ontvang(RekeningHouder rh, Transactie t);
 }
