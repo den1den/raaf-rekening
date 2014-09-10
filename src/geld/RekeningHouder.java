@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import util.diplay.ResultPrintStream;
 
 public abstract class RekeningHouder implements RekeningHouderInterface {
 
@@ -36,14 +37,16 @@ public abstract class RekeningHouder implements RekeningHouderInterface {
 
     @Override
     public void betaaldNog(RekeningHouder aan, int bedrag, Referentie referentie) {
-        if(bedrag < 0){
+        if (bedrag < 0) {
             throw new IllegalArgumentException();
         }
         Relatie r;
         r = this.findRelatie(aan);
-        r.nog(true, bedrag, referentie);
+        r.moetBetalen(bedrag, referentie);
+        
+        //oposite
         r = aan.findRelatie(this);
-        r.nog(false, bedrag, referentie);
+        r.krijgtnog(bedrag, referentie);
     }
 
     @Override
@@ -53,7 +56,7 @@ public abstract class RekeningHouder implements RekeningHouderInterface {
 
     @Override
     public void geeft(RekeningHouder aan, int bedrag, Referentie referentie) {
-        if(bedrag < 0){
+        if (bedrag < 0) {
             throw new IllegalArgumentException();
         }
         Relatie r;
@@ -65,11 +68,11 @@ public abstract class RekeningHouder implements RekeningHouderInterface {
 
     @Override
     public void krijgt(RekeningHouder aan, int bedrag, Referentie referentie) {
-        aan.betaald(this, bedrag, referentie);
+        aan.geeft(this, bedrag, referentie);
     }
 
     @Override
-    public int getBetaaldNog(RekeningHouderInterface aan) {
+    public int getKrijgtNog(RekeningHouderInterface aan) {
         Relatie r = getRelatie(aan);
         if (r == null) {
             return 0;
@@ -78,29 +81,29 @@ public abstract class RekeningHouder implements RekeningHouderInterface {
     }
 
     @Override
-    public int getBetaald(RekeningHouderInterface aan) {
+    public int getGekregen(RekeningHouderInterface aan) {
         Relatie r = getRelatie(aan);
         if (r == null) {
             return 0;
         }
-        return r.getHeeft();
+        return r.getGekregen();
     }
 
     @Override
-    public int getSaldo(RekeningHouderInterface aan) {
+    public int getSchuld(RekeningHouderInterface aan) {
         Relatie r = getRelatie(aan);
         if (r == null) {
             return 0;
         }
-        return r.getSaldo();
+        return r.getSchuld();
     }
 
     @Override
-    public int getSaldo() {
+    public int getSchuld() {
         int saldo = 0;
         for (RekeningHouderInterface rhis : trackers.keySet()) {
             Relatie r = getRelatie(rhis);
-            saldo += r.getSaldo();
+            saldo += r.getSchuld();
         }
         return saldo;
     }
@@ -108,14 +111,23 @@ public abstract class RekeningHouder implements RekeningHouderInterface {
     @Override
     public List<TransactiesRecord> getTransacties(RekeningHouderInterface rhc) {
         Relatie r = getRelatie(rhc);
-        if(r == null){
+        if (r == null) {
             return new ArrayList<>(1);
         }
         ArrayList<TransactiesRecord> result = new ArrayList<>(r.geschiedenis.size());
         for (Transactie gesch : r.geschiedenis) {
-                result.add(new TransactiesRecord(gesch, this, rhc));
+            result.add(new TransactiesRecord(gesch, this, rhc));
         }
         return result;
+    }
+
+    public String relatieToString(RekeningHouderInterface rhi) {
+        Relatie r = getRelatie(rhi);
+        if (r == null) {
+            return "geen";
+        } else {
+            return "heeft: " + r.gekregen + " krijgtNog:" + r.krijgtNog + " lastT: " + r.geschiedenis.getLast();
+        }
     }
 
     private class Relatie {
@@ -124,32 +136,53 @@ public abstract class RekeningHouder implements RekeningHouderInterface {
             indexesOfMoetNogGebeuren = new HashSet<>(geschiedenis.size() / 2);
         }
 
-        int heeft = 0;
+        /**
+         * wat het onderwerp heeft gekregen
+         */
+        int gekregen = 0;
+        /**
+         * wat het onderwerp nog krijgt
+         */
         int krijgtNog = 0;
 
         /**
          * Only add
          */
-        final List<Transactie> geschiedenis = new LinkedList<>();
+        final LinkedList<Transactie> geschiedenis = new LinkedList<>();
         final Set<Integer> indexesOfMoetNogGebeuren;
 
-        void nog(boolean af, int bedrag, Referentie referentie) {
-            Transactie t = new Transactie(af, bedrag, referentie);
-            if (af) {
-                krijgtNog -= bedrag;
-            } else {
-                krijgtNog += bedrag;
-            }
+        void krijgtnog(int bedrag, Referentie referentie) {
+            Transactie t = new Transactie(false, bedrag, referentie);
+            krijgtNog += bedrag;
             indexesOfMoetNogGebeuren.add(geschiedenis.size());
+            geschiedenis.add(t);
+        }
+
+        void moetBetalen(int bedrag, Referentie referentie) {
+            Transactie t = new Transactie(true, bedrag, referentie);
+            krijgtNog -= bedrag;
+            indexesOfMoetNogGebeuren.add(geschiedenis.size());
+            geschiedenis.add(t);
+        }
+        
+        void betaald(int bedrag, Referentie referentie){
+            Transactie t = new Transactie(false, bedrag, referentie);
+            gekregen += bedrag;
+            geschiedenis.add(t);
+        }
+        
+        void ontvangt(int bedrag, Referentie referentie){
+            Transactie t = new Transactie(true, bedrag, referentie);
+            gekregen -= bedrag;
             geschiedenis.add(t);
         }
 
         void nu(boolean af, int bedrag, Referentie referentie) {
             Transactie t = new Transactie(af, bedrag, referentie);
             if (af) {
-                heeft -= bedrag;
+                gekregen -= bedrag;
             } else {
-                heeft += bedrag;
+                gekregen += bedrag;
             }
             geschiedenis.add(t);
         }
@@ -186,14 +219,32 @@ public abstract class RekeningHouder implements RekeningHouderInterface {
             return krijgtNog;
         }
 
-        public int getHeeft() {
-            return heeft;
+        public int getGekregen() {
+            return gekregen;
         }
 
-        public int getSaldo() {
-            return getKrijgtNog() - getHeeft();
+        public int getSchuld() {
+            return getKrijgtNog() - getGekregen();
         }
     }
 
-
+    public static void main(String[] args) {
+        System.out.println("testing:");
+        
+        RekeningHouder raaf = new RekeningHouderSimple("raaf");
+        RekeningHouder den = new RekeningHouderSimple("den");
+        
+        Referentie r = new ReferentieSimple("Wasmachine");
+        System.out.println("dennis koopt "+r+" voor raaf (50e)");
+        den.krijgtNog(raaf, 5000, r);
+        ResultPrintStream.showLastT(den, raaf);
+        System.out.println();
+        
+        System.out.println("krijgt geld terug");
+        den.krijgt(raaf, 4000, r);
+        ResultPrintStream.showLastT(den, raaf);
+        System.out.println();
+        
+        System.out.println("Testing done");
+    }
 }

@@ -29,4 +29,9 @@ final String referentie;
     public Time getTime() {
         return null;
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName()+"["+getRef()+"]";
+    }
 }

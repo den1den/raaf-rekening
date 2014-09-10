@@ -169,23 +169,23 @@ public class ResultPrintStream extends Result {
     public static List<String[]> getTOV(Collection<RekeningHouderInterface> onderwerps, RekeningHouderInterface... tovs){
         ArrayList<String[]> r = new ArrayList<>(onderwerps.size()+1);
         ArrayList<String> row = new ArrayList<>(2 + 3*tovs.length);
-        row.add("Naam"); row.add("Saldo");
+        row.add("Naam"); row.add("TotaalSchuld");
         for (int i = 0; i < tovs.length; i++) {
             RekeningHouderInterface tov = tovs[i];
-            row.add(i+"betaaldNog ");
-            row.add(i+"betaald ");
-            row.add(i+"totaal ");
+            row.add(i+"krijgt ");
+            row.add(i+"gekregen ");
+            row.add(i+"Schuld ");
         }
         r.add(row.toArray(new String[row.size()]));
         for (RekeningHouderInterface onderwerp : onderwerps) {
             row.clear();
             row.add(onderwerp.getNaam());
-            row.add(String.valueOf(onderwerp.getSaldo()));
+            row.add(String.valueOf(onderwerp.getSchuld()));
             for (int i = 0; i < tovs.length; i++) {
                 RekeningHouderInterface tov = tovs[i];
-                row.add(String.valueOf(onderwerp.getBetaaldNog(tov)));
-                row.add(String.valueOf(onderwerp.getBetaald(tov)));
-                row.add(String.valueOf(onderwerp.getSaldo(tov)));
+                row.add(String.valueOf(onderwerp.getKrijgtNog(tov)));
+                row.add(String.valueOf(onderwerp.getGekregen(tov)));
+                row.add(String.valueOf(onderwerp.getSchuld(tov)));
             }
             r.add(row.toArray(new String[row.size()]));
         }

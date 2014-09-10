@@ -282,9 +282,10 @@ int bedrag = afschrift.getBedrag();
                     //kan voorgeschoten zijn...
                     if(afschrift.getMededeling().toLowerCase().contains("voorgeschoten")){
                         Persoon p = memory.personen.findRek(afschrift);
-                        System.out.print("saldo: "+p.getSaldo(verrekMetRekening));
+                        System.out.println("before: "+p.relatieToString(verrekMetRekening));
                         p.krijgtNog(verrekMetRekening, bedrag, new ReferentieSimple("Wasmachine betaald"));
-                        verrekMetRekening.betaald(p, bedrag, afschrift);
+                        System.out.println("after: "+p.relatieToString(verrekMetRekening));
+                        verrekMetRekening.geeft(p, bedrag, afschrift);
                         System.out.println(": "+p.getSaldo(verrekMetRekening));
                         ResultPrintStream.showLastT(p, verrekMetRekening);
                         return;
@@ -366,7 +367,7 @@ int bedrag = afschrift.getBedrag();
                         || afschrift.getMededeling().contains("UPC Nederland B.V.")) {
                     Incasso incasso = memory.incassos.findRek(UPC_INCASSO_NAAM, afschrift.getVanRekening());
                     verrekMetRekening.geeft(incasso, afschrift.getBedrag(), afschrift);
-                    ResultPrintStream.showLastT(incasso, verrekMetRekening);
+                    //ResultPrintStream.showLastT(incasso, verrekMetRekening);
                     return;
                 } else {
                     throw new UnsupportedOperationException();

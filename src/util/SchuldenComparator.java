@@ -26,7 +26,7 @@ public class SchuldenComparator implements Comparator<RekeningHouderInterface> {
 
     @Override
     public int compare(RekeningHouderInterface o1, RekeningHouderInterface o2) {
-        return Integer.compare(o1.getSaldo(subject), o2.getSaldo(subject));
+        return Integer.compare(o1.getSchuld(subject), o2.getSchuld(subject));
     }
 
     static public Comparator<RekeningHouderInterface> byMag(RekeningHouderInterface rhi) {
@@ -49,7 +49,7 @@ public class SchuldenComparator implements Comparator<RekeningHouderInterface> {
 
         @Override
         public int compare(RekeningHouderInterface o1, RekeningHouderInterface o2) {
-            return Integer.compareUnsigned(o1.getSaldo(super.subject), o2.getSaldo(super.subject));
+            return Integer.compareUnsigned(o1.getSchuld(super.subject), o2.getSchuld(super.subject));
         }
     }
 
@@ -72,7 +72,7 @@ public class SchuldenComparator implements Comparator<RekeningHouderInterface> {
                     return comp;
                 }
             }
-            return Integer.compare(o1.getSaldo(), o2.getSaldo());
+            return Integer.compare(o1.getSchuld(), o2.getSchuld());
         }
 
     }

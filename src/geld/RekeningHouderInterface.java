@@ -36,7 +36,7 @@ public interface RekeningHouderInterface extends HasNaam {
      */
     void krijgtNog(RekeningHouder aan, int bedrag, Referentie referentie);
 
-    int getBetaaldNog(RekeningHouderInterface aan);
+    int getKrijgtNog(RekeningHouderInterface aan);
 
     /**
      * Een bedrag word betaald
@@ -49,18 +49,18 @@ public interface RekeningHouderInterface extends HasNaam {
 
     void krijgt(RekeningHouder aan, int bedrag, Referentie referentie);
 
-    int getBetaald(RekeningHouderInterface aan);
+    int getGekregen(RekeningHouderInterface aan);
 
     /**
      * @param aan
      * @return betaald - moetNogBetalen
      */
-    int getSaldo(RekeningHouderInterface aan);
+    int getSchuld(RekeningHouderInterface aan);
 
     /**
      * @return sum of getSaldo for all Rekeningen
      */
-    int getSaldo();
+    int getSchuld();
     
     public List<TransactiesRecord> getTransacties(RekeningHouderInterface rhc);
 }
