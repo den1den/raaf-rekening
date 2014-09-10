@@ -101,12 +101,13 @@ public class Policy {
                 if (persoon.equals(kok)) {
                     verreken = kookdag.getBedrag()
                             - kokPrijs - prijs * (m.getValue() - 1);
-                    kookRekening.addSchuld(verantwoordelijk, verreken, kookdag);
+                    verantwoordelijk.krijgtNog(kookRekening, verreken, kookdag);
                     total += verreken;
 
                 } else if (!persoon.kwijtschelden()) {
                     verreken = prijs * (m.getValue());
-                    verantwoordelijk.addSchuld(kookRekening, verreken, kookdag);
+                    kookRekening.krijgtNog(verantwoordelijk, verreken, kookdag);
+                    //ResultPrintStream.showLastT(kookRekening, verantwoordelijk);
                     total -= verreken;
                 }
             }
@@ -122,7 +123,7 @@ public class Policy {
             Persoon persoon = bewoonPeriode.getPersoon();
             for (BewoonPeriode.SubPeriode subPeriode : bewoonPeriode) {
                 final int bedrag = 2000;
-                persoon.addSchuld(verrekMetRekening, bedrag, subPeriode);
+                persoon.betaaldNog(verrekMetRekening, bedrag, subPeriode);
             }
         }
     }
@@ -130,7 +131,7 @@ public class Policy {
     public void verrekenBonnetjes(
             Set<Bonnetje> bonnetjes) {
         for (Bonnetje bonnetje : bonnetjes) {
-            verrekMetRekening.addSchuld(bonnetje.getPersoon(), bonnetje.getBedrag(), bonnetje);
+            bonnetje.getPersoon().krijgtNog(verrekMetRekening, bonnetje.getBedrag(), bonnetje);
         }
     }
 
@@ -239,7 +240,8 @@ public class Policy {
                 if (!afschrift.isAf()) {
                     if (isMededelingRaRe(afschrift)) {
                         //zeker
-                        verrekMetRekening.verwerk(memory.personen.findRek(afschrift), afschrift);
+                        ResultPrintStream.showFastLast10(verrekMetRekening);
+                        memory.personen.findRek(afschrift).betaaldSchuldAf(verrekMetRekening, afschrift);
                         ResultPrintStream.showFastLast10(memory.personen.findRek(afschrift));
                         return;
                     }else{
@@ -356,7 +358,7 @@ public class Policy {
                 if (afschrift.getMededeling().trim().substring(0, 3).equalsIgnoreCase("upc")
                         || afschrift.getMededeling().contains("UPC Nederland B.V.")) {
                     Incasso incasso = memory.incassos.findRek(UPC_INCASSO_NAAM, afschrift.getVanRekening());
-                    verrekMetRekening.verwerk(incasso, afschrift);
+                    verrekMetRekening.betaald(incasso, afschrift.getBedrag(), afschrift);
                     return;
                 } else {
                     throw new UnsupportedOperationException();
@@ -444,9 +446,6 @@ public class Policy {
                 return true;
             }
             return false;
-        }
-        if(isRaRa){
-            throw new Error("Bijde gaan in de + tg?");
         }
         return isRaRa;
     }

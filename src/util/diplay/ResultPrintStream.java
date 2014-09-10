@@ -6,10 +6,12 @@
 package util.diplay;
 
 import data.Afschrift;
+import data.Persoon;
 import geld.Referentie;
 import geld.ReferentieMultiple;
 import geld.RekeningHouder;
 import geld.RekeningHouderContant;
+import geld.RekeningHouderContantInterface;
 import geld.RekeningHouderInterface;
 import geld.Transactie;
 import geld.TransactiesRecord;
@@ -35,8 +37,36 @@ import util.diplay.gui.graph.Graph;
 
 public class ResultPrintStream extends Result {
 
-    public static void showFastLast10(RekeningHouder rh) {
-        showFast(rh, -10, System.out, 4);
+    /**
+     * 
+     * @param rs rekeningen TOV laatste
+     */
+    public static void showLastT(RekeningHouder... rs) {
+        int max = 2;
+        
+        List<String[]> TOV_ordered = getTOV_ordered(Arrays.asList(rs), rs[rs.length - 1]);
+        
+        int keepUpper = 1;
+        for (int i = keepUpper; i < TOV_ordered.size()-max; i++) {
+            //keep header
+            TOV_ordered.remove(keepUpper);
+        }
+        
+        System.out.println(new MyTxtTableHeader(TOV_ordered));
+        
+        /*
+        List<TransactiesRecord> tr1 = r1.getTransacties(r2);
+        List<TransactiesRecord> tr2 = r2.getTransacties(r1);
+        System.out.println("1: "+r1.toString());
+        for (int i = 0; i < tr1.size() && i < max; i++) {
+            System.out.println(" "+tr1.get(i).toString());
+        }
+        System.out.println("2: "+r2.toString());
+        for (int i = 0; i < tr2.size() && i < max; i++) {
+            System.out.println(" "+tr2.get(i).toString());
+        }
+        System.out.println();
+                */
     }
 
     final int version;
@@ -50,11 +80,6 @@ public class ResultPrintStream extends Result {
     public ResultPrintStream(int version, PrintStream stream) {
         this.version = version;
         this.stream = stream;
-    }
-
-    @Override
-    public <R extends RekeningHouderInterface> void showDetailed(R rekeninghouder) {
-        showFast(rekeninghouder, Integer.MAX_VALUE, stream, version);
     }
 
     static String[][] listTransacties(List<TransactiesRecord> transacties, int saldo) {
@@ -129,71 +154,58 @@ public class ResultPrintStream extends Result {
         return result;
     }
 
-    public static <R extends RekeningHouderInterface> void showFast(R rekeninghouder, int lines, PrintStream printStream, int v) {
-        printStream.println("Detailed: " + rekeninghouder + ", afschriften:");
+    public static List<String[]> getTOV_ordered(Collection<? extends RekeningHouderInterface> van, RekeningHouderInterface... voorRekening) {
+        //stream.println();
+        //stream.println("Schulden van " + voorRekening + " ("+voorRekening.getSaldo()+"):");
 
-        int saldo = 0;
-        String[][] rows = lastTransacties(rekeninghouder.getAllTransacties(), saldo, lines);
-
-        printStream.print(new MyTxtTableHeader(Arrays.asList(rows)));
-        if (rekeninghouder instanceof RekeningHouderContant) {
-            showFast(((RekeningHouderContant) rekeninghouder).getContant(), lines, printStream, v);
-        }
-
-        printStream.println();
-    }
-
-    @Override
-    public void showTransacties(Iterable<Transactie> trs) {
-        stream.println();
-        stream.println("Transacties: ");
-        super.showTransacties(trs); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void showTransactie(Transactie trs) {
-        stream.println(trs);
-    }
-
-    @Override
-    public <R extends RekeningHouderInterface> void showSchuld(Collection<R> van, RekeningHouder voorRekening) {
-        showFast(voorRekening, 10, stream, version);
-        stream.println();
-        stream.println("Schulden van " + voorRekening + ":");
-
-        List<R> rList = new ArrayList<>(van);
-        Comparator<RekeningHouderInterface> comparator = new SchuldenComparator(voorRekening);
+        List<RekeningHouderInterface> rList = new ArrayList<>(van);
+        Comparator<RekeningHouderInterface> comparator = SchuldenComparator.by(voorRekening);
         Collections.sort(rList, comparator);
 
-        stream.println();
-        stream.println("Result:");
-        List<String[]> rows = new ArrayList<>(1 + rList.size());
-        rows.add(new String[]{"Naam", "Schuld"});
-        for (R r : rList) {
-            double euros = ((double) r.getSchuld(voorRekening)) / 100;
-            rows.add(new String[]{r.getNaam(), " €" + FORMAT.format(euros) + " "});
+        return getTOV(rList, voorRekening);
+    }
+    
+    public static List<String[]> getTOV(Collection<RekeningHouderInterface> onderwerps, RekeningHouderInterface... tovs){
+        ArrayList<String[]> r = new ArrayList<>(onderwerps.size()+1);
+        ArrayList<String> row = new ArrayList<>(2 + 3*tovs.length);
+        row.add("Naam"); row.add("Saldo");
+        for (int i = 0; i < tovs.length; i++) {
+            RekeningHouderInterface tov = tovs[i];
+            row.add(i+"betaaldNog ");
+            row.add(i+"betaald ");
+            row.add(i+"totaal ");
         }
-        stream.print(new MyTxtTable.MyTxtTableHeader(rows));
+        r.add(row.toArray(new String[row.size()]));
+        for (RekeningHouderInterface onderwerp : onderwerps) {
+            row.clear();
+            row.add(onderwerp.getNaam());
+            row.add(String.valueOf(onderwerp.getSaldo()));
+            for (int i = 0; i < tovs.length; i++) {
+                RekeningHouderInterface tov = tovs[i];
+                row.add(String.valueOf(onderwerp.getBetaaldNog(tov)));
+                row.add(String.valueOf(onderwerp.getBetaald(tov)));
+                row.add(String.valueOf(onderwerp.getSaldo(tov)));
+            }
+            r.add(row.toArray(new String[row.size()]));
+        }
+        return r;
     }
 
     @Override
-    public <R extends RekeningHouderInterface> void showDetailedPer(R rekeninghouder, RekeningHouderInterface... rhis) {
+    public void listResultaat(Collection<? extends RekeningHouderInterface> rhs, RekeningHouder tov) {
+        this.stream.println("List: "+rhs.size()+" rekeningen tegen "+tov+ " (€"+((double)tov.getSaldo())/100+")");
+        this.stream.println(new MyTxtTableHeader(getTOV_ordered(rhs, tov)));
+    }
+
+    @Override
+    public <RH extends RekeningHouderInterface> void showDetailledTov(Collection<RH> subject, RH... rhs) {
         stream.println();
-        stream.println("Schulden van " + rekeninghouder + " per " + rhis.length + " rekeningen:");
-        AtomicInteger saldo = new AtomicInteger();
-        for (int i = 0; i < rhis.length; i++) {
-            if (i > 0) {
-                stream.println();
-            }
-            RekeningHouderInterface rekeningHouderInterface = rhis[i];
-            stream.println(" " + rekeningHouderInterface + ":");
-            List<TransactiesRecord> all = rekeninghouder.getAllTransacties(rekeningHouderInterface);
-            MyTxtTable table = new MyTxtTableHeader(Arrays.asList(listTransacties(all, saldo)));
-            for (String line : table.toLines()) {
-                stream.println("  " + line);
-            }
+        stream.print("Details for: ");
+        for (int i = 0; i < rhs.length; i++) {
+            stream.print(rhs+" ");
         }
-        stream.println("__________");
+        stream.println();
+        stream.print(new MyTxtTableHeader(getTOV_ordered(subject, rhs)));
     }
 
     static class SlowPrintStream extends PrintStream {

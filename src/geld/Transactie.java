@@ -32,6 +32,17 @@ public class Transactie {
         this.referentie = referentie;
     }
 
+    public static Transactie t(int bedrag, Referentie referentie) {
+        boolean af;
+        if (bedrag < 0) {
+            af = true;
+            bedrag = -bedrag;
+        } else {
+            af = false;
+        }
+        return new Transactie(af, bedrag, referentie);
+    }
+
     public boolean isAf() {
         return af;
     }
@@ -44,14 +55,23 @@ public class Transactie {
         return referentie;
     }
 
-    public void addReferentie(Referentie r){
-        if(referentie instanceof ReferentieMultiple){
-            ((ReferentieMultiple)referentie).add(r);
-        }else{
+    public void addReferentie(Referentie r) {
+        if (referentie instanceof ReferentieMultiple) {
+            ((ReferentieMultiple) referentie).add(r);
+        } else {
             List<Referentie> rfs = new ArrayList<>(2);
             rfs.add(referentie);
             rfs.add(r);
             this.referentie = new ReferentieMultiple(rfs);
         }
+    }
+
+    @Override
+    public String toString() {
+        double b = bedrag;
+        if(af){
+            b = -b;
+        }
+        return "Transactie: €"+b/100+" ["+referentie+"]";
     }
 }

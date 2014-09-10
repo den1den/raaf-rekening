@@ -34,8 +34,33 @@ public class RekeningHouderContant extends RekeningHouderSimple implements Reken
     }
 
     @Override
-    public int getTotaalSchuld(RekeningHouder rh) {
-        return getSchuld(rh) + contant.getSchuld(rh);
+    public int getSaldo() {
+        return getRekeningSaldo() + getContantSaldo();
+    }
+
+    @Override
+    public int getSaldo(RekeningHouderInterface aan) {
+        return getRekeningSaldo(aan) + getContantSaldo(aan);
+    }
+
+    @Override
+    public int getRekeningSaldo(RekeningHouderInterface rh) {
+        return super.getSaldo(rh);
+    }
+
+    @Override
+    public int getRekeningSaldo() {
+        return super.getSaldo();
+    }
+
+    @Override
+    public int getContantSaldo(RekeningHouderInterface rh) {
+        return contant.getSaldo(rh);
+    }
+
+    @Override
+    public int getContantSaldo() {
+        return contant.getSaldo();
     }
 
 

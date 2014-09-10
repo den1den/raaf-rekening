@@ -17,5 +17,9 @@ public interface RekeningHouderContantInterface extends RekeningHouderInterface{
 
     public void stort(int bedrag);
     
-    public int getTotaalSchuld(RekeningHouder rh);
+    public int getRekeningSaldo(RekeningHouderInterface rh);
+    public int getRekeningSaldo();
+    public int getContantSaldo(RekeningHouderInterface rh);
+    public int getContantSaldo();
+    
 }

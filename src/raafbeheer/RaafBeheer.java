@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package raafbeheer;
+package raafbeheer; 
 
 import data.Afschrift;
 import data.BewoonPeriode;
@@ -61,13 +61,13 @@ public class RaafBeheer {
 
     private final int version;
     private final DataManager files;
-    
+
     private final FormatFactory formats;
     private final Result result;
-    
+
     private final RekeningHouderContant raafRekening = new RekeningHouderContant("RaafRekening");
     private final RekeningHouderContant kookRekening = new RekeningHouderContant("KookLijstRekening");
-    
+
     private Policy policy = null;
     private Memory memory = null;
 
@@ -78,7 +78,7 @@ public class RaafBeheer {
         this.result = new ResultPrintStream(version);
     }
 
-    void testing() { 
+    void testing() {
         files.collect();
         try {
             files.read();
@@ -96,25 +96,32 @@ public class RaafBeheer {
         Map<Persoon, Persoon> kookSchuldDelers = formats.kookSchuldDelers.parser.parse(files.getKookSchuldDelers());
 
         policy = new Policy(version, raafRekening, kookRekening, memory);
-        
+
         policy.verrekenKookdagen(kookdagen, kookSchuldDelers);
 
-        result.showSchuld(memory.personen.getAll(), kookRekening);
+        result.listResultaat(memory.personen.getAll(), kookRekening);
+
         
+        
+        
+
         RekeningHouderContant perR = new RekeningHouderContant("periodes");
-        RekeningHouderContant bonR = new RekeningHouderContant("bonnetjesRek");
-                RekeningHouderContant afR = new RekeningHouderContant("AfschriftenRek");
-                
         policy.setVerrekMetRekening(perR);
         policy.verrekenBewoonPeriodes(bewoonPeriodes);
+        result.listResultaat(memory.personen.getAll(), perR);
+        
+        RekeningHouderContant bonR = new RekeningHouderContant("bonnetjesRek");
         policy.setVerrekMetRekening(bonR);
         policy.verrekenBonnetjes(bonnetjes);
+        result.listResultaat(memory.personen.getAll(), bonR);
+        
+        RekeningHouderContant afR = new RekeningHouderContant("AfschriftenRek");
         policy.setVerrekMetRekening(afR);
         policy.verwerkAfschriften(afschriften, bonnetjes);
+        result.listResultaat(memory.personen.getAll(), afR);
 
         //result.showFactuurs(fs);
-        
-        result.showDetailedPer(memory.personen.get("Dennis"), perR, bonR, afR);
+        result.showDetailledTov(memory.personen.get("Dennis"), perR, bonR, afR);
     }
 
     void forReal() {

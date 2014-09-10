@@ -18,29 +18,49 @@ public interface RekeningHouderInterface extends HasNaam {
     @Override
     public String getNaam();
 
-    void addSchuld(RekeningHouderInterface aan, int bedrag, Referentie referentie);
-    void payBack(RekeningHouderInterface aan, int bedrag, Referentie referentie);
-
-    int getSchuld(RekeningHouderInterface rh);
-
-    void add(boolean af, RekeningHouderInterface aan, int bedrag, Referentie referentie);
+    /**
+     * Als een bedrag nog moet worden betaald
+     *
+     * @param aan aan desbetreffend persoon
+     * @param bedrag >= 0
+     * @param referentie waarom
+     */
+    void betaaldNog(RekeningHouder aan, int bedrag, Referentie referentie);
 
     /**
-     * 
-     * @param r
-     * @return can be null
+     * Als een bedrag nog moet worden ontvangen
+     *
+     * @param aan
+     * @param bedrag >= 0
+     * @param referentie
      */
-    List<Transactie> getTransactiesRef(RekeningHouderInterface r);
-    
-    /**
-     * 
-     * @param r
-     * @return != null
-     */
-    List<Transactie> getTransactiesCopy(RekeningHouderInterface r);
-    
-    List<TransactiesRecord> getAllTransacties();
-    List<TransactiesRecord> getAllTransacties(RekeningHouderInterface i);
+    void krijgtNog(RekeningHouder aan, int bedrag, Referentie referentie);
 
-    void verwerk(RekeningHouder AfsVan, Afschrift afschrift);
+    int getBetaaldNog(RekeningHouderInterface aan);
+
+    /**
+     * Een bedrag word betaald
+     *
+     * @param aan
+     * @param bedrag
+     * @param referentie
+     */
+    void betaald(RekeningHouder aan, int bedrag, Referentie referentie);
+
+    void krijgt(RekeningHouder aan, int bedrag, Referentie referentie);
+
+    int getBetaald(RekeningHouderInterface aan);
+
+    /**
+     * @param aan
+     * @return betaald - moetNogBetalen
+     */
+    int getSaldo(RekeningHouderInterface aan);
+
+    /**
+     * @return sum of getSaldo for all Rekeningen
+     */
+    int getSaldo();
+    
+    public List<TransactiesRecord> getTransacties(RekeningHouderInterface rhc);
 }

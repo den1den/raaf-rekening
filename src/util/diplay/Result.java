@@ -5,7 +5,9 @@
  */
 package util.diplay;
 
+import data.Persoon;
 import geld.RekeningHouder;
+import geld.RekeningHouderContant;
 import geld.RekeningHouderInterface;
 import geld.Transactie;
 import java.text.DecimalFormat;
@@ -18,18 +20,8 @@ import java.util.Collection;
 public abstract class Result {
 
     protected final DecimalFormat FORMAT = new DecimalFormat();
-
-    abstract public <R extends RekeningHouderInterface> void showDetailed(R rekeninghouder);
     
-    abstract public <R extends RekeningHouderInterface> void showDetailedPer(R rekeninghouder, RekeningHouderInterface... rhis);
+    abstract public void listResultaat(Collection<? extends RekeningHouderInterface> rhs, RekeningHouder tov);
 
-    public void showTransacties(Iterable<Transactie> trs){
-        for (Transactie transactie : trs) {
-            showTransactie(transactie);
-        }
-    }
-    
-    public abstract void showTransactie(Transactie trs);
-
-    public abstract <R extends RekeningHouderInterface> void showSchuld(Collection<R> van, RekeningHouder voorRekening);
+    abstract public <RH extends RekeningHouderInterface> void showDetailledTov(Collection<RH> subject, RH... rhs);
 }

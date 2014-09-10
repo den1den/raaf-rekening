@@ -20,4 +20,9 @@ public class RekeningHouderSimple extends RekeningHouder {
     public String getNaam() {
         return naam;
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName()+"["+getNaam()+"]";
+    }
 }
