@@ -45,7 +45,7 @@ public interface RekeningHouderInterface extends HasNaam {
      * @param bedrag
      * @param referentie
      */
-    void betaald(RekeningHouder aan, int bedrag, Referentie referentie);
+    void geeft(RekeningHouder aan, int bedrag, Referentie referentie);
 
     void krijgt(RekeningHouder aan, int bedrag, Referentie referentie);
 

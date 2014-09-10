@@ -52,6 +52,7 @@ public class ResultPrintStream extends Result {
             TOV_ordered.remove(keepUpper);
         }
         
+        System.out.println("Show "+(rs.length-1)+" against: "+rs[rs.length-1].toString());
         System.out.println(new MyTxtTableHeader(TOV_ordered));
         
         /*

@@ -52,15 +52,15 @@ public abstract class RekeningHouder implements RekeningHouderInterface {
     }
 
     @Override
-    public void betaald(RekeningHouder aan, int bedrag, Referentie referentie) {
+    public void geeft(RekeningHouder aan, int bedrag, Referentie referentie) {
         if(bedrag < 0){
             throw new IllegalArgumentException();
         }
         Relatie r;
         r = this.findRelatie(aan);
-        r.nu(false, bedrag, referentie);
-        r = aan.findRelatie(this);
         r.nu(true, bedrag, referentie);
+        r = aan.findRelatie(this);
+        r.nu(false, bedrag, referentie);
     }
 
     @Override
@@ -191,7 +191,7 @@ public abstract class RekeningHouder implements RekeningHouderInterface {
         }
 
         public int getSaldo() {
-            return getHeeft() + getKrijgtNog();
+            return getKrijgtNog() - getHeeft();
         }
     }
 

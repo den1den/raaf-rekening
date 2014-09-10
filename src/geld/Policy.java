@@ -151,6 +151,7 @@ public class Policy {
     private <RL extends List<Bonnetje> & RandomAccess> void verwerkAfschrift(
             Afschrift afschrift,
             RL bonnetjes) {
+int bedrag = afschrift.getBedrag();
 
         switch (afschrift.getCode()) {
             case "BA": //betaalautomaat
@@ -167,18 +168,20 @@ public class Policy {
                     throw new Error();
                 }
 
-                RekeningHouderInterface rhi;
-                int bedrag = afschrift.getBedrag();
+                RekeningHouder rhi;
+                
                 List<Referentie> refs;
 
                 List<Bonnetje> candidates = HasBedrag.searchOn(
                         HasDate.searchOn(bonnetjes, afschrift.getDate(), byDay),
                         afschrift.getBedrag());
                 if (candidates.size() == 1) {
+                    throw new UnsupportedOperationException();
                     Bonnetje bon = candidates.get(0);
 
                     //bonnetje found
                     bonnetjes.remove(bon);
+                    
 
                     //wel referentie toevoegen
                     List<Transactie> trs = bon.getPersoon().getTransactiesRef(bon.getWinkel());
@@ -230,7 +233,7 @@ public class Policy {
                 }
                 refs.add(afschrift);
                 Referentie referentie = new ReferentieMultiple(refs);
-                verrekMetRekening.addSchuld(rhi, bedrag, referentie);
+                verrekMetRekening.betaald(rhi, bedrag, referentie);
                 return;
             case "OV":
                 if (!afschrift.getMutatieSoort().equals("Overschrijving")) {
@@ -279,7 +282,11 @@ public class Policy {
                     //kan voorgeschoten zijn...
                     if(afschrift.getMededeling().toLowerCase().contains("voorgeschoten")){
                         Persoon p = memory.personen.findRek(afschrift);
-                        verrekMetRekening.verwerk(memory.personen.findRek(afschrift), afschrift);
+                        System.out.print("saldo: "+p.getSaldo(verrekMetRekening));
+                        p.krijgtNog(verrekMetRekening, bedrag, new ReferentieSimple("Wasmachine betaald"));
+                        verrekMetRekening.betaald(p, bedrag, afschrift);
+                        System.out.println(": "+p.getSaldo(verrekMetRekening));
+                        ResultPrintStream.showLastT(p, verrekMetRekening);
                         return;
                     }else if(afschrift.getMededeling().contains(" Correctie Raafrekening")
                             && afschrift.getVan().contains("D.J. van den Brand")){
@@ -358,7 +365,7 @@ public class Policy {
                 if (afschrift.getMededeling().trim().substring(0, 3).equalsIgnoreCase("upc")
                         || afschrift.getMededeling().contains("UPC Nederland B.V.")) {
                     Incasso incasso = memory.incassos.findRek(UPC_INCASSO_NAAM, afschrift.getVanRekening());
-                    verrekMetRekening.betaald(incasso, afschrift.getBedrag(), afschrift);
+                    verrekMetRekening.geeft(incasso, afschrift.getBedrag(), afschrift);
                     ResultPrintStream.showLastT(incasso, verrekMetRekening);
                     return;
                 } else {
