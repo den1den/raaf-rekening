@@ -20,6 +20,8 @@ public abstract class Result {
     protected final DecimalFormat FORMAT = new DecimalFormat();
 
     abstract public <R extends RekeningHouderInterface> void showDetailed(R rekeninghouder);
+    
+    abstract public <R extends RekeningHouderInterface> void showDetailedPer(R rekeninghouder, RekeningHouderInterface... rhis);
 
     public void showTransacties(Iterable<Transactie> trs){
         for (Transactie transactie : trs) {

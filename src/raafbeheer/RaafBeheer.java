@@ -17,6 +17,7 @@ import file.manager.FormatFactory;
 import geld.Policy;
 import geld.RekeningHouderContant;
 import geld.Transactie;
+import geld.TransactiesRecord;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -58,20 +59,23 @@ public class RaafBeheer {
         }
     }
 
+    private final int version;
     private final DataManager files;
-    private final Policy policy;
+    
     private final FormatFactory formats;
-    private final RekeningHouderContant raafRekening;
-    private final RekeningHouderContant kookRekening;
     private final Result result;
+    
+    private final RekeningHouderContant raafRekening = new RekeningHouderContant("RaafRekening");
+    private final RekeningHouderContant kookRekening = new RekeningHouderContant("KookLijstRekening");
+    
+    private Policy policy = null;
+    private Memory memory = null;
 
     RaafBeheer(int version) {
-        formats = new FormatFactory(version);
-        files = new DataManager(formats, false);
-        raafRekening = new RekeningHouderContant("RaafRekening");
-        kookRekening = new RekeningHouderContant("KookLijstRekening");
-        policy = new Policy(version, raafRekening, kookRekening);
-        result = new ResultPrintStream(version);
+        this.version = version;
+        this.formats = new FormatFactory(version);
+        this.files = new DataManager(formats, false);
+        this.result = new ResultPrintStream(version);
     }
 
     void testing() {
@@ -82,7 +86,7 @@ public class RaafBeheer {
             throw new RuntimeException(e);
         }
 
-        Memory memory = formats.memoryFormat.parser.parse(files.getMemory());
+        memory = formats.memoryFormat.parser.parse(files.getMemory());
         formats.personen.parser.parse(files.getPersonen());
         List<Kookdag> kookdagen = formats.kookdagen.parser.parse(files.getKookdagen());
         Set<Afschrift> afschriften = formats.afschriften.parser.parse(files.getAfschriften());
@@ -90,21 +94,27 @@ public class RaafBeheer {
         Set<Bonnetje> bonnetjes = formats.bonnetjes.parser.parse(files.getBonnetjes());
         Set<BierBonnetje> bierBonnetjes = formats.bierBonnetjes.parser.parse(files.getBierBonnetjes());
         Map<Persoon, Persoon> kookSchuldDelers = formats.kookSchuldDelers.parser.parse(files.getKookSchuldDelers());
-        
-        policy.setMemory(memory);
 
+        policy = new Policy(version, raafRekening, kookRekening, memory);
+        
         policy.verrekenKookdagen(kookdagen, kookSchuldDelers);
 
         result.showSchuld(memory.personen.getAll(), kookRekening);
         
-        
-        List<Transactie.Record> fs = policy.verrekenBewoonPeriodes(bewoonPeriodes);
-        fs.addAll(policy.verrekenBonnetjes(bonnetjes));
-        fs.addAll(policy.verwerkAfschriften(afschriften, bonnetjes));
+        RekeningHouderContant perR = new RekeningHouderContant("periodes");
+        RekeningHouderContant bonR = new RekeningHouderContant("bonnetjesRek");
+                RekeningHouderContant afR = new RekeningHouderContant("AfschriftenRek");
+                
+        policy.setVerrekMetRekening(perR);
+        policy.verrekenBewoonPeriodes(bewoonPeriodes);
+        policy.setVerrekMetRekening(bonR);
+        policy.verrekenBonnetjes(bonnetjes);
+        policy.setVerrekMetRekening(afR);
+        policy.verwerkAfschriften(afschriften, bonnetjes);
 
         //result.showFactuurs(fs);
         
-        result.showDetailed(memory.personen.get("Dennis"));
+        result.showDetailedPer(memory.personen.get("Dennis"), perR, bonR, afR);
     }
 
     void forReal() {

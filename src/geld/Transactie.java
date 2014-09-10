@@ -7,6 +7,8 @@ package geld;
 
 import data.Bonnetje;
 import data.Kookdag;
+import java.util.ArrayList;
+import java.util.List;
 import tijd.Datum;
 
 /**
@@ -17,7 +19,7 @@ public class Transactie {
 
     final private boolean af;
     final private int bedrag;
-    final private Referentie referentie;
+    private Referentie referentie;
 
     public Transactie(boolean af, int bedrag, Referentie referentie) {
         if (referentie == null
@@ -42,21 +44,14 @@ public class Transactie {
         return referentie;
     }
 
-    public static class Record {
-
-        final private Transactie transactie;
-        final private RekeningHouderInterface van;
-        final private RekeningHouderInterface naar;
-
-        public Record(Transactie transactie, RekeningHouderInterface van, RekeningHouderInterface naar) {
-            this.transactie = transactie;
-            this.van = van;
-            this.naar = naar;
+    public void addReferentie(Referentie r){
+        if(referentie instanceof ReferentieMultiple){
+            ((ReferentieMultiple)referentie).add(r);
+        }else{
+            List<Referentie> rfs = new ArrayList<>(2);
+            rfs.add(referentie);
+            rfs.add(r);
+            this.referentie = new ReferentieMultiple(rfs);
         }
-
-        public Transactie getTransactie() {
-            return transactie;
-        }
-
     }
 }

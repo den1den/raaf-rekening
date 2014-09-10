@@ -16,13 +16,12 @@ public class Winkel extends RekeningHouderSimple implements HasNaam{
 
     
     AankoopCat defaultAankoopCat;
-    String[] beschrijvingContains;
 
-    public Winkel(String naam, AankoopCat defaultAankoopCat, String[] beschrijvingContains) {
+    public Winkel(String naam, AankoopCat defaultAankoopCat) {
         super(naam);
         this.defaultAankoopCat = defaultAankoopCat;
-        this.beschrijvingContains = beschrijvingContains;
     }
+
 
     public void foundDefaultCat(AankoopCat defaultCat) {
         if (defaultAankoopCat == null) {

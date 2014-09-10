@@ -24,7 +24,7 @@ public class Memory {
 
     public final data.memory.interfaces.DyMapRekLast<Persoon> personen;
     public final data.memory.interfaces.DyMapRek<Incasso> incassos;
-    public final data.memory.interfaces.StMapRek<Winkel> winkels;
+    public final data.memory.interfaces.StMapMede<Winkel> winkels;
     public final data.memory.interfaces.DyMap<AankoopCat> aankoopCats;
     public final data.memory.interfaces.DyMap<PathEntry> paths;
 
@@ -38,7 +38,7 @@ public class Memory {
                     }
                 },
                 new DyMapRek.DyMapRekIncasso(initialCapacity),
-                new StMapRek<>(initialCapacity),
+                new StMapMede<>(initialCapacity),
                 new DyMap<AankoopCat>(initialCapacity) {
 
                     @Override
@@ -59,12 +59,12 @@ public class Memory {
     public Memory(
             data.memory.interfaces.DyMapRekLast<Persoon> personen,
             data.memory.interfaces.DyMapRek<Incasso> incassos,
-            data.memory.interfaces.StMapRek<Winkel> winkels,
+            data.memory.interfaces.StMapMede<Winkel> winkelsByMede,
             data.memory.interfaces.DyMap<AankoopCat> aankoopCats,
             data.memory.interfaces.DyMap<PathEntry> paths) {
         this.personen = personen;
         this.incassos = incassos;
-        this.winkels = winkels;
+        this.winkels = winkelsByMede;
         this.aankoopCats = aankoopCats;
         this.paths = paths;
     }

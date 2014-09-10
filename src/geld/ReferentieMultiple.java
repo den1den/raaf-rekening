@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package geld;
 
 import java.util.ArrayList;
@@ -11,9 +10,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import tijd.Time;
 
-
 public class ReferentieMultiple implements Referentie {
-final ArrayList<Referentie> other;
+
+    final ArrayList<Referentie> other;
 
     public ReferentieMultiple(Collection<? extends Referentie> c) {
         this.other = new ArrayList<>(c);
@@ -25,9 +24,16 @@ final ArrayList<Referentie> other;
         }
         this.other = other;
     }
+
+    void add(Referentie r){
+        if(r == null)
+            throw new IllegalArgumentException();
+        other.add(r);
+    }
+    
     @Override
     public String getRef() {
-        
+
         String ref = getClass().getSimpleName() + ": ";
         Iterator<Referentie> it = other.iterator();
         ref += it.next();
@@ -39,7 +45,7 @@ final ArrayList<Referentie> other;
 
     @Override
     public Time getTime() {
-         throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }
-    
+
 }

@@ -470,17 +470,20 @@ private static final String typePersoon = "nickname";
                         String categorieNaam = strings[++index];
                         AankoopCat defaultCat = memoryInstance.aankoopCats.find(categorieNaam);
 
-                        String[] beschrijvingContains
+                        String[] medeDelingen
                                 = new String[strings.length - 1 - index];
 
-                        System.arraycopy(strings, index, beschrijvingContains, 0, beschrijvingContains.length);
+                        System.arraycopy(strings, index, medeDelingen, 0, medeDelingen.length);
 
                         Winkel w = memoryInstance.winkels.get(subject);
                         if (w == null) {
-                            w = new Winkel(subject, defaultCat, beschrijvingContains);
+                            w = new Winkel(subject, defaultCat);
                             memoryInstance.winkels.put(w, subject);
                         } else {
                             w.foundDefaultCat(defaultCat);
+                        }
+                        for (String mededeling : medeDelingen) {
+                            memoryInstance.winkels.putMede(w, mededeling);
                         }
                         break;
                     case typeAankoopCat:
@@ -651,8 +654,7 @@ private static final String typePersoon = "nickname";
                 if (winkel == null) {
                     winkel = new Winkel(
                             strings[i],
-                            memoryInstance.aankoopCats.find("Bier"),
-                            null);
+                            memoryInstance.aankoopCats.find("Bier"));
                 }
 
                 return new BierBonnetje(merk, kratten, totaalPrijs, datum, winkel);
