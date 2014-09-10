@@ -60,7 +60,7 @@ public abstract class RekeningHouder implements RekeningHouderInterface {
         r = this.findRelatie(aan);
         r.nu(false, bedrag, referentie);
         r = aan.findRelatie(this);
-        r.nu(false, bedrag, referentie);
+        r.nu(true, bedrag, referentie);
     }
 
     @Override
@@ -74,7 +74,7 @@ public abstract class RekeningHouder implements RekeningHouderInterface {
         if (r == null) {
             return 0;
         }
-        return r.getMoetNogGebeuren();
+        return r.getKrijgtNog();
     }
 
     @Override
@@ -83,7 +83,7 @@ public abstract class RekeningHouder implements RekeningHouderInterface {
         if (r == null) {
             return 0;
         }
-        return r.getBetaald();
+        return r.getHeeft();
     }
 
     @Override
@@ -124,7 +124,7 @@ public abstract class RekeningHouder implements RekeningHouderInterface {
             indexesOfMoetNogGebeuren = new HashSet<>(geschiedenis.size() / 2);
         }
 
-        int betaald = 0;
+        int heeft = 0;
         int krijgtNog = 0;
 
         /**
@@ -147,9 +147,9 @@ public abstract class RekeningHouder implements RekeningHouderInterface {
         void nu(boolean af, int bedrag, Referentie referentie) {
             Transactie t = new Transactie(af, bedrag, referentie);
             if (af) {
-                betaald -= bedrag;
+                heeft -= bedrag;
             } else {
-                betaald += bedrag;
+                heeft += bedrag;
             }
             geschiedenis.add(t);
         }
@@ -182,131 +182,18 @@ public abstract class RekeningHouder implements RekeningHouderInterface {
             return result;
         }
 
-        public int getMoetNogGebeuren() {
+        public int getKrijgtNog() {
             return krijgtNog;
         }
 
-        public int getBetaald() {
-            return betaald;
+        public int getHeeft() {
+            return heeft;
         }
 
         public int getSaldo() {
-            return getBetaald() + getMoetNogGebeuren();
+            return getHeeft() + getKrijgtNog();
         }
     }
 
-    /*
-     @Override
-     public void payBack(RekeningHouderInterface aan, int bedrag, Referentie referentie) {
-     aan.addSchuld(this, bedrag, referentie);
-     try {
-     //rather not used
-     throw new Exception("Rathe rnot used");
-     } catch (Exception ex) {
-     Logger.getLogger(RekeningHouder.class.getName()).log(Level.INFO, null, ex);
-     }
-     }
 
-     @Override
-     public void verwerk(RekeningHouder AfsVan, Afschrift afschrift) {
-     int bedrag = afschrift.getBedrag();
-     if (afschrift.isAf()) {
-     addSchuld(AfsVan, bedrag, afschrift);
-     } else {
-     AfsVan.addSchuld(this, bedrag, afschrift);
-     }
-     }
-
-     @Override
-     public void add(boolean af, RekeningHouderInterface aan, int bedrag, Referentie referentie) {
-     Transactie t = new Transactie(af, bedrag, referentie);
-     pi.put(aan, t);
-     }
-
-     @Override
-     public String toString() {
-     return getNaam() + " €" + ((double) pi.getTotaal()) / 100;
-     }
-
-     public List<TransactiesRecord> getAllTransacties(RekeningHouderInterface rhi) {
-     List<Transactie> trs = getTransactiesRef(rhi);
-     if (trs == null) {
-     return new ArrayList<>(0);
-     } else {
-     List<TransactiesRecord> trsR = new LinkedList<>();
-     for (Transactie tr : trs) {
-     if (tr.isAf()) {
-     trsR.add(new TransactiesRecord(tr, this, rhi));
-     } else {
-     trsR.add(new TransactiesRecord(tr, rhi, this));
-     }
-     }
-     return trsR;
-     }
-     }
-
-     private class ProtectedImplementation {
-
-     private ProtectedImplementation(int size) {
-     this.transacties = new HashMap<>(size);
-     this.schulden = new HashMap<>(size);
-     this.allTransacties = new LinkedList<>();
-     }
-
-     private final Map<RekeningHouderInterface, List<Transactie>> transacties;
-     private final Map<RekeningHouderInterface, Integer> schulden;
-     private final List<TransactiesRecord> allTransacties;
-     private int totaal;
-
-     private int schuld(RekeningHouderInterface rh) {
-     Integer schuld = schulden.get(rh);
-     if (schuld == null) {
-     return 0;
-     } else {
-     return schuld;
-     }
-     }
-
-     private List<Transactie> createTransacties(RekeningHouderInterface r) {
-     List<Transactie> list = getTransacties(r);
-     if (list == null) {
-     list = new LinkedList<>();
-     transacties.put(r, list);
-     }
-     return list;
-     }
-
-     private List<Transactie> getTransacties(RekeningHouderInterface r) {
-     return transacties.get(r);
-     }
-
-     private void put(RekeningHouderInterface aan, Transactie t) {
-     List<Transactie> ts = createTransacties(aan);
-     ts.add(t);
-
-     int newBedrag;
-     TransactiesRecord record;
-     if (t.isAf()) {
-     record = new TransactiesRecord(t, RekeningHouder.this, aan);
-     newBedrag = schuld(aan) - t.getBedrag();
-     totaal -= t.getBedrag();
-     } else {
-     record = new TransactiesRecord(t, aan, RekeningHouder.this);
-     newBedrag = schuld(aan) + t.getBedrag();
-     totaal += t.getBedrag();
-     }
-     schulden.put(aan, newBedrag);
-
-     allTransacties.add(record);
-     }
-
-     private List<TransactiesRecord> getAllTransacties() {
-     return allTransacties;
-     }
-
-     private int getTotaal() {
-     return totaal;
-     }
-
-     }*/
 }

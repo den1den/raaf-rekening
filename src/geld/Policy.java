@@ -359,6 +359,7 @@ public class Policy {
                         || afschrift.getMededeling().contains("UPC Nederland B.V.")) {
                     Incasso incasso = memory.incassos.findRek(UPC_INCASSO_NAAM, afschrift.getVanRekening());
                     verrekMetRekening.betaald(incasso, afschrift.getBedrag(), afschrift);
+                    ResultPrintStream.showLastT(incasso, verrekMetRekening);
                     return;
                 } else {
                     throw new UnsupportedOperationException();
