@@ -78,7 +78,7 @@ public class RaafBeheer {
         this.result = new ResultPrintStream(version);
     }
 
-    void testing() {
+    void testing() { 
         files.collect();
         try {
             files.read();
