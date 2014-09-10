@@ -21,6 +21,9 @@ class StMapNaam<T extends HasNaam> extends StMap<T> implements data.memory.inter
 
     @Override
     public T get(String naam) {
+        if(naam.isEmpty()){
+            throw new IllegalArgumentException();
+        }
         return super.get(naam); //To change body of generated methods, choose Tools | Templates.
     }
     

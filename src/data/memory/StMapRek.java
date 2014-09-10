@@ -17,9 +17,9 @@ class StMapRek<T extends HasNaam> extends StMapNaam<T> implements data.memory.in
 
     StMap<T> rekening;
     
-    public StMapRek(int intialCapacity) {
-        super(intialCapacity);
-        rekening = new StMap<T>(intialCapacity);
+    public StMapRek(int initialCapacity) {
+        super(initialCapacity);
+        rekening = new StMap<T>(initialCapacity);
     }
 
     @Override

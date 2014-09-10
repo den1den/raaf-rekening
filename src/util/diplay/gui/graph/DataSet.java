@@ -20,8 +20,8 @@ import java.util.List;
  */
 public class DataSet<X, Y> {
 
-    public static DataSet createFrom(List<Transactie.Record> list) {
-        Class y = Transactie.Record.class;
+    public static DataSet createFrom(List<Transactie.TransactiesRecord> list) {
+        Class y = Transactie.TransactiesRecord.class;
         return histogram(y, list);
     }
 

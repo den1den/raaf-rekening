@@ -6,7 +6,7 @@
 package util.diplay;
 
 import geld.Transactie;
-import geld.Transactie.Record;
+import geld.TransactiesRecord;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;

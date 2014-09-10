@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 /**
  *
@@ -61,6 +62,15 @@ public class MyTxtTable {
             line(sb);
         }
         return sb.toString();
+    }
+    
+    public String[] toLines(){
+        LinkedList<String> lines = new LinkedList<>();
+        for (StringTokenizer st = new StringTokenizer(toString(), System.lineSeparator()); st.hasMoreTokens();) {
+            String line = st.nextToken();
+            lines.add(line);
+        }
+        return lines.toArray(new String[lines.size()]);
     }
 
     protected void line(StringBuilder sb) {

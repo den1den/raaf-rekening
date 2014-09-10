@@ -15,7 +15,7 @@ import data.Winkel;
 import data.memory.Memory;
 import data.types.HasBedrag;
 import data.types.HasDate;
-import geld.Transactie.Record;
+import geld.TransactiesRecord;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -37,33 +37,34 @@ import util.diplay.ResultPrintStream;
 public class Policy {
 
     final private int version;
-    final private RekeningHouderContant raafrekeneing;
-    final private Comparator<Datum> byDay = HasDate.getOnDay();
-    private Memory memory = null;
+    private RekeningHouderContant verrekMetRekening;
+    final private RekeningHouderContant kookRekening;
+    final private Memory memory;
 
-    public Policy(int version, RekeningHouderContant raaf, RekeningHouder kookRekening) {
+    public Policy(int version, RekeningHouderContant verrekMetRekening, RekeningHouderContant kookRekening, Memory memory) {
         this.version = version;
-        if (raaf == null || kookRekening == null) {
+        if (memory == null || verrekMetRekening == null || kookRekening == null) {
             throw new IllegalArgumentException();
         }
-        this.raafrekeneing = raaf;
+        this.verrekMetRekening = verrekMetRekening;
         this.kookRekening = kookRekening;
-    }
-
-    public void setMemory(Memory memory) {
-        if (memory == null) {
-            throw new IllegalArgumentException();
-        }
         this.memory = memory;
     }
+
+    public void setVerrekMetRekening(RekeningHouderContant verrekMetRekening) {
+        this.verrekMetRekening = verrekMetRekening;
+    }
+
+    final private Comparator<Datum> byDay = HasDate.getOnDay();
+    final private String ING_INCASSO_NAAM = "ING";
+    final private String UPC_INCASSO_NAAM = "UPC";
+    final private String WINKEL_UNKNOWN_NAAM = "Niet bekend";
 
     public void verrekenKookdagen(List<Kookdag> allDagen, Map<Persoon, Persoon> kookSchuldDelers) {
         for (Kookdag kookdag : allDagen) {
             verrekenKookdag(kookdag, kookSchuldDelers);
         }
-        new ResultPrintStream(version).showSchuld(memory.personen.getAll(), kookRekening);
     }
-    private final RekeningHouder kookRekening;
 
     private void verrekenKookdag(Kookdag kookdag, Map<Persoon, Persoon> kookSchuldDelers) {
         Persoon kok = kookdag.getKok();
@@ -115,93 +116,198 @@ public class Policy {
         }
     }
 
-    public List<Record> verrekenBewoonPeriodes(
+    public void verrekenBewoonPeriodes(
             Collection<BewoonPeriode> bewoonPeriodes) {
-        List<Record> records = new LinkedList<>();
         for (BewoonPeriode bewoonPeriode : bewoonPeriodes) {
             Persoon persoon = bewoonPeriode.getPersoon();
             for (BewoonPeriode.SubPeriode subPeriode : bewoonPeriode) {
                 final int bedrag = 2000;
-                persoon.addSchuld(raafrekeneing, bedrag, subPeriode);
+                persoon.addSchuld(verrekMetRekening, bedrag, subPeriode);
             }
         }
-        return records;
     }
 
-    public List<Record> verrekenBonnetjes(
+    public void verrekenBonnetjes(
             Set<Bonnetje> bonnetjes) {
-        List<Record> records = new LinkedList<>();
         for (Bonnetje bonnetje : bonnetjes) {
-            raafrekeneing.addSchuld(bonnetje.getPersoon(), bonnetje.getBedrag(), bonnetje);
+            verrekMetRekening.addSchuld(bonnetje.getPersoon(), bonnetje.getBedrag(), bonnetje);
         }
-        return records;
     }
 
-    public Collection<Record> verwerkAfschriften(Collection<Afschrift> afschriften,
+    public void verwerkAfschriften(Collection<Afschrift> afschriften,
             Collection<Bonnetje> bonnetjes) {
-        Collection<Record> records = new LinkedList<>();
         ArrayList<Bonnetje> bonnetjes1 = new ArrayList<>(bonnetjes);
         Collections.sort(bonnetjes1, Bonnetje.getByDate());
         for (Afschrift afschrift : afschriften) {
             try {
-                records.add(verwerkAfschrift(afschrift, bonnetjes1));
+                verwerkAfschrift(afschrift, bonnetjes1);
             } catch (Error e) {
                 throw new Error("At afschrift: " + afschrift, e);
             }
         }
-        return records;
     }
-    final private String ING_NAAM = "ING";
-    final private String UPC_NAAM = "UPC";
-    final private Winkel WINKEL_UNKNOWN = new Winkel("Niet bekend", null, null);
 
-    private <RL extends List<Bonnetje> & RandomAccess> Record verwerkAfschrift(
+    private <RL extends List<Bonnetje> & RandomAccess> void verwerkAfschrift(
             Afschrift afschrift,
             RL bonnetjes) {
-        Incasso ING_INCASSO = memory.incassos.get(ING_NAAM);
-
-        RekeningHouder tegenRekeningHouder; //must be set
-        Referentie referentie = null; //must be set
 
         switch (afschrift.getCode()) {
             case "BA": //betaalautomaat
                 if (!afschrift.getMutatieSoort().equals("Betaalautomaat")) {
                     throw new Error("Betaalautomaat verwacht ipv: " + afschrift.getMutatieSoort());
                 }
+                if (!afschrift.getVanRekening().isEmpty()) {
+                    throw new Error("Assumed it did");
+                }
+                if (!afschrift.getVan().toLowerCase().contains("betaalautomaat")) {
+                    throw new Error("Assumed it did");
+                }
+                if (!afschrift.isAf()) {
+                    throw new Error();
+                }
+
+                RekeningHouderInterface rhi;
+                int bedrag = afschrift.getBedrag();
+                List<Referentie> refs;
+
                 List<Bonnetje> candidates = HasBedrag.searchOn(
                         HasDate.searchOn(bonnetjes, afschrift.getDate(), byDay),
                         afschrift.getBedrag());
                 if (candidates.size() == 1) {
-                    Bonnetje bonnetje = candidates.get(0);
-                    bonnetjes.remove(bonnetje);
-                    referentie = bonnetje;
-                    tegenRekeningHouder = bonnetje.getWinkel();
-                } else if (candidates.isEmpty()) {
-                    try {
-                        throw new Exception("afschrift not found in: " + bonnetjes);
-                    } catch (Exception ex) {
-                        Logger.getLogger(Policy.class.getName()).log(Level.INFO, "Je moet het bonnetje zoeken van " + afschrift, ex);
+                    Bonnetje bon = candidates.get(0);
+
+                    //bonnetje found
+                    bonnetjes.remove(bon);
+
+                    //wel referentie toevoegen
+                    List<Transactie> trs = bon.getPersoon().getTransactiesRef(bon.getWinkel());
+                    if (trs == null) {
+                        throw new UnsupportedOperationException();
                     }
-                    referentie = afschrift;
-                    tegenRekeningHouder = WINKEL_UNKNOWN;
+                    List<Transactie> tBonnetje = new ArrayList<>(1);
+                    for (Transactie transactie : trs) {//find this bonnetje
+                        if (transactie.getReferentie() == bon) {
+                            tBonnetje.add(transactie);
+                        }
+                    }
+                    if (tBonnetje.size() != 1) {
+                        throw new UnsupportedOperationException("Bonnejte niet verrekend");
+                    }
+                    Transactie vorrigeT = tBonnetje.get(0);
+                    vorrigeT.addReferentie(bon);
+
+                    //hoeft niet dubbel
+                    return;
+                } else if (candidates.isEmpty()) {
+                    refs = new ArrayList<>(1);
+                    Logger.getLogger(Policy.class.getName()).log(Level.INFO, "Je moet het bonnetje zoeken van " + afschrift);
+
+                    Winkel w = memory.winkels.getMede(afschrift.getMededeling());
+                    if (w == null) {
+                        w = new Winkel(afschrift.getMededeling(), null);
+                        memory.winkels.putMede(w, afschrift.getMededeling());
+                    }
+
+                    rhi = w;
                 } else { // > 1
-                    referentie = new ReferentieMultiple(candidates);
-                    throw new UnsupportedOperationException("Wat is de tegenrekeninghouder? Undertermind?");
+                    refs = new ArrayList<>(candidates.size() + 1);
+
+                    Bonnetje bon = candidates.get(0);
+                    Winkel soiso = bon.getWinkel();
+                    for (int i = 1; i < candidates.size(); i++) {
+                        bon = candidates.get(i);
+                        Winkel w = bon.getWinkel();
+                        if (w != soiso) {
+                            //ambigious
+                            rhi = null;
+                            refs.add(afschrift);
+                            verrekMetRekening.add(true, rhi, bedrag, new ReferentieMultiple(refs));
+                            throw new UnsupportedOperationException("Wat is de tegenrekeninghouder? Undertermind?");
+                        }
+                    }
+                    rhi = soiso;
                 }
-                break;
+                refs.add(afschrift);
+                Referentie referentie = new ReferentieMultiple(refs);
+                verrekMetRekening.addSchuld(rhi, bedrag, referentie);
+                return;
             case "OV":
                 if (!afschrift.getMutatieSoort().equals("Overschrijving")) {
                     throw new Error("Overschrijving verwacht ipv: " + afschrift.getMutatieSoort());
                 }
                 //overboeking
-                tegenRekeningHouder = memory.personen.findRek(afschrift.getVan(), afschrift.getVanRekening());
-                referentie = afschrift;
+                if (!afschrift.isAf()) {
+                    if (isMededelingRaRe(afschrift)) {
+                        //zeker
+                        verrekMetRekening.verwerk(memory.personen.findRek(afschrift), afschrift);
+                        ResultPrintStream.showFastLast10(memory.personen.findRek(afschrift));
+                        return;
+                    }else{
+                        //niet zeker
+                        Persoon p = memory.personen.getRek(afschrift.getVanRekening());
+                        if(p != null){
+                            //persoon heeft iets erop geboekt, dus igg toevoegen aan rekening
+                            verrekMetRekening.addSchuld(p, afschrift.getBedrag(), afschrift);
+                        }else{
+                            //kan nieuw persoon zijn maar wel rare start dan...
+                            p = memory.personen.findRek(afschrift);
+                            System.err.println("Niet zeker afschrift van "+p+": "+afschrift);
+                            verrekMetRekening.addSchuld(p, afschrift.getBedrag(), afschrift);
+                        }
+                        return;
+                    }
+                }
+                throw new UnknownError();
                 break;
             case "GT":
                 if (!afschrift.getMutatieSoort().equals("Internetbankieren")) {
                     throw new Error("Internetbankieren verwacht ipv: " + afschrift.getMutatieSoort());
                 }
                 //kan incasso zijn => handmatige overboeking
+
+                if (afschrift.isAf()) {
+                    
+                    Incasso in = memory.incassos.getRek(afschrift.getVanRekening());
+                    if(in != null){
+                        //incasso detected
+                        verrekMetRekening.verwerk(in, afschrift);
+                        return;
+                    }
+                    
+                    //kan voorgeschoten zijn...
+                    if(afschrift.getMededeling().toLowerCase().contains("voorgeschoten")){
+                        Persoon p = memory.personen.findRek(afschrift);
+                        verrekMetRekening.verwerk(memory.personen.findRek(afschrift), afschrift);
+                        return;
+                    }else if(afschrift.getMededeling().contains(" Correctie Raafrekening")
+                            && afschrift.getVan().contains("D.J. van den Brand")){
+                        verrekMetRekening.verwerk(memory.personen.findRek(afschrift), afschrift);
+                        return;
+                    }else if(afschrift.getMededeling().equals(" 20e te veel betaald voor de huis rekening")
+                            && afschrift.getVan().equals("M.M.C. Tilburgs                 ")){
+                        verrekMetRekening.verwerk(memory.personen.findRek(afschrift), afschrift);
+                        return;
+                    }else if(afschrift.getMededeling().equals(" Ik had 27.17 eigen geld gestort  en heb al 20 gepind, dit is rest")){
+                        verrekMetRekening.verwerk(memory.personen.findRek(afschrift), afschrift);
+                        return;
+                    }else if (afschrift.getMededeling().equals(" Toilet papier 11-9-12")){
+                        verrekMetRekening.verwerk(memory.personen.findRek(afschrift), afschrift);
+                        System.err.println("errorous");
+                        return;
+                    }
+                    //zal wss incasso zijn
+                    Logger.getLogger(Policy.class.getName()).log(Level.INFO, "GT gaat nog fout");
+                    throw new UnsupportedOperationException();
+                }else{
+                    //bijboeking
+                    if (isMededelingRaRe(afschrift)) {
+                        verrekMetRekening.verwerk(memory.personen.findRek(afschrift), afschrift);
+                        return;
+                    } else {
+                        throw new UnsupportedOperationException();
+                    }
+                }
+
                 try {
                     throw new UnsupportedOperationException();
                 } catch (UnsupportedOperationException ex) {
@@ -230,16 +336,18 @@ public class Policy {
                 if (afschrift.getMededeling().contains("productrekening")
                         && afschrift.getMededeling().contains("ING")) {
                     //defeniatly ing
-                    if (ING_INCASSO == null) {
-                        ING_INCASSO = memory.incassos.findRek(ING_NAAM, afschrift.getVanRekening());
+                    Incasso ing = memory.incassos.get(ING_INCASSO_NAAM);
+                    if (ing == null) {
+                        ing = memory.incassos.findRek(ING_INCASSO_NAAM, afschrift.getVanRekening());
+                        memory.incassos.put(ing, afschrift.getVan());
                     }
 
-                    tegenRekeningHouder = ING_INCASSO;
-                    referentie = afschrift;
+                    verrekMetRekening.verwerk(ing, afschrift);
+                    ResultPrintStream.showFast(verrekMetRekening, 10, System.out, version);
                 } else {
                     throw new Error();
                 }
-                break;
+                return;
             case "IC": //incasso
                 if (!afschrift.getMutatieSoort().equals("Incasso")) {
                     throw new Error("Incasso verwacht ipv: " + afschrift.getMutatieSoort());
@@ -247,7 +355,9 @@ public class Policy {
                 //incasso van UPC ofzo
                 if (afschrift.getMededeling().trim().substring(0, 3).equalsIgnoreCase("upc")
                         || afschrift.getMededeling().contains("UPC Nederland B.V.")) {
-                    tegenRekeningHouder = memory.incassos.findRek(UPC_NAAM, afschrift.getVanRekening());
+                    Incasso incasso = memory.incassos.findRek(UPC_INCASSO_NAAM, afschrift.getVanRekening());
+                    verrekMetRekening.verwerk(incasso, afschrift);
+                    return;
                 } else {
                     throw new UnsupportedOperationException();
                 }
@@ -257,9 +367,9 @@ public class Policy {
                 if (!afschrift.getMutatieSoort().equals("Periodieke overschrijving")) {
                     throw new Error("Periodieke overschrijving verwacht ipv: " + afschrift.getMutatieSoort());
                 }
-                if (isMededelingRaRe(afschrift.getMededeling())) {
-                    referentie = afschrift;
-                    tegenRekeningHouder = memory.personen.findRek(afschrift);
+                if (isMededelingRaRe(afschrift)) {
+                    verrekMetRekening.verwerk(memory.personen.findRek(afschrift), afschrift);
+                    return;
                 } else {
                     throw new UnsupportedOperationException();
                 }
@@ -268,9 +378,11 @@ public class Policy {
                 if (!afschrift.getMutatieSoort().equals("Storting")) {
                     throw new Error("Storting verwacht ipv: " + afschrift.getMutatieSoort());
                 }
-                referentie = afschrift;
-                tegenRekeningHouder = raafrekeneing.getContant();
-                break;
+                if (afschrift.isAf()) {
+                    throw new Error("Rare storting...");
+                }
+                verrekMetRekening.verwerk(verrekMetRekening.getContant(), afschrift);
+                return;
             case "GM":
                 if (!afschrift.getMutatieSoort().equals("Geldautomaat")) {
                     throw new Error("Geldautomaat verwacht ipv: " + afschrift.getMutatieSoort());
@@ -279,9 +391,9 @@ public class Policy {
                 if (afschrift.getBedrag() % 500 != 0) {
                     throw new Error("bedrag: " + afschrift.getBedrag() + " kan niet gepind zijn...");
                 }
-                referentie = afschrift;
-                tegenRekeningHouder = raafrekeneing.getContant();
-                break;
+                verrekMetRekening.verwerk(verrekMetRekening.getContant(), afschrift);
+                ResultPrintStream.showFastLast10(verrekMetRekening);
+                return;
             default:
                 throw new Error("Code: " + afschrift.getCode() + " niet bekend");
         }
@@ -319,11 +431,24 @@ public class Policy {
         throw new UnsupportedOperationException("Not yet");
     }
 
-    private boolean isMededelingRaRe(String mededeling) {
-        String meld = mededeling.toLowerCase();
-        return meld.contains("huisrekening")
+    private boolean isMededelingRaRe(Afschrift afschrift) {
+        String meld = afschrift.getMededeling().toLowerCase();
+        boolean isRaRa = meld.contains("huisrekening")
                 || meld.contains("huis rekening")
-                || (meld.contains("huiskosten"));
+                || meld.contains("huiskosten")
+                || meld.contains("maandkosten de raaf");
+        if (!isRaRa) {
+            if (afschrift.getVan().equalsIgnoreCase("B.F.W. van Vugt") &&
+                    (afschrift.getMededeling().equalsIgnoreCase(" HOMO"))
+                    || afschrift.getMededeling().toUpperCase().contains("SCHOOIER")) {
+                return true;
+            }
+            return false;
+        }
+        if(isRaRa){
+            throw new Error("Bijde gaan in de + tg?");
+        }
+        return isRaRa;
     }
 
 }

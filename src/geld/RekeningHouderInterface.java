@@ -5,8 +5,8 @@
  */
 package geld;
 
+import data.Afschrift;
 import data.types.HasNaam;
-import geld.Transactie.Record;
 import java.util.List;
 
 /**
@@ -19,7 +19,6 @@ public interface RekeningHouderInterface extends HasNaam {
     public String getNaam();
 
     void addSchuld(RekeningHouderInterface aan, int bedrag, Referentie referentie);
-
     void payBack(RekeningHouderInterface aan, int bedrag, Referentie referentie);
 
     int getSchuld(RekeningHouderInterface rh);
@@ -29,9 +28,19 @@ public interface RekeningHouderInterface extends HasNaam {
     /**
      * 
      * @param r
+     * @return can be null
+     */
+    List<Transactie> getTransactiesRef(RekeningHouderInterface r);
+    
+    /**
+     * 
+     * @param r
      * @return != null
      */
     List<Transactie> getTransactiesCopy(RekeningHouderInterface r);
     
-    List<Record> getAllTransacties();
+    List<TransactiesRecord> getAllTransacties();
+    List<TransactiesRecord> getAllTransacties(RekeningHouderInterface i);
+
+    void verwerk(RekeningHouder AfsVan, Afschrift afschrift);
 }
