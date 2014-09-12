@@ -6,7 +6,6 @@
 package data;
 
 import data.types.HasNaam;
-import geld.RekeningHouderSimple;
 
 /**
  *
