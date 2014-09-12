@@ -16,23 +16,23 @@ import util.diplay.ResultPrintStream;
 
 public abstract class RekeningHouder implements RekeningHouderInterface {
 
-    private final Map<RekeningHouderInterface, Relatie> trackers;
+    private final Map<RekeningHouderInterface, Relatie> relaties;
 
     public RekeningHouder() {
-        trackers = new HashMap<>(2);
+        relaties = new HashMap<>(2);
     }
 
     private Relatie findRelatie(RekeningHouderInterface rhi) {
         Relatie r = getRelatie(rhi);
         if (r == null) {
             r = new Relatie();
-            trackers.put(rhi, r);
+            relaties.put(rhi, r);
         }
         return r;
     }
 
     private Relatie getRelatie(RekeningHouderInterface rhi) {
-        return trackers.get(rhi);
+        return relaties.get(rhi);
     }
 
     @Override
@@ -101,7 +101,7 @@ public abstract class RekeningHouder implements RekeningHouderInterface {
     @Override
     public int getSchuld() {
         int saldo = 0;
-        for (RekeningHouderInterface rhis : trackers.keySet()) {
+        for (RekeningHouderInterface rhis : relaties.keySet()) {
             Relatie r = getRelatie(rhis);
             saldo += r.getSchuld();
         }
@@ -135,16 +135,19 @@ public abstract class RekeningHouder implements RekeningHouderInterface {
         public Relatie() {
             indexesOfMoetNogGebeuren = new HashSet<>(geschiedenis.size() / 2);
         }
-
         /**
-         * wat het onderwerp heeft gekregen
+         * Dit houd bij wat deze rekening nog te bestenden heeft
          */
-        int gekregen = 0;
-        /**
-         * wat het onderwerp nog krijgt
-         */
-        int krijgtNog = 0;
-
+        int rekeningVerschil = 0; //inpact
+/**
+ * Dit houd bij hoeveel dez rekening nog moet betalen aan
+ */
+int dezeRekMoetBetalen; //moetBetalen
+/**
+ * Hoeveel er al betaald is
+ */
+int dezeRekHeeftBetaald; //uitbetaald
+        
         /**
          * Only add
          */
