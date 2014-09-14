@@ -16,7 +16,6 @@ import data.Kookdag;
 import data.Persoon;
 import data.Winkel;
 import data.memory.Memory;
-import geld.ReferentieSimple;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,8 +40,8 @@ import tijd.Interval;
 public class FormatFactory {
 
     private final int version;
+    private Memory memoryInstance = null;
     private final ParserFactory parserFactory = new ParserFactory();
-    private final Memory memoryInstance = parserFactory.getMemory();
 
     public FormatFactory() {
         this(1);
@@ -121,14 +120,13 @@ public class FormatFactory {
                     } else {
                         betaald = 0;
                     }
-
-                    Persoon p = parserFactory.getMemory().personen.find(naam);
+                    Persoon p = memoryInstance.personen.find(naam);
                     if (p.getKwijtschelden() == null) {
                         p.setKwijtschelden(kwijtschelden);
                     } else if (p.kwijtschelden() != kwijtschelden) {
                         throw new MyParseException(0);
                     }
-                    
+
                     return GeregistreerdeBetaling.getContant(null);
                 }
             };
@@ -415,23 +413,20 @@ public class FormatFactory {
     }
 
     private Format<Memory> createMemory() {
-        String[] header;
+        final String[] header;
         MyFilenameFilter filenameFilter;
         Parser<Memory> parser;
 
         header = new String[]{"Type", "various", "(winkel categorie)", "(winkel andere namen)"};
         filenameFilter = new MyFilenameFilter("memory");
-        parser = parserFactory.new SingleParser<Memory>( 
-             
-             
-             
-             
-             
-             
-             
-             
-            memoryInstance) {
-private static final String typePersoon = "nickname";
+        
+        int size = 20/header.length;
+        
+        this.memoryInstance = new Memory(size);
+        
+        parser = parserFactory.new SingleParser<Memory>(memoryInstance) {
+
+            private static final String typePersoon = "nickname";
             private static final String typeRekening = "rekening";
             private static final String typeIncasso = "incasso";
             private static final String typeWinkel = "winkel";
@@ -502,6 +497,8 @@ private static final String typePersoon = "nickname";
             protected int getParseLevel() {
                 return 0;
             }
+            
+            
         };
         return new Format<>(filenameFilter, header, parser);
     }
@@ -565,6 +562,8 @@ private static final String typePersoon = "nickname";
         filenameFilter = new MyFilenameFilter("bewoners");
         parser = parserFactory.new SingleParser<IntegerParsable>(
                  
+             
+             
             new IntegerParsable()) {@Override
             protected void parseLine(String[] strings) {
                 if (strings.length != 2) {

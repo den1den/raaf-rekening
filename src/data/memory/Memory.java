@@ -10,7 +10,7 @@ import data.Incasso;
 import data.Persoon;
 import data.Winkel;
 import file.manager.PathEntry;
-import geld.RekeningHouder;
+import geld.Rekening;
 
 /**
  *
@@ -18,15 +18,11 @@ import geld.RekeningHouder;
  */
 public class Memory {
 
-    public static final int TYPE_REKENING = 0;
-    public static final int TYPE_LAST_REKENING = 1;
-    public static final int TYPE_CATEGORIE = 2;
-
-    public final data.memory.interfaces.DyMapRekLast<Persoon> personen;
-    public final data.memory.interfaces.DyMapRek<Incasso> incassos;
-    public final data.memory.interfaces.StMapMede<Winkel> winkels;
-    public final data.memory.interfaces.DyMap<AankoopCat> aankoopCats;
-    public final data.memory.interfaces.DyMap<PathEntry> paths;
+    public final DyMapRekLast<Persoon> personen;
+    public final DyMapRek<Incasso> incassos;
+    public final StMapMede<Winkel> winkels;
+    public final DyMap<AankoopCat> aankoopCats;
+    public final DyMap<PathEntry> paths;
 
     public Memory(int initialCapacity) {
         this(
@@ -56,31 +52,72 @@ public class Memory {
         );
     }
 
-    public Memory(
-            data.memory.interfaces.DyMapRekLast<Persoon> personen,
-            data.memory.interfaces.DyMapRek<Incasso> incassos,
-            data.memory.interfaces.StMapMede<Winkel> winkelsByMede,
-            data.memory.interfaces.DyMap<AankoopCat> aankoopCats,
-            data.memory.interfaces.DyMap<PathEntry> paths) {
+    private Memory(
+            DyMapRekLast<Persoon> personen,
+            DyMapRek<Incasso> incassos,
+            StMapMede<Winkel> winkelsByMede,
+            DyMap<AankoopCat> aankoopCats,
+            DyMap<PathEntry> paths) {
         this.personen = personen;
         this.incassos = incassos;
         this.winkels = winkelsByMede;
         this.aankoopCats = aankoopCats;
         this.paths = paths;
     }
+    /*
+     public static Memory getMem(int initialCapacity) {
+     DyMapRekLast<Persoon> personen
+     = new DyMapRekLast<Persoon>(initialCapacity) {
 
-    public RekeningHouder getByRekening(String rekening) {
+     @Override
+     Persoon create(String naam) {
+     return new Persoon(naam);
+     }
+     };
+     DyMapRek<Incasso> incassos
+     = new DyMapRek.DyMapRekIncasso(initialCapacity);
+     StMapMede<Winkel> winkels
+     = new StMapMede<>(initialCapacity);
+     DyMap<AankoopCat> aankoopCats
+     = new DyMap<AankoopCat>(initialCapacity) {
+
+     @Override
+     AankoopCat create(String index) {
+     return new AankoopCat(index);
+     }
+     };
+     DyMap<PathEntry> paths
+     = new DyMap<PathEntry>(initialCapacity) {
+
+     @Override
+     PathEntry create(String index) {
+     return new PathEntry(index);
+     }
+     };
+     return new Memory(personen, incassos, winkels, aankoopCats, paths);
+     }*/
+
+    public Rekening getByRekening(String rekening) {
         Persoon p = personen.getRek(rekening);
         Incasso i = incassos.getRek(rekening);
         if (p == null) {
             if (i == null) {
                 return null;
+            } else {
+                return i;
             }
-            return i;
         }
         if (i == null) {
+            throw new UnsupportedOperationException();
             return p;
+        } else {
+            throw new UnsupportedOperationException();
         }
-        throw new UnsupportedOperationException();
+    }
+
+    public int getN() {
+        int n = 10;
+        System.err.println("getN: " + n);
+        return n;
     }
 }

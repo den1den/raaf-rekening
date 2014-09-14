@@ -13,7 +13,7 @@ import data.types.HasNaam;
  * @author Dennis
  * @param <T>
  */
-class StMapNaam<T extends HasNaam> extends StMap<T> implements data.memory.interfaces.StMapNaam<T>{
+class StMapNaam<T extends HasNaam> extends StMap<T> {
 
     public StMapNaam(int intialCapacity) {
         super(intialCapacity);
@@ -27,7 +27,6 @@ class StMapNaam<T extends HasNaam> extends StMap<T> implements data.memory.inter
         return super.get(naam); //To change body of generated methods, choose Tools | Templates.
     }
     
-    @Override
     public void put(T t){
         T old = map.put(t.getNaam(), t);
         if(old != null){

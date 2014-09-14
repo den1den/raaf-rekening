@@ -15,7 +15,7 @@ import java.util.logging.Logger;
  * @author Dennis
  * @param <T>
  */
-abstract class DyMapRekLast<T extends HasNaam> extends DyMapRek<T> implements data.memory.interfaces.DyMapRekLast<T>{
+public abstract class DyMapRekLast<T extends HasNaam> extends DyMapRek<T>{
     StMap<T> lastRekening;
 
     public DyMapRekLast(int intialCapacity) {
@@ -26,12 +26,10 @@ abstract class DyMapRekLast<T extends HasNaam> extends DyMapRek<T> implements da
     @Override
     abstract T create(String naam);
 
-    @Override
     public T findRekLast(String naam, String rekening, String lastRekening) {
         throw new UnsupportedOperationException();
     }
 
-    @Override
     public T findLast(String naam, String lastRekening) {
         T t = getLast(lastRekening);
         if( t == null){
@@ -54,19 +52,16 @@ abstract class DyMapRekLast<T extends HasNaam> extends DyMapRek<T> implements da
         return t;
     }
 
-    @Override
     public T getLast(String rekeningLast) {
         return this.lastRekening.get(rekeningLast);
     }
 
-    @Override
     public T getRekLast(String rekening, String rekeningLast) {
         T rek = getRek(rekening);
         T last = getLast(rekeningLast);
         throw new UnsupportedOperationException();
     }
 
-    @Override
     public void putLast(T t, String rekeningLast) {
         this.put(t);
         this.lastRekening.put(t, rekeningLast);

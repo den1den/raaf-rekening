@@ -36,6 +36,7 @@ public class DataManager {
         this.initBasePath = basePath;
         this.baseDir = new File(basePath);
         while (!baseDir.isDirectory()) {
+            Logger.getLogger(DataManager.class.getName()).log(Level.INFO, "Gaat fout op linux");
             Exception e = new Exception("BasePath "+basePath+" is not Directory");
             baseDir = baseDir.getParentFile();
             if (baseDir == null) {

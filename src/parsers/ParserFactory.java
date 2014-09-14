@@ -20,21 +20,8 @@ import java.util.Set;
  * @author Dennis
  */
 public class ParserFactory {
-
-    private final Memory memory;
+    
     private int currentParseLevel = 0;
-
-    public ParserFactory() {
-        this(new Memory(10));
-    }
-
-    public ParserFactory(Memory memory) {
-        this.memory = memory;
-    }
-
-    public Memory getMemory() {
-        return memory;
-    }
 
     /**
      * To parse Strings arrays into objects.
@@ -108,12 +95,12 @@ public class ParserFactory {
         }
 
         @Override
-        final protected P init(int size) {
+        protected P init(int size) {
             return instance;
         }
 
         @Override
-        final protected void parseData(StringsData data) {
+        protected void parseData(StringsData data) {
             int lineNumber = 0;
             for (String[] fileLine : data) {
                 try {

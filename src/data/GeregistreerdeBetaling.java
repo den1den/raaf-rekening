@@ -5,6 +5,7 @@
  */
 package data;
 
+import data.types.HasTime;
 import geld.Referentie;
 import tijd.Time;
 
@@ -12,7 +13,7 @@ import tijd.Time;
  *
  * @author Dennis
  */
-public class GeregistreerdeBetaling implements Referentie {
+public class GeregistreerdeBetaling implements Referentie, HasTime {
 
     final private Referentie referentie;
     final private Time time;

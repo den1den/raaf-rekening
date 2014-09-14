@@ -16,7 +16,7 @@ import java.util.logging.Logger;
  * @author Dennis
  * @param <T>
  */
-abstract class DyMapRek<T extends HasNaam> extends DyMapNaam<T> implements data.memory.interfaces.DyMapRek<T> {
+public abstract class DyMapRek<T extends HasNaam> extends DyMapNaam<T> {
 
     StMap<T> rekening;
 
@@ -28,23 +28,19 @@ abstract class DyMapRek<T extends HasNaam> extends DyMapNaam<T> implements data.
     @Override
     abstract T create(String naam);
 
-    @Override
     public T getRek(String rekening) {
         return this.rekening.get(rekening);
     }
 
-    @Override
     public void putRek(T t, String rekening) {
         this.put(t);
         this.rekening.put(t, rekening);
     }
 
-    @Override
     public T findRek(Afschrift afschrift) {
         return findRek(afschrift.getVan(), afschrift.getVanRekening());
     }
 
-    @Override
     public T findRek(String naam, String rekening) {
         T tRek = getRek(rekening);
         T tNaam;

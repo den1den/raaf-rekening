@@ -11,18 +11,16 @@ package data.memory;
  * @author Dennis
  * @param <T>
  */
-class StMap<T> extends Map<T> implements data.memory.interfaces.StMap<T>{
+class StMap<T> extends Map<T>{
 
     public StMap(int intialCapacity) {
         super(intialCapacity);
     }
     
-    @Override
     public void put(T t, String index){
         map.put(filter(index), t);
     }
 
-    @Override
     public boolean replace(T old, T t) {
         boolean replace = false;
         for (java.util.Map.Entry<String, T> entry : map.entrySet()) {

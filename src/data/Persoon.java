@@ -6,19 +6,26 @@
 package data;
 
 import data.types.HasNaam;
-import geld.RekeningHouderContantInterface;
-import geld.RekeningHouderSimple;
+import geld.Referentie;
+import geld.Rekening;
+import geld.geldImpl.HasSchulden;
+import geld.geldImpl.LeenRekening;
+import geld.geldImpl.KrijgtNog;
 
 /**
  *
  * @author Dennis
  */
-public class Persoon extends RekeningHouderSimple implements HasNaam{
+public class Persoon extends LeenRekening implements HasNaam, HasSchulden{
 
+    private final String naam;
     protected Boolean kwijtschelden = null;
 
     public Persoon(String naam) {
-        super(naam);
+        super();
+        if(naam == null || naam.isEmpty())
+            throw new IllegalArgumentException();
+        this.naam = naam;
         if(naam.equalsIgnoreCase("rk")){
             throw new IllegalArgumentException();
         }
@@ -70,4 +77,10 @@ public class Persoon extends RekeningHouderSimple implements HasNaam{
     public String toString() {
         return getNaam();
     }
+
+    @Override
+    public String getNaam() {
+        return naam;
+    }
+    
 }

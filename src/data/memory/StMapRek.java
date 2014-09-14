@@ -13,7 +13,7 @@ import data.types.HasNaam;
  * @author Dennis
  * @param <T>
  */
-class StMapRek<T extends HasNaam> extends StMapNaam<T> implements data.memory.interfaces.StMapRek<T>{
+class StMapRek<T extends HasNaam> extends StMapNaam<T> {
 
     StMap<T> rekening;
     
@@ -22,12 +22,10 @@ class StMapRek<T extends HasNaam> extends StMapNaam<T> implements data.memory.in
         rekening = new StMap<T>(initialCapacity);
     }
 
-    @Override
     public T getRek(String rekening) {
         return this.rekening.get(rekening);
     }
 
-    @Override
     public void putRek(T t, String rekening) {
         //rekening filtering?
         put(t);

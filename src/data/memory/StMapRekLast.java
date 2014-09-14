@@ -14,7 +14,7 @@ import java.util.logging.Logger;
  *
  * @author Dennis
  */
-class StMapRekLast<T extends HasNaam> extends StMapRek<T> implements data.memory.interfaces.StMapRekLast<T>{
+class StMapRekLast<T extends HasNaam> extends StMapRek<T> {
 
     StMap<T> lastRekening;
 
@@ -23,12 +23,10 @@ class StMapRekLast<T extends HasNaam> extends StMapRek<T> implements data.memory
         lastRekening = new StMap<>(intialCapacity);
     }
     
-    @Override
     public T getLast(String rekeningLast) {
         return lastRekening.get(rekeningLast);
     }
 
-    @Override
     public T getRekLast(String rekening, String rekeningLast) {
         T rekT = getRek(rekening);
         T lasT = getLast(rekeningLast);
@@ -51,7 +49,6 @@ class StMapRekLast<T extends HasNaam> extends StMapRek<T> implements data.memory
         return null;
     }
 
-    @Override
     public void putLast(T t, String rekeningLast) {
         put(t);
         lastRekening.put(t, rekeningLast);

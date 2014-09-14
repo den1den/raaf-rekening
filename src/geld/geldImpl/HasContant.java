@@ -4,19 +4,14 @@
  * and open the template in the editor.
  */
 
-package geld;
-
-import tijd.Datum;
-import tijd.Time;
+package geld.geldImpl;
 
 /**
  *
  * @author Dennis
  */
-interface ReferentieHasDate {
-
-    Datum getDate();
-
-    Time getTime();
-    
+interface HasContant {
+    default void doContant(){
+        throw new UnsupportedOperationException();
+    }
 }

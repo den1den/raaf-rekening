@@ -12,4 +12,5 @@ package data.types;
  */
 public interface HasNaam {
     public String getNaam();
+    
 }

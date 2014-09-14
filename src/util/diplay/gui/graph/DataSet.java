@@ -5,7 +5,6 @@
  */
 package util.diplay.gui.graph;
 
-import geld.Transactie;
 import java.awt.Color;
 import java.lang.reflect.Array;
 import java.util.ArrayList;

@@ -4,18 +4,15 @@
  * and open the template in the editor.
  */
 
-package geld;
+package data.types;
 
-import tijd.Datum;
 import tijd.Time;
 
 /**
  *
  * @author Dennis
  */
-interface ReferentieHasDate {
-
-    Datum getDate();
+public interface HasTime {
 
     Time getTime();
     

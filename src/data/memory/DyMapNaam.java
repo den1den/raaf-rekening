@@ -12,12 +12,11 @@ import data.types.HasNaam;
  *
  * @author Dennis
  */
-abstract class DyMapNaam<T extends HasNaam> extends DyMap<T> implements data.memory.interfaces.DyMapNaam<T>{
+abstract class DyMapNaam<T extends HasNaam> extends DyMap<T>{
     public DyMapNaam(int intialCapacity) {
         super(intialCapacity);
     }
 
-    @Override
     public void put(T t) {
         put(t, t.getNaam());
     }

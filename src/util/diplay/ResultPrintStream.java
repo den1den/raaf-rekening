@@ -7,14 +7,9 @@ package util.diplay;
 
 import data.Afschrift;
 import data.Persoon;
+import data.memory.Memory;
 import geld.Referentie;
-import geld.ReferentieMultiple;
-import geld.RekeningHouder;
-import geld.RekeningHouderContant;
-import geld.RekeningHouderContantInterface;
-import geld.RekeningHouderInterface;
-import geld.Transactie;
-import geld.TransactiesRecord;
+import geld.geldImpl.HasSchulden;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -35,39 +30,39 @@ import util.SchuldenComparator;
 import util.diplay.gui.graph.DataSet;
 import util.diplay.gui.graph.Graph;
 
-public class ResultPrintStream extends Result {
+public class ResultPrintStream {
 
     /**
-     * 
+     *
      * @param rs rekeningen TOV laatste
      */
-    public static void showLastT(RekeningHouder... rs) {
+    public static void showLastT(Object... rs) {
         int max = 2;
-        
+
         List<String[]> TOV_ordered = getTOV_ordered(Arrays.asList(rs), rs[rs.length - 1]);
-        
+
         int keepUpper = 1;
-        for (int i = keepUpper; i < TOV_ordered.size()-max; i++) {
+        for (int i = keepUpper; i < TOV_ordered.size() - max; i++) {
             //keep header
             TOV_ordered.remove(keepUpper);
         }
-        
-        System.out.println("Show "+(rs.length-1)+" against: "+rs[rs.length-1].toString());
+
+        System.out.println("Show " + (rs.length - 1) + " against: " + rs[rs.length - 1].toString());
         System.out.println(new MyTxtTableHeader(TOV_ordered));
-        
+
         /*
-        List<TransactiesRecord> tr1 = r1.getTransacties(r2);
-        List<TransactiesRecord> tr2 = r2.getTransacties(r1);
-        System.out.println("1: "+r1.toString());
-        for (int i = 0; i < tr1.size() && i < max; i++) {
-            System.out.println(" "+tr1.get(i).toString());
-        }
-        System.out.println("2: "+r2.toString());
-        for (int i = 0; i < tr2.size() && i < max; i++) {
-            System.out.println(" "+tr2.get(i).toString());
-        }
-        System.out.println();
-                */
+         List<TransactiesRecord> tr1 = r1.getTransacties(r2);
+         List<TransactiesRecord> tr2 = r2.getTransacties(r1);
+         System.out.println("1: "+r1.toString());
+         for (int i = 0; i < tr1.size() && i < max; i++) {
+         System.out.println(" "+tr1.get(i).toString());
+         }
+         System.out.println("2: "+r2.toString());
+         for (int i = 0; i < tr2.size() && i < max; i++) {
+         System.out.println(" "+tr2.get(i).toString());
+         }
+         System.out.println();
+         */
     }
 
     final int version;
@@ -83,11 +78,11 @@ public class ResultPrintStream extends Result {
         this.stream = stream;
     }
 
-    static String[][] listTransacties(List<TransactiesRecord> transacties, int saldo) {
+    static String[][] listTransacties(List<Object> transacties, int saldo) {
         return listTransacties(transacties, new AtomicInteger(saldo));
     }
 
-    static String[][] listTransacties(List<TransactiesRecord> transacties, AtomicInteger saldo) {
+    static String[][] listTransacties(List<Object> transacties, AtomicInteger saldo) {
         String[][] rows;
         if (transacties.isEmpty()) {
             rows = new String[][]{new String[]{"Geen transactie gevonden..."}};
@@ -137,7 +132,7 @@ public class ResultPrintStream extends Result {
         return rows;
     }
 
-    static String[][] lastTransacties(List<TransactiesRecord> trs, Integer saldo, int lines) {
+    static String[][] lastTransacties(List<Object> trs, Integer saldo, int lines) {
         String[][] rows = listTransacties(trs, saldo);
         String[][] result;
         if (lines > 0 && lines < rows.length) {
@@ -155,58 +150,83 @@ public class ResultPrintStream extends Result {
         return result;
     }
 
-    public static List<String[]> getTOV_ordered(Collection<? extends RekeningHouderInterface> van, RekeningHouderInterface... voorRekening) {
+    public static List<String[]> getTOV_ordered(Collection<? extends HasSchulden> van, HasSchulden... tov) {
         //stream.println();
         //stream.println("Schulden van " + voorRekening + " ("+voorRekening.getSaldo()+"):");
 
-        List<RekeningHouderInterface> rList = new ArrayList<>(van);
-        Comparator<RekeningHouderInterface> comparator = SchuldenComparator.by(voorRekening);
+        List<HasSchulden> rList = new ArrayList<>(van);
+        Comparator<HasSchulden> comparator = SchuldenComparator.by(tov);
         Collections.sort(rList, comparator);
 
-        return getTOV(rList, voorRekening);
+        return getTOV(rList, tov);
     }
-    
-    public static List<String[]> getTOV(Collection<RekeningHouderInterface> onderwerps, RekeningHouderInterface... tovs){
-        ArrayList<String[]> r = new ArrayList<>(onderwerps.size()+1);
-        ArrayList<String> row = new ArrayList<>(2 + 3*tovs.length);
-        row.add("Naam"); row.add("TotaalSchuld");
+
+    public static List<String[]> getTOV(Collection<HasSchulden> onderwerps, HasSchulden... tovs) {
+        List<String[]> r = new ArrayList<>(onderwerps.size() + 1);
+        ArrayList<String> row = new ArrayList<>(2 + 3 * tovs.length);
+        row.add("Naam");
+        row.add("Totaal");
         for (int i = 0; i < tovs.length; i++) {
-            RekeningHouderInterface tov = tovs[i];
-            row.add(i+"krijgt ");
-            row.add(i+"gekregen ");
-            row.add(i+"Schuld ");
+            HasSchulden tov = tovs[i];
+            row.add("Totaal "+tov.getNaam());
         }
         r.add(row.toArray(new String[row.size()]));
-        for (RekeningHouderInterface onderwerp : onderwerps) {
+        for (HasSchulden onderwerp : onderwerps) {
             row.clear();
             row.add(onderwerp.getNaam());
-            row.add(String.valueOf(onderwerp.getSchuld()));
+            row.add(onderwerp.getKrijgtNog().show());
             for (int i = 0; i < tovs.length; i++) {
-                RekeningHouderInterface tov = tovs[i];
-                row.add(String.valueOf(onderwerp.getKrijgtNog(tov)));
-                row.add(String.valueOf(onderwerp.getGekregen(tov)));
-                row.add(String.valueOf(onderwerp.getSchuld(tov)));
+                HasSchulden tov = tovs[i];
+                row.add(onderwerp.getKrijgtNog().show(tov));
             }
             r.add(row.toArray(new String[row.size()]));
         }
         return r;
     }
-
-    @Override
-    public void listResultaat(Collection<? extends RekeningHouderInterface> rhs, RekeningHouder tov) {
-        this.stream.println("List: "+rhs.size()+" rekeningen tegen "+tov+ " (€"+((double)tov.getSaldo())/100+")");
-        this.stream.println(new MyTxtTableHeader(getTOV_ordered(rhs, tov)));
+    public static List<String[]> getTOV_ordered(List<? extends HasSchulden> onderwerps, HasSchulden... tovs) {
+        List<HasSchulden> rList = new ArrayList<>(onderwerps);
+        Comparator<HasSchulden> comparator = SchuldenComparator.by(tovs);
+        Collections.sort(rList, comparator);
+        return getTOV(rList, tovs);
+    }
+    
+    public static void lijstje(Memory memory, HasSchulden... tov){
+        showTOV(memory.personen.getAll(), tov);
+    }
+    
+    public static void showTOV(Collection<? extends HasSchulden> items, HasSchulden... tov){
+        String header;
+        if(tov.length > 0){
+            header = items.size() + " ten opzichte van ("+tov.length+"): ";
+            header += tov[0].getNaam();
+            for (int i = 1; i < tov.length; i++) {
+                header += ", " + tov[i].getNaam();
+            }
+        }else{
+            header = items.size() + " schulden";
+        }
+        System.out.println(header);
+        System.out.println(new MyTxtTableHeader(getTOV_ordered(items, tov)));
     }
 
-    @Override
-    public <RH extends RekeningHouderInterface> void showDetailledTov(Collection<RH> subject, RH... rhs) {
+    public void listResultaat(Collection<? extends HasSchulden> rhs, HasSchulden tov) {
+        this.stream.println(rhs.size() + " rekeningen tegen " + tov + " (" + tov.getKrijgtNog().show() + ")");
+        this.stream.println(new MyTxtTableHeader(ResultPrintStream.getTOV_ordered(rhs, tov)));
+    }
+
+    public <RH extends HasSchulden> void showDetailledTov(Collection<RH> subject, RH... rhs) {
         stream.println();
         stream.print("Details for: ");
         for (int i = 0; i < rhs.length; i++) {
-            stream.print(rhs+" ");
+            stream.print(rhs + " ");
         }
         stream.println();
         stream.print(new MyTxtTableHeader(getTOV_ordered(subject, rhs)));
+    }
+
+    public void listResultaat(Collection<? extends Object> rhs, Object tov, boolean dummy) {
+        this.stream.println("List: " + rhs.size() + " rekeningen tegen " + tov + " (€" + ((double) tov.getSchulden().getSaldo()) / 100 + ")");
+
     }
 
     static class SlowPrintStream extends PrintStream {

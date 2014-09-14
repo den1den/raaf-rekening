@@ -5,8 +5,9 @@
  */
 package data;
 
-import geld.ReferentieHasDate;
-import geld.RekeningHouder;
+import data.types.HasDate;
+import geld.Referentie;
+import geld.Rekening;
 import tijd.Datum;
 import tijd.Time;
 
@@ -15,7 +16,7 @@ import tijd.Time;
  * @author Dennis
  */
 public class Afschrift
-        implements ReferentieHasDate {
+        implements Referentie, HasDate {
 
     private final Datum datum;
     private final String van;
@@ -26,8 +27,6 @@ public class Afschrift
     private final int bedrag;
     private final String mutatieSoort;
     private final String mededeling;
-
-    private RekeningHouder vanRHouder;
 
     /**
      *
@@ -56,10 +55,6 @@ public class Afschrift
         this.mededeling = mededeling;
     }
 
-    public RekeningHouder getVanRHouder() {
-        return vanRHouder;
-    }
-
     public String getDezeRekening() {
         return dezeRekening;
     }
@@ -84,13 +79,6 @@ public class Afschrift
         return mededeling;
     }
 
-    public void setVanRHouder(RekeningHouder vanRHouder) {
-        if (vanRHouder == null) {
-            throw new IllegalArgumentException();
-        }
-        this.vanRHouder = vanRHouder;
-    }
-
     public String getVan() {
         return van;
     }
@@ -113,10 +101,5 @@ public class Afschrift
     @Override
     public Datum getDate() {
      return datum;   
-    }
-
-    @Override
-    public Time getTime() {
-        return datum;
     }
 }

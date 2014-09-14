@@ -6,15 +6,12 @@
 
 package geld;
 
-import tijd.Time;
-
 /**
  *
  * @author Dennis
  */
 public interface Referentie {
-    public default String getRef(){
+    default String getRefString(){
         return toString();
     }
-    public Time getTime();
 }

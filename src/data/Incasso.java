@@ -7,13 +7,14 @@
 package data;
 
 import data.types.HasNaam;
-import geld.RekeningHouderSimple;
+import geld.Rekening;
+import geld.Rekening.Virtueel;
 
 /**
  *
  * @author Dennis
  */
-public class Incasso extends RekeningHouderSimple implements HasNaam{
+public class Incasso extends Rekening.Virtueel implements HasNaam{
     
     private final String rekeningNummer;
 

@@ -5,7 +5,8 @@
  */
 package data;
 
-import geld.ReferentieHasDate;
+import data.types.HasDate;
+import geld.Referentie;
 import java.util.Map;
 import tijd.Datum;
 import tijd.Time;
@@ -14,7 +15,7 @@ import tijd.Time;
  *
  * @author Dennis
  */
-public class Kookdag implements ReferentieHasDate{
+public class Kookdag implements Referentie{
     public final int id;
     private final int totaalBedrag;
     private final Persoon kok;
@@ -42,7 +43,7 @@ public class Kookdag implements ReferentieHasDate{
     }
 
     @Override
-    public String getRef() {
+    public String getRefString() {
         return "Kookdag ("+id+") van "+getBedrag()+"ct met "+getTotaalEters()+" man";
     }
     
@@ -56,15 +57,5 @@ public class Kookdag implements ReferentieHasDate{
             tot += p;
         }
         return tot;
-    }
-
-    @Override
-    public Time getTime() {
-        return null;
-    }
-
-    @Override
-    public Datum getDate() {
-        return null;
     }
 }

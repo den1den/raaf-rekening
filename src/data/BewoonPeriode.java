@@ -72,7 +72,6 @@ public class BewoonPeriode implements Iterable<SubPeriode> {
             this.subInterval = subInterval;
         }
 
-        @Override
         public Time getTime() {
             return subInterval.getEnd();
         }

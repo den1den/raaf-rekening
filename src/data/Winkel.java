@@ -6,18 +6,19 @@
 package data;
 
 import data.types.HasNaam;
+import geld.Rekening;
 
 /**
  *
  * @author Dennis
  */
-public class Winkel extends RekeningHouderSimple implements HasNaam{
+public class Winkel extends Rekening implements HasNaam{
 
-    
+    final String naam;
     AankoopCat defaultAankoopCat;
 
     public Winkel(String naam, AankoopCat defaultAankoopCat) {
-        super(naam);
+        this.naam = naam;
         this.defaultAankoopCat = defaultAankoopCat;
     }
 
@@ -28,5 +29,10 @@ public class Winkel extends RekeningHouderSimple implements HasNaam{
         } else {
             new Error("ehh? eerst: " + defaultAankoopCat + " en nu dit: " + defaultCat + " (Nothing done)").printStackTrace();
         }
+    }
+
+    @Override
+    public String getNaam() {
+        return naam;
     }
 }

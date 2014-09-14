@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package raafbeheer; 
+package raafbeheer;
 
 import data.Afschrift;
 import data.BewoonPeriode;
@@ -14,10 +14,9 @@ import data.Persoon;
 import data.memory.Memory;
 import file.manager.DataManager;
 import file.manager.FormatFactory;
+import geld.geldImpl.RaafRekening;
 import geld.Policy;
-import geld.RekeningHouderContant;
-import geld.Transactie;
-import geld.TransactiesRecord;
+import geld.geldImpl.LeenRekening;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -25,7 +24,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import util.diplay.Result;
 import util.diplay.ResultPrintStream;
 
 /**
@@ -39,8 +37,13 @@ public class RaafBeheer {
      */
     public static void main(String[] args) {
         int version = 4;
-
-        RaafBeheer raafBeheer = new RaafBeheer(version);
+        RaafBeheer raafBeheer;
+        try {
+            raafBeheer = new RaafBeheer(version);
+        } catch (ExceptionInInitializerError e) {
+            System.out.println("Big mistake!");
+            throw e;
+        }
         if (args.length > 0 && args[0].equalsIgnoreCase("testing")) {
             System.out.println();
             System.out.println("Testing");
@@ -63,10 +66,7 @@ public class RaafBeheer {
     private final DataManager files;
 
     private final FormatFactory formats;
-    private final Result result;
-
-    private final RekeningHouderContant raafRekening = new RekeningHouderContant("RaafRekening");
-    private final RekeningHouderContant kookRekening = new RekeningHouderContant("KookLijstRekening");
+    private final ResultPrintStream result;
 
     private Policy policy = null;
     private Memory memory = null;
@@ -95,33 +95,25 @@ public class RaafBeheer {
         Set<BierBonnetje> bierBonnetjes = formats.bierBonnetjes.parser.parse(files.getBierBonnetjes());
         Map<Persoon, Persoon> kookSchuldDelers = formats.kookSchuldDelers.parser.parse(files.getKookSchuldDelers());
 
-        policy = new Policy(version, raafRekening, kookRekening, memory);
-
-        policy.verrekenKookdagen(kookdagen, kookSchuldDelers);
-
-        result.listResultaat(memory.personen.getAll(), kookRekening);
-
+        policy = new Policy(version, memory);
+        LeenRekening kookR = new LeenRekening.Easy("Kook Rekening");
+        policy.verrekenKookdagen(kookdagen, kookSchuldDelers, kookR);
         
-        
-        
+        result.listResultaat(memory.personen.getAll(), kookR);
 
-        RekeningHouderContant perR = new RekeningHouderContant("periodes");
-        policy.setVerrekMetRekening(perR);
-        policy.verrekenBewoonPeriodes(bewoonPeriodes);
-        result.listResultaat(memory.personen.getAll(), perR);
-        
-        RekeningHouderContant bonR = new RekeningHouderContant("bonnetjesRek");
-        policy.setVerrekMetRekening(bonR);
-        policy.verrekenBonnetjes(bonnetjes);
-        result.listResultaat(memory.personen.getAll(), bonR);
-        
-        RekeningHouderContant afR = new RekeningHouderContant("AfschriftenRek");
-        policy.setVerrekMetRekening(afR);
-        policy.verwerkAfschriften(afschriften, bonnetjes);
-        result.listResultaat(memory.personen.getAll(), afR);
+         RaafRekening perR = new RaafRekening("periodes");
+         policy.verrekenBewoonPeriodes(bewoonPeriodes, perR);
+         result.listResultaat(memory.personen.getAll(), perR);
 
+         RaafRekening bonR = new RaafRekening("bonnetjesRek");
+         policy.verrekenBonnetjes(bonnetjes, bonR);
+         result.listResultaat(memory.personen.getAll(), bonR);
+
+         RaafRekening afR = new RaafRekening("AfschriftenRek");
+         policy.verwerkAfschriften(afschriften, bonnetjes, afR);
+         result.listResultaat(memory.personen.getAll(), afR);
         //result.showFactuurs(fs);
-        result.showDetailledTov(memory.personen.get("Dennis"), perR, bonR, afR);
+        //result.showDetailledTov(memory.personen.get("Dennis"), perR, bonR, afR);
     }
 
     void forReal() {

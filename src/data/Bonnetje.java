@@ -6,7 +6,8 @@
 package data;
 
 import data.types.HasBedrag;
-import geld.ReferentieHasDate;
+import data.types.HasDate;
+import geld.Referentie;
 import java.util.Comparator;
 import java.util.List;
 import tijd.Datum;
@@ -16,7 +17,7 @@ import tijd.Time;
  *
  * @author Dennis
  */
-public class Bonnetje implements ReferentieHasDate, HasBedrag{
+public class Bonnetje implements Referentie, HasBedrag, HasDate{
 
     public static Comparator<Bonnetje> getByDate() {
         return (Bonnetje o1, Bonnetje o2) -> o1.datum.compareTo(o2.datum);
@@ -57,11 +58,6 @@ public class Bonnetje implements ReferentieHasDate, HasBedrag{
 
     @Override
     public Datum getDate() {
-        return datum;
-    }
-
-    @Override
-    public Time getTime() {
         return datum;
     }
 

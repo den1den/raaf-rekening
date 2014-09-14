@@ -10,7 +10,7 @@ package data.memory;
  * @author Dennis
  * @param <T>
  */
-public abstract class DyMap<T> extends StMap<T> implements data.memory.interfaces.DyMap<T>{
+public abstract class DyMap<T> extends StMap<T>{
 
     public DyMap(int intialCapacity) {
         super(intialCapacity);
@@ -18,7 +18,6 @@ public abstract class DyMap<T> extends StMap<T> implements data.memory.interface
     
     abstract T create(String index);
 
-    @Override
     public T find(String index) {
         T t = get(index);
         if (t == null) {

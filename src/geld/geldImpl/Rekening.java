@@ -4,19 +4,14 @@
  * and open the template in the editor.
  */
 
-package geld;
+package geld.geldImpl;
 
-import tijd.Datum;
-import tijd.Time;
+import data.types.HasNaam;
 
 /**
  *
  * @author Dennis
  */
-interface ReferentieHasDate {
-
-    Datum getDate();
-
-    Time getTime();
-    
+public abstract class Rekening implements HasNaam{
+    Sum opRekening;
 }
