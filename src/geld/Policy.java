@@ -15,7 +15,8 @@ import data.Winkel;
 import data.memory.Memory;
 import data.types.HasBedrag;
 import data.types.HasDate;
-import geld.TransactiesRecord;
+import geld.geldImpl.LeenRekening;
+import geld.geldImpl.RaafRekening;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -37,22 +38,14 @@ import util.diplay.ResultPrintStream;
 public class Policy {
 
     final private int version;
-    private RekeningHouderContant verrekMetRekening;
-    final private RekeningHouderContant kookRekening;
     final private Memory memory;
 
-    public Policy(int version, RekeningHouderContant verrekMetRekening, RekeningHouderContant kookRekening, Memory memory) {
+    public Policy(int version, Memory memory) {
         this.version = version;
-        if (memory == null || verrekMetRekening == null || kookRekening == null) {
+        if (version < 0 || memory == null) {
             throw new IllegalArgumentException();
         }
-        this.verrekMetRekening = verrekMetRekening;
-        this.kookRekening = kookRekening;
         this.memory = memory;
-    }
-
-    public void setVerrekMetRekening(RekeningHouderContant verrekMetRekening) {
-        this.verrekMetRekening = verrekMetRekening;
     }
 
     final private Comparator<Datum> byDay = HasDate.getOnDay();
@@ -60,13 +53,17 @@ public class Policy {
     final private String UPC_INCASSO_NAAM = "UPC";
     final private String WINKEL_UNKNOWN_NAAM = "Niet bekend";
 
-    public void verrekenKookdagen(List<Kookdag> allDagen, Map<Persoon, Persoon> kookSchuldDelers) {
-        for (Kookdag kookdag : allDagen) {
-            verrekenKookdag(kookdag, kookSchuldDelers);
-        }
+    public void verrekenKookdagen(List<Kookdag> allDagen,
+            Map<Persoon, Persoon> kookSchuldDelers,
+            LeenRekening r){
+        allDagen.stream().forEach((kookdag) -> {
+            verrekenKookdag(kookdag, kookSchuldDelers, r);
+        });
     }
 
-    private void verrekenKookdag(Kookdag kookdag, Map<Persoon, Persoon> kookSchuldDelers) {
+    private void verrekenKookdag(Kookdag kookdag,
+            Map<Persoon, Persoon> kookSchuldDelers,
+            LeenRekening r){
         Persoon kok = kookdag.getKok();
         Map<Persoon, Integer> meeters = kookdag.getMeeters();
 
@@ -99,14 +96,16 @@ public class Policy {
                 }
 
                 if (persoon.equals(kok)) {
+                    //kok
                     verreken = kookdag.getBedrag()
                             - kokPrijs - prijs * (m.getValue() - 1);
-                    verantwoordelijk.krijgtNog(kookRekening, verreken, kookdag);
+                    r.leentVan(verantwoordelijk, verreken, kookdag);
                     total += verreken;
 
                 } else if (!persoon.kwijtschelden()) {
+                    //meeter
                     verreken = prijs * (m.getValue());
-                    kookRekening.krijgtNog(verantwoordelijk, verreken, kookdag);
+                    verantwoordelijk.leentVan(r, verreken, kookdag);
                     //ResultPrintStream.showLastT(kookRekening, verantwoordelijk);
                     total -= verreken;
                 }
@@ -118,30 +117,32 @@ public class Policy {
     }
 
     public void verrekenBewoonPeriodes(
-            Collection<BewoonPeriode> bewoonPeriodes) {
+            Collection<BewoonPeriode> bewoonPeriodes,
+            RaafRekening rekening) {
         for (BewoonPeriode bewoonPeriode : bewoonPeriodes) {
             Persoon persoon = bewoonPeriode.getPersoon();
             for (BewoonPeriode.SubPeriode subPeriode : bewoonPeriode) {
                 final int bedrag = 2000;
-                persoon.betaaldNog(verrekMetRekening, bedrag, subPeriode);
+                rekening.krijgtNog(bedrag, persoon, subPeriode);
+                //persoon.betaaldNog(verrekMetRekening, bedrag, subPeriode);
             }
         }
     }
 
     public void verrekenBonnetjes(
-            Set<Bonnetje> bonnetjes) {
+            Set<Bonnetje> bonnetjes,
+            RaafRekening rekening) {
         for (Bonnetje bonnetje : bonnetjes) {
-            bonnetje.getPersoon().krijgtNog(verrekMetRekening, bonnetje.getBedrag(), bonnetje);
+            rekening.betaaldDoor(bonnetje.getPersoon(), bonnetje.getBedrag(), bonnetje);
         }
     }
 
-    public void verwerkAfschriften(Collection<Afschrift> afschriften,
-            Collection<Bonnetje> bonnetjes) {
+    public void verwerkAfschriften(Set<Afschrift> afschriften, Set<Bonnetje> bonnetjes, RaafRekening rekening) {
         ArrayList<Bonnetje> bonnetjes1 = new ArrayList<>(bonnetjes);
         Collections.sort(bonnetjes1, Bonnetje.getByDate());
         for (Afschrift afschrift : afschriften) {
             try {
-                verwerkAfschrift(afschrift, bonnetjes1);
+                verwerkAfschrift(afschrift, bonnetjes1,rekening);
             } catch (Error e) {
                 throw new Error("At afschrift: " + afschrift, e);
             }
@@ -150,7 +151,8 @@ public class Policy {
 
     private <RL extends List<Bonnetje> & RandomAccess> void verwerkAfschrift(
             Afschrift afschrift,
-            RL bonnetjes) {
+            RL bonnetjes,
+            RaafRekening rekening) {
 int bedrag = afschrift.getBedrag();
 
         switch (afschrift.getCode()) {
@@ -167,8 +169,6 @@ int bedrag = afschrift.getBedrag();
                 if (!afschrift.isAf()) {
                     throw new Error();
                 }
-
-                RekeningHouder rhi;
                 
                 List<Referentie> refs;
 
@@ -243,9 +243,11 @@ int bedrag = afschrift.getBedrag();
                 if (!afschrift.isAf()) {
                     if (isMededelingRaRe(afschrift)) {
                         //zeker
-                        ResultPrintStream.showFastLast10(verrekMetRekening);
-                        memory.personen.findRek(afschrift).betaaldSchuldAf(verrekMetRekening, afschrift);
-                        ResultPrintStream.showFastLast10(memory.personen.findRek(afschrift));
+                        throw new UnsupportedOperationException("Gebeuren twee dingen tegelijk, moet in Raafrekenng complexe functies maken en in history zetter per handeling, zie Word");
+                        Persoon p = memory.personen.findRek(afschrift);
+                        rekening.bij(bedrag, p, afschrift);
+                        rekening.krijgtNog(bedrag, p, afschrift);
+                        ResultPrintStream.lijstje(memory, rekening);
                         return;
                     }else{
                         //niet zeker
