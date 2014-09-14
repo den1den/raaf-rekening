@@ -17,7 +17,6 @@ import java.util.List;
  */
 public abstract class Rekening implements HasNaam{
 
-    int opRekening = 0;
     final private List<?> geschiedenis = new LinkedList<>();
 
     public List<?> getGeschiedenis() {

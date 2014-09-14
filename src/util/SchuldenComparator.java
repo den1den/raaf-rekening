@@ -34,7 +34,7 @@ public class SchuldenComparator implements Comparator<HasSchulden> {
 
     @Override
     public int compare(HasSchulden o1, HasSchulden o2) {
-        return Integer.compare(o1.getKrijgtNog().From(subject), o2.getKrijgtNog().From(subject));
+        return Integer.compare(o1.getKrijgtNogVan().get(subject), o2.getKrijgtNogVan().get(subject));
     }
 
     private static class ByMagnitude extends SchuldenComparator {
@@ -45,7 +45,7 @@ public class SchuldenComparator implements Comparator<HasSchulden> {
 
         @Override
         public int compare(HasSchulden o1, HasSchulden o2) {
-            return Integer.compareUnsigned(o1.getKrijgtNog().From(super.subject), o2.getKrijgtNog().From(super.subject));
+            return Integer.compareUnsigned(o1.getKrijgtNogVan().get(super.subject), o2.getKrijgtNogVan().get(super.subject));
         }
     }
 
@@ -68,7 +68,7 @@ public class SchuldenComparator implements Comparator<HasSchulden> {
                     return comp;
                 }
             }
-            return Integer.compare(o1.getKrijgtNog().Total(), o2.getKrijgtNog().Total());
+            return Integer.compare(o1.getKrijgtNogVan().get(), o2.getKrijgtNogVan().get());
         }
 
     }

@@ -165,19 +165,21 @@ public class ResultPrintStream {
         List<String[]> r = new ArrayList<>(onderwerps.size() + 1);
         ArrayList<String> row = new ArrayList<>(2 + 3 * tovs.length);
         row.add("Naam");
-        row.add("Totaal");
+        row.add("Krijgt");
+        row.add(" ");
         for (int i = 0; i < tovs.length; i++) {
             HasSchulden tov = tovs[i];
-            row.add("Totaal "+tov.getNaam());
+            row.add("van "+tov.getNaam());
         }
         r.add(row.toArray(new String[row.size()]));
         for (HasSchulden onderwerp : onderwerps) {
             row.clear();
             row.add(onderwerp.getNaam());
-            row.add(onderwerp.getKrijgtNog().show());
+            row.add(onderwerp.getKrijgtNogVan().show());
+            row.add(" ");
             for (int i = 0; i < tovs.length; i++) {
                 HasSchulden tov = tovs[i];
-                row.add(onderwerp.getKrijgtNog().show(tov));
+                row.add(onderwerp.getKrijgtNogVan().show(tov));
             }
             r.add(row.toArray(new String[row.size()]));
         }
@@ -190,11 +192,41 @@ public class ResultPrintStream {
         return getTOV(rList, tovs);
     }
     
+    public static Object lijst1(HasSchulden hs, HasSchulden... tov){
+        return getTOV_ordered(Arrays.asList(hs), tov);
+    }
+    
+    public static void lijst2(Object o, HasSchulden hs, HasSchulden... tov){
+        if(!(o instanceof List)){
+            throw new IllegalArgumentException();
+        }
+        List<String[]> old = (List<String[]>)o;
+        List<HasSchulden> hsList = Arrays.asList(hs);
+        
+        System.out.println(getHeader(hsList, tov));
+        old.add(new String[]{});
+        
+        List<String[]> new_ = getTOV_ordered(hsList, tov);
+        new_.remove(0);//remove header
+        old.addAll(new_);
+        System.out.println(new MyTxtTableHeader(old));
+    }
+    
+    public static void lijstje(HasSchulden hs, HasSchulden... tov){
+        showTOV(Arrays.asList(hs), tov);
+    }
+    
     public static void lijstje(Memory memory, HasSchulden... tov){
         showTOV(memory.personen.getAll(), tov);
     }
     
     public static void showTOV(Collection<? extends HasSchulden> items, HasSchulden... tov){
+        String header = getHeader(items, tov);
+        System.out.println(header);
+        System.out.println(new MyTxtTableHeader(getTOV_ordered(items, tov)));
+    }
+    
+    private static String getHeader(Collection<? extends HasSchulden> items, HasSchulden... tov){
         String header;
         if(tov.length > 0){
             header = items.size() + " ten opzichte van ("+tov.length+"): ";
@@ -205,12 +237,11 @@ public class ResultPrintStream {
         }else{
             header = items.size() + " schulden";
         }
-        System.out.println(header);
-        System.out.println(new MyTxtTableHeader(getTOV_ordered(items, tov)));
+        return header;
     }
 
     public void listResultaat(Collection<? extends HasSchulden> rhs, HasSchulden tov) {
-        this.stream.println(rhs.size() + " rekeningen tegen " + tov + " (" + tov.getKrijgtNog().show() + ")");
+        this.stream.println(rhs.size() + " rekeningen tegen " + tov + " (" + tov.getKrijgtNogVan().show() + ")");
         this.stream.println(new MyTxtTableHeader(ResultPrintStream.getTOV_ordered(rhs, tov)));
     }
 

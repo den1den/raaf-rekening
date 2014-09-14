@@ -15,10 +15,13 @@ import geld.Referentie;
  * @author Dennis
  */
 public interface HasSchulden extends HasNaam{
-    KrijgtNog getKrijgtNog();
-    public void leentVan(HasSchulden hasSchulden, int verreken, Referentie referentie);
+    SumMap getKrijgtNogVan();
 
     @Override
     public String getNaam();
+
+    void moetBetalenAan(HasSchulden hs, int bedrag, Referentie r);
+
+    void moetKrijgenVan(HasSchulden hs, int bedrag, Referentie r);
     
 }

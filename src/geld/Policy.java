@@ -55,7 +55,7 @@ public class Policy {
 
     public void verrekenKookdagen(List<Kookdag> allDagen,
             Map<Persoon, Persoon> kookSchuldDelers,
-            LeenRekening r){
+            LeenRekening r) {
         allDagen.stream().forEach((kookdag) -> {
             verrekenKookdag(kookdag, kookSchuldDelers, r);
         });
@@ -63,7 +63,7 @@ public class Policy {
 
     private void verrekenKookdag(Kookdag kookdag,
             Map<Persoon, Persoon> kookSchuldDelers,
-            LeenRekening r){
+            LeenRekening r) {
         Persoon kok = kookdag.getKok();
         Map<Persoon, Integer> meeters = kookdag.getMeeters();
 
@@ -99,13 +99,13 @@ public class Policy {
                     //kok
                     verreken = kookdag.getBedrag()
                             - kokPrijs - prijs * (m.getValue() - 1);
-                    r.leentVan(verantwoordelijk, verreken, kookdag);
+                    verantwoordelijk.moetKrijgenVan(r, verreken, kookdag);
                     total += verreken;
 
                 } else if (!persoon.kwijtschelden()) {
                     //meeter
                     verreken = prijs * (m.getValue());
-                    verantwoordelijk.leentVan(r, verreken, kookdag);
+                    r.moetKrijgenVan(verantwoordelijk, verreken, kookdag);
                     //ResultPrintStream.showLastT(kookRekening, verantwoordelijk);
                     total -= verreken;
                 }
@@ -142,7 +142,7 @@ public class Policy {
         Collections.sort(bonnetjes1, Bonnetje.getByDate());
         for (Afschrift afschrift : afschriften) {
             try {
-                verwerkAfschrift(afschrift, bonnetjes1,rekening);
+                verwerkAfschrift(afschrift, bonnetjes1, rekening);
             } catch (Error e) {
                 throw new Error("At afschrift: " + afschrift, e);
             }
@@ -153,7 +153,7 @@ public class Policy {
             Afschrift afschrift,
             RL bonnetjes,
             RaafRekening rekening) {
-int bedrag = afschrift.getBedrag();
+        int bedrag = afschrift.getBedrag();
 
         switch (afschrift.getCode()) {
             case "BA": //betaalautomaat
@@ -169,19 +169,19 @@ int bedrag = afschrift.getBedrag();
                 if (!afschrift.isAf()) {
                     throw new Error();
                 }
-                
-                List<Referentie> refs;
 
+                Rekening r = null;
+                List<Referentie> refs;
                 List<Bonnetje> candidates = HasBedrag.searchOn(
                         HasDate.searchOn(bonnetjes, afschrift.getDate(), byDay),
                         afschrift.getBedrag());
+                
                 if (candidates.size() == 1) {
                     throw new UnsupportedOperationException();
                     Bonnetje bon = candidates.get(0);
 
                     //bonnetje found
                     bonnetjes.remove(bon);
-                    
 
                     //wel referentie toevoegen
                     List<Transactie> trs = bon.getPersoon().getTransactiesRef(bon.getWinkel());
@@ -211,8 +211,8 @@ int bedrag = afschrift.getBedrag();
                         w = new Winkel(afschrift.getMededeling(), null);
                         memory.winkels.putMede(w, afschrift.getMededeling());
                     }
-
-                    rhi = w;
+                    
+                    r = w;
                 } else { // > 1
                     refs = new ArrayList<>(candidates.size() + 1);
 
@@ -229,11 +229,12 @@ int bedrag = afschrift.getBedrag();
                             throw new UnsupportedOperationException("Wat is de tegenrekeninghouder? Undertermind?");
                         }
                     }
-                    rhi = soiso;
+                    r = soiso;
                 }
                 refs.add(afschrift);
                 Referentie referentie = new ReferentieMultiple(refs);
-                verrekMetRekening.betaald(rhi, bedrag, referentie);
+                rekening.gekocht(r, bedrag, referentie);
+                
                 return;
             case "OV":
                 if (!afschrift.getMutatieSoort().equals("Overschrijving")) {
@@ -243,22 +244,21 @@ int bedrag = afschrift.getBedrag();
                 if (!afschrift.isAf()) {
                     if (isMededelingRaRe(afschrift)) {
                         //zeker
-                        throw new UnsupportedOperationException("Gebeuren twee dingen tegelijk, moet in Raafrekenng complexe functies maken en in history zetter per handeling, zie Word");
                         Persoon p = memory.personen.findRek(afschrift);
-                        rekening.bij(bedrag, p, afschrift);
-                        rekening.krijgtNog(bedrag, p, afschrift);
-                        ResultPrintStream.lijstje(memory, rekening);
+                        rekening.plusContributie(p, bedrag, afschrift);
+                        //throw new UnsupportedOperationException("Gebeuren twee dingen tegelijk, moet in Raafrekenng complexe functies maken en in history zetter per handeling, zie Word");
+                        ResultPrintStream.lijstje(p, rekening);
                         return;
-                    }else{
+                    } else {
                         //niet zeker
                         Persoon p = memory.personen.getRek(afschrift.getVanRekening());
-                        if(p != null){
+                        if (p != null) {
                             //persoon heeft iets erop geboekt, dus igg toevoegen aan rekening
                             verrekMetRekening.addSchuld(p, afschrift.getBedrag(), afschrift);
-                        }else{
+                        } else {
                             //kan nieuw persoon zijn maar wel rare start dan...
                             p = memory.personen.findRek(afschrift);
-                            System.err.println("Niet zeker afschrift van "+p+": "+afschrift);
+                            System.err.println("Niet zeker afschrift van " + p + ": " + afschrift);
                             verrekMetRekening.addSchuld(p, afschrift.getBedrag(), afschrift);
                         }
                         return;
@@ -273,44 +273,47 @@ int bedrag = afschrift.getBedrag();
                 //kan incasso zijn => handmatige overboeking
 
                 if (afschrift.isAf()) {
-                    
+
                     Incasso in = memory.incassos.getRek(afschrift.getVanRekening());
-                    if(in != null){
+                    if (in != null) {
                         //incasso detected
                         verrekMetRekening.verwerk(in, afschrift);
                         return;
-                    }
-                    
-                    //kan voorgeschoten zijn...
-                    if(afschrift.getMededeling().toLowerCase().contains("voorgeschoten")){
+                    } else {
                         Persoon p = memory.personen.findRek(afschrift);
-                        System.out.println("before: "+p.relatieToString(verrekMetRekening));
-                        p.krijgtNog(verrekMetRekening, bedrag, new ReferentieSimple("Wasmachine betaald"));
-                        System.out.println("after: "+p.relatieToString(verrekMetRekening));
-                        verrekMetRekening.geeft(p, bedrag, afschrift);
-                        System.out.println(": "+p.getSaldo(verrekMetRekening));
-                        ResultPrintStream.showLastT(p, verrekMetRekening);
-                        return;
-                    }else if(afschrift.getMededeling().contains(" Correctie Raafrekening")
-                            && afschrift.getVan().contains("D.J. van den Brand")){
-                        verrekMetRekening.verwerk(memory.personen.findRek(afschrift), afschrift);
-                        return;
-                    }else if(afschrift.getMededeling().equals(" 20e te veel betaald voor de huis rekening")
-                            && afschrift.getVan().equals("M.M.C. Tilburgs                 ")){
-                        verrekMetRekening.verwerk(memory.personen.findRek(afschrift), afschrift);
-                        return;
-                    }else if(afschrift.getMededeling().equals(" Ik had 27.17 eigen geld gestort  en heb al 20 gepind, dit is rest")){
-                        verrekMetRekening.verwerk(memory.personen.findRek(afschrift), afschrift);
-                        return;
-                    }else if (afschrift.getMededeling().equals(" Toilet papier 11-9-12")){
-                        verrekMetRekening.verwerk(memory.personen.findRek(afschrift), afschrift);
-                        System.err.println("errorous");
-                        return;
+
+                        //kan voorgeschoten zijn...
+                        if (afschrift.getMededeling().toLowerCase().contains("voorgeschoten")) {
+                            Persoon p = memory.personen.findRek(afschrift);
+                            System.out.println("before: " + p.relatieToString(verrekMetRekening));
+                            p.krijgtNog(verrekMetRekening, bedrag, new ReferentieSimple("Wasmachine betaald"));
+                            System.out.println("after: " + p.relatieToString(verrekMetRekening));
+                            verrekMetRekening.geeft(p, bedrag, afschrift);
+                            System.out.println(": " + p.getSaldo(verrekMetRekening));
+                            ResultPrintStream.showLastT(p, verrekMetRekening);
+                            return;
+                        } else if (afschrift.getMededeling().contains(" Correctie Raafrekening")
+                                && afschrift.getVan().contains("D.J. van den Brand")) {
+                            verrekMetRekening.verwerk(memory.personen.findRek(afschrift), afschrift);
+                            return;
+                        } else if (afschrift.getMededeling().equals(" 20e te veel betaald voor de huis rekening")
+                                && afschrift.getVan().equals("M.M.C. Tilburgs                 ")) {
+                            verrekMetRekening.verwerk(memory.personen.findRek(afschrift), afschrift);
+                            return;
+                        } else if (afschrift.getMededeling().equals(" Ik had 27.17 eigen geld gestort  en heb al 20 gepind, dit is rest")) {
+                            verrekMetRekening.verwerk(memory.personen.findRek(afschrift), afschrift);
+                            return;
+                        } else if (afschrift.getMededeling().equals(" Toilet papier 11-9-12")) {
+                            Object o = ResultPrintStream.lijst1(p, rekening);
+                            rekening.betaaldDoor(p, bedrag, afschrift);
+                            ResultPrintStream.lijst2(o, p, rekening);
+                            return;
+                        }
                     }
-                    //zal wss incasso zijn
+                    //zal wss tg incasso zijn?
                     Logger.getLogger(Policy.class.getName()).log(Level.INFO, "GT gaat nog fout");
                     throw new UnsupportedOperationException();
-                }else{
+                } else {
                     //bijboeking
                     if (isMededelingRaRe(afschrift)) {
                         verrekMetRekening.verwerk(memory.personen.findRek(afschrift), afschrift);
@@ -451,8 +454,8 @@ int bedrag = afschrift.getBedrag();
                 || meld.contains("huiskosten")
                 || meld.contains("maandkosten de raaf");
         if (!isRaRa) {
-            if (afschrift.getVan().equalsIgnoreCase("B.F.W. van Vugt") &&
-                    (afschrift.getMededeling().equalsIgnoreCase(" HOMO"))
+            if (afschrift.getVan().equalsIgnoreCase("B.F.W. van Vugt")
+                    && (afschrift.getMededeling().equalsIgnoreCase(" HOMO"))
                     || afschrift.getMededeling().toUpperCase().contains("SCHOOIER")) {
                 return true;
             }

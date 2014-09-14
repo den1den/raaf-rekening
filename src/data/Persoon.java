@@ -10,7 +10,7 @@ import geld.Referentie;
 import geld.Rekening;
 import geld.geldImpl.HasSchulden;
 import geld.geldImpl.LeenRekening;
-import geld.geldImpl.KrijgtNog;
+import geld.geldImpl.SumMap;
 
 /**
  *

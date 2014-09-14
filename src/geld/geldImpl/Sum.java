@@ -36,24 +36,25 @@ class Sum {
         this.changes.add(r);
     }
     
-    void af(int bedrag, Referentie referentie) {
+    Record af(int bedrag, Referentie referentie) {
         if(bedrag < 0){
             throw new IllegalArgumentException();
         }
-        verreken(-bedrag, referentie);
+        return verreken(-bedrag, referentie);
     }
 
-    void bij(int bedrag, Referentie referentie) {
+    Record bij(int bedrag, Referentie referentie) {
         if(bedrag < 0){
             throw new IllegalArgumentException();
         }
-        verreken(bedrag, referentie);
+        return verreken(bedrag, referentie);
     }
     
-    void verreken(int change, Referentie referentie){
+    Record verreken(int change, Referentie referentie){
         Record r = new Record(change, referentie);
         changes.add(r);
         total += change;
+        return r;
     }
 
     int get() {

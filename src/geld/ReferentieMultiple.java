@@ -4,14 +4,17 @@
  * and open the template in the editor.
  */
 
-package geld.geldImpl;
+package geld;
 
-import data.types.HasNaam;
+import java.util.List;
 
 /**
  *
  * @author Dennis
  */
-public abstract class Rekening implements HasNaam{
-    Sum opRekening;
+class ReferentieMultiple implements Referentie {
+
+    public ReferentieMultiple(List<Referentie> refs) {
+    }
+    
 }

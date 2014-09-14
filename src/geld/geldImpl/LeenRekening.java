@@ -12,20 +12,29 @@ import java.util.Map;
 
 public abstract class LeenRekening implements HasSchulden, HasNaam {
 
-    KrijgtNog krijgtNog = new KrijgtNog();
+    SumMap krijgtNog = new SumMap();
 
     @Override
-    public KrijgtNog getKrijgtNog() {
+    public SumMap getKrijgtNogVan() {
         return krijgtNog;
     }
-
+    
     @Override
-    public void leentVan(HasSchulden hasSchulden, int verreken, Referentie referentie) {
-        KrijgtNog thiS = getKrijgtNog();
-        KrijgtNog that = hasSchulden.getKrijgtNog();
-        
-        thiS.Add(hasSchulden, -verreken, referentie);
-        that.Add(this, verreken, referentie);
+    public void moetBetalenAan(HasSchulden hs, int bedrag, Referentie r){
+        if(bedrag < 0){
+            throw new IllegalArgumentException();
+        }
+        hs.getKrijgtNogVan().add(this, bedrag, r);
+        this.getKrijgtNogVan().add(hs, -bedrag, r);
+    }
+    
+    @Override
+    public void moetKrijgenVan(HasSchulden hs, int bedrag, Referentie r){
+        if(bedrag < 0){
+            throw new IllegalArgumentException();
+        }
+        this.getKrijgtNogVan().add(hs, bedrag, r);
+        hs.getKrijgtNogVan().add(this, -bedrag, r);
     }
 
     public static class Easy extends LeenRekening {
