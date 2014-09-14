@@ -28,13 +28,20 @@ public class SumMap {
         m = new HashMap<>(initialCapacity);
     }
 
-    public void add(HasSchulden key, int value, Referentie referentie) {
+    /**
+     * Add a value to the sum of the key.
+     * @param key
+     * @param value
+     * @return index to difference
+     */
+    public int add(HasSchulden key, int value) {
         Sum s = m.get(key);
         if (s == null) {
-            s = new Sum(value, referentie);
+            s = new Sum(value);
             m.put(key, s);
+            return 0; //first value
         } else {
-            s.verreken(value, referentie);
+            return s.verreken(value);
         }
     }
 

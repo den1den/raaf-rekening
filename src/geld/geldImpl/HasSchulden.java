@@ -24,4 +24,5 @@ public interface HasSchulden extends HasNaam{
 
     void moetKrijgenVan(HasSchulden hs, int bedrag, Referentie r);
     
+    void addHistory(RecordComplete recordComplete);
 }

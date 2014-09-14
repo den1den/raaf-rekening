@@ -101,17 +101,15 @@ public class RaafBeheer {
         
         result.listResultaat(memory.personen.getAll(), kookR);
 
-         RaafRekening perR = new RaafRekening("periodes");
-         policy.verrekenBewoonPeriodes(bewoonPeriodes, perR);
-         result.listResultaat(memory.personen.getAll(), perR);
+         RaafRekening raafRekening = new RaafRekening("Raaf Rekening");
+         policy.verrekenBewoonPeriodes(bewoonPeriodes, raafRekening);
+         result.listResultaat(memory.personen.getAll(), raafRekening);
 
-         RaafRekening bonR = new RaafRekening("bonnetjesRek");
-         policy.verrekenBonnetjes(bonnetjes, bonR);
-         result.listResultaat(memory.personen.getAll(), bonR);
+         policy.verrekenBonnetjes(bonnetjes, raafRekening);
+         result.listResultaat(memory.personen.getAll(), raafRekening);
 
-         RaafRekening afR = new RaafRekening("AfschriftenRek");
-         policy.verwerkAfschriften(afschriften, bonnetjes, afR);
-         result.listResultaat(memory.personen.getAll(), afR);
+         policy.verwerkAfschriften(afschriften, bonnetjes, raafRekening);
+         result.listResultaat(memory.personen.getAll(), raafRekening);
         //result.showFactuurs(fs);
         //result.showDetailledTov(memory.personen.get("Dennis"), perR, bonR, afR);
     }

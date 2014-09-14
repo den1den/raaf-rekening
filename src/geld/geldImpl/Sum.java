@@ -22,43 +22,50 @@ import java.util.List;
 class Sum {
 
     private int total;
-    List<Record> changes;
+    private final List<Integer> diffs;
 
     public Sum() {
         this.total = 0;
-        this.changes = new LinkedList<>();
+        this.diffs = new LinkedList<>();
     }
 
-    public Sum(int bedrag, Referentie referentie) {
+    public Sum(int bedrag) {
         this.total = bedrag;
-        this.changes = new LinkedList<>();
-        Record r = new Record(bedrag, referentie);
-        this.changes.add(r);
+        this.diffs = new LinkedList<>();
+        this.diffs.add(bedrag);
     }
     
-    Record af(int bedrag, Referentie referentie) {
+    int af(int bedrag) {
         if(bedrag < 0){
             throw new IllegalArgumentException();
         }
-        return verreken(-bedrag, referentie);
+        return verreken(-bedrag);
     }
 
-    Record bij(int bedrag, Referentie referentie) {
+    int bij(int bedrag) {
         if(bedrag < 0){
             throw new IllegalArgumentException();
         }
-        return verreken(bedrag, referentie);
+        return verreken(bedrag);
     }
     
-    Record verreken(int change, Referentie referentie){
-        Record r = new Record(change, referentie);
-        changes.add(r);
+    /**
+     * add and record the change.
+     * @param change the amount the sum should change
+     * @return the index of the diff
+     */
+    int verreken(int change){
+        diffs.add(change);
         total += change;
-        return r;
+        return diffs.size() - 1;
     }
 
     int get() {
         return total;
+    }
+    
+    int get(int index){
+        return diffs.get(index);
     }
 
     @Override

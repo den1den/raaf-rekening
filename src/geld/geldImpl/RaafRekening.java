@@ -7,6 +7,7 @@ package geld.geldImpl;
 
 import data.Afschrift;
 import data.BewoonPeriode;
+import data.Incasso;
 import data.Persoon;
 import geld.Referentie;
 import geld.Rekening;
@@ -26,8 +27,6 @@ public class RaafRekening extends LeenRekening implements HasContant {
     private final Sum kas = new Sum();
     private final Sum contant = new Sum();
 
-    private final MultiMap<Object, Record> history = new MultiMap<>();
-
     public RaafRekening(final String naam) {
         this(naam, 10);
     }
@@ -35,21 +34,6 @@ public class RaafRekening extends LeenRekening implements HasContant {
     public RaafRekening(final String naam, final int capacity) {
         super();
         this.naam = naam;
-    }
-
-    public void schietVoor(Object bedrag, Referentie referentie) {
-        throw new UnsupportedOperationException();
-        //budget.af(bedrag); //bedrag > 0
-        //van.putLening(this, bedrag, referentie);
-    }
-
-    public void betaal(Rekening van, int bedrag, Referentie referentie) {
-        if (bedrag < 0) {
-            throw new IllegalArgumentException();
-        }
-        throw new UnsupportedOperationException();
-        //this.budget.bij(bedrag);
-        //this.bedrag += bedrag;
     }
 
     @Override
@@ -97,6 +81,13 @@ public class RaafRekening extends LeenRekening implements HasContant {
         kas.bij(bedrag, referentie);
     }
 
+    /**
+     * betaald schuld af.
+     * kas komt iets bij. {van} krijgt minder schuld
+     * @param van
+     * @param bedrag
+     * @param referentie 
+     */
     public void plusContributie(LeenRekening van, int bedrag, Referentie referentie) {
         if (bedrag < 0) {
             throw new IllegalArgumentException();
@@ -111,15 +102,42 @@ public class RaafRekening extends LeenRekening implements HasContant {
     }
 
     /**
-     * Iets gekocht bij Rekening r.
+     * Iets gekocht bij.
      * Er gaat iets uit de kas en bij degene waar het is gekocht gaat iets bij.
      * @param bij
      * @param bedrag
      * @param referentie 
      */
     public void gekocht(Rekening bij, int bedrag, Referentie referentie) {
+        if(bedrag < 0) throw new IllegalArgumentException();
         af(bedrag, referentie);
         System.err.println("TODO3: bij rekening 'bij' moet er geld bij");
         if(bij == null)throw new IllegalArgumentException();
+    }
+
+    /**
+     * Betaald voor een dienst aan (Door automatische incasso b.v.).
+     * Er gaat iets uit de kas en bij degene waar het is gekocht gaat iets bij.
+     * @param bedrag >0
+     * @param aan
+     * @param referentie 
+     */
+    public void betaald(int bedrag, Rekening aan, Referentie referentie) {
+        gekocht(aan, bedrag, referentie);
+    }
+    
+    /**
+     * De raaf betaald uit.
+     * De kas gaat iets uit. De schuld word groter.
+     * @param bedrag
+     * @param aan
+     * @param referentie 
+     */
+    public void terrugGave(int bedrag, LeenRekening aan, Referentie referentie){
+        //er gaat wat uit de kas
+        af(bedrag, referentie);
+        //aan krijgt minder schuld 
+        aan.getKrijgtNogVan().add(this, -bedrag, referentie);
+        this.getKrijgtNogVan().add(aan, bedrag, referentie);
     }
 }

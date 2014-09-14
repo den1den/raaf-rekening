@@ -172,6 +172,18 @@ public class ResultPrintStream {
             row.add("van "+tov.getNaam());
         }
         r.add(row.toArray(new String[row.size()]));
+        
+        for (HasSchulden tov : tovs) {
+            row.clear();
+            row.add(tov.getNaam());
+            row.add(tov.getKrijgtNogVan().show());
+            row.add(" ");
+            for (HasSchulden hs : tovs) {
+                row.add("-");
+            }
+            r.add(row.toArray(new String[row.size()]));
+        }
+                
         for (HasSchulden onderwerp : onderwerps) {
             row.clear();
             row.add(onderwerp.getNaam());
