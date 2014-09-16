@@ -17,6 +17,10 @@ abstract class DyMapNaam<T extends HasNaam> extends DyMap<T>{
         super(intialCapacity);
     }
 
+    /**
+     * Put by naam
+     * @param t 
+     */
     public void put(T t) {
         put(t, t.getNaam());
     }

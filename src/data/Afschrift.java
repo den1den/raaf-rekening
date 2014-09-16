@@ -7,9 +7,7 @@ package data;
 
 import data.types.HasDate;
 import geld.Referentie;
-import geld.Rekening;
 import tijd.Datum;
-import tijd.Time;
 
 /**
  *

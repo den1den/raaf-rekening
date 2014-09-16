@@ -15,13 +15,10 @@ import data.Winkel;
 import data.memory.Memory;
 import data.types.HasBedrag;
 import data.types.HasDate;
-import geld.geldImpl.LeenRekening;
-import geld.geldImpl.RaafRekening;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.RandomAccess;
@@ -39,16 +36,20 @@ public class Policy {
 
     final private int version;
     final private Memory memory;
+    private Datum until;
 
     public Policy(int version, Memory memory) {
-        this.version = version;
-        if (version < 0 || memory == null) {
-            throw new IllegalArgumentException();
-        }
-        this.memory = memory;
+        this(version, memory, Datum.now);
     }
 
-    final private Comparator<Datum> byDay = HasDate.getOnDay();
+    public Policy(int version, Memory memory, Datum until) {
+        if(version < 0 || memory == null)
+            throw new IllegalArgumentException();
+        this.version = version;
+        this.memory = memory;
+        this.until = until;
+    }
+
     final private String ING_INCASSO_NAAM = "ING";
     final private String UPC_INCASSO_NAAM = "UPC";
     final private String WINKEL_UNKNOWN_NAAM = "Niet bekend";
@@ -56,9 +57,13 @@ public class Policy {
     public void verrekenKookdagen(List<Kookdag> allDagen,
             Map<Persoon, Persoon> kookSchuldDelers,
             LeenRekening r) {
-        allDagen.stream().forEach((kookdag) -> {
+        if(until != Datum.now){
+            Logger.getLogger(Policy.class.getName())
+                    .log(Level.INFO, "Kookdagen aan het verekenen terwijl er een restricitie is van tot: "+until);
+        }
+        for (Kookdag kookdag : allDagen) {
             verrekenKookdag(kookdag, kookSchuldDelers, r);
-        });
+        }
     }
 
     private void verrekenKookdag(Kookdag kookdag,
@@ -123,7 +128,9 @@ public class Policy {
             Persoon persoon = bewoonPeriode.getPersoon();
             for (BewoonPeriode.SubPeriode subPeriode : bewoonPeriode) {
                 final int bedrag = 2000;
+                if(subPeriode.getEind().before(until)){
                 rekening.krijgtNog(bedrag, persoon, subPeriode);
+                }
                 //persoon.betaaldNog(verrekMetRekening, bedrag, subPeriode);
             }
         }
@@ -174,7 +181,7 @@ public class Policy {
                 Rekening r = null;
                 List<Referentie> refs;
                 List<Bonnetje> candidates = HasBedrag.searchOn(
-                        HasDate.searchOn(bonnetjes, afschrift.getDate(), byDay),
+                        HasDate.searchOn(bonnetjes, afschrift.getDate(), Datum.COMP_BY_DAY),
                         afschrift.getBedrag());
 
                 if (candidates.size() == 1) {
@@ -279,42 +286,47 @@ public class Policy {
                         //incasso detected
                         rekening.betaald(bedrag, in, referentie);
                         return;
-                    } else {
-                        Persoon p = memory.personen.findRek(afschrift);
-
-                        Object o = ResultPrintStream.lijst1(p, rekening);
-
-                        //kan voorgeschoten zijn...
-                        if (afschrift.getMededeling().toLowerCase().contains("voorgeschoten")) {
-
-                            //wasmachine voorgeschoten
-                            rekening.betaaldDoor(p, bedrag, afschrift);
-
-                            //ResultPrintStream.lijst2(o, p, rekening);
-                            return;
-                        } else if (afschrift.getMededeling().contains(" Correctie Raafrekening")
-                                && afschrift.getVan().contains("D.J. van den Brand")) {
-                            Logger.getLogger(Policy.class.getName()).log(Level.INFO, "Eva contant gebeure1");
-                            rekening.betaaldDoor(p, bedrag, referentie);
-                            return;
-                        } else if (afschrift.getMededeling().equals(" 20e te veel betaald voor de huis rekening")
-                                && afschrift.getVan().equals("M.M.C. Tilburgs                 ")) {
-                            rekening.terrugGave(bedrag, p, referentie);
-                            //ResultPrintStream.lijst2(o, p, rekening);
-                            return;
-                        } else if (afschrift.getMededeling().equals(" Ik had 27.17 eigen geld gestort  en heb al 20 gepind, dit is rest")) {
-                            Logger.getLogger(Policy.class.getName()).log(Level.INFO, "Eva contant gebeure2 (niet verrekend)");
-                            //teruggave zonder de kas, meer een écht lening dus?
-                            rekening.terrugGave(bedrag, p, referentie);
-                            return;
-                        } else if (afschrift.getMededeling().equals(" Toilet papier 11-9-12")) {
-                            rekening.betaaldDoor(p, bedrag, afschrift);
-                            //ResultPrintStream.lijst2(o, p, rekening);
-                            return;
-                        }
                     }
-                    //zal wss tg incasso zijn?
-                    Logger.getLogger(Policy.class.getName()).log(Level.INFO, "GT gaat nog fout");
+                    Persoon p = memory.personen.findRek(afschrift);
+
+                    Object o = ResultPrintStream.lijst1(p, rekening);
+
+                    //kan voorgeschoten zijn...
+                    if (afschrift.getMededeling().toLowerCase().contains("voorgeschoten")) {
+
+                        //wasmachine voorgeschoten
+                        rekening.betaaldDoor(p, bedrag, afschrift);
+
+                        //ResultPrintStream.lijst2(o, p, rekening);
+                        return;
+                    } else if (afschrift.getMededeling().contains(" Correctie Raafrekening")
+                            && afschrift.getVan().contains("D.J. van den Brand")) {
+                        Logger.getLogger(Policy.class.getName()).log(Level.INFO, "Eva contant gebeure1");
+                        rekening.betaaldDoor(p, bedrag, referentie);
+                        return;
+                    } else if (afschrift.getMededeling().equals(" 20e te veel betaald voor de huis rekening")
+                            && afschrift.getVan().equals("M.M.C. Tilburgs                 ")) {
+                        rekening.terrugGave(bedrag, p, referentie);
+                        //ResultPrintStream.lijst2(o, p, rekening);
+                        return;
+                    } else if (afschrift.getMededeling().equals(" Ik had 27.17 eigen geld gestort  en heb al 20 gepind, dit is rest")) {
+                        Logger.getLogger(Policy.class.getName()).log(Level.INFO, "Eva contant gebeure2 (niet verrekend)");
+                        //teruggave zonder de kas, meer een écht lening dus?
+                        rekening.terrugGave(bedrag, p, referentie);
+                        return;
+                    } else if (afschrift.getMededeling().equals(" Toilet papier 11-9-12")) {
+                        rekening.betaaldDoor(p, bedrag, afschrift);
+                        //ResultPrintStream.lijst2(o, p, rekening);
+                        return;
+                    }
+                    
+                    //zal wss tg incasso zijn? unzeker
+                    Logger.getLogger(Policy.class.getName()).log(Level.INFO, "GT niet 100% zeker");
+                    in = memory.incassos.findRek(afschrift);
+                    rekening.betaald(bedrag, in, referentie);
+                    return;
+                    
+                    
                     throw new UnsupportedOperationException();
                 } else {
                     //bijboeking
@@ -335,18 +347,18 @@ public class Policy {
                 }
 
                 /*
-                if (afschrift.isAf()) {
-                    //terugboeking
-                    tegenRekeningHouder = memory.getByRekening(afschrift.getVanRekening());
-                } else {
+                 if (afschrift.isAf()) {
+                 //terugboeking
+                 tegenRekeningHouder = memory.getByRekening(afschrift.getVanRekening());
+                 } else {
 
-                    if (isMededelingRaRe(afschrift.getMededeling())) {
-                        //huisrekening
-                        tegenRekeningHouder = memory.personen.findRek(afschrift);
-                    } else {
-                        throw new UnsupportedOperationException();
-                    }
-                }*/
+                 if (isMededelingRaRe(afschrift.getMededeling())) {
+                 //huisrekening
+                 tegenRekeningHouder = memory.personen.findRek(afschrift);
+                 } else {
+                 throw new UnsupportedOperationException();
+                 }
+                 }*/
                 break;
             case "DV":
                 if (!afschrift.getMutatieSoort().equals("Diversen")) {

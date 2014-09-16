@@ -1,0 +1,18 @@
+Mark ten opzichte van ten opzichte van (1): Kook Rekening
+**********************************************************************************************************************************************************************************************************
+*Naam*krijgt*kr van: Kook Rekening*Event                                                                                                       *Mark leent van Kook Rekening*Kook Rekening leent van Mark*
+**********************************************************************************************************************************************************************************************************
+*Mark*-7052 *-7052                *Mark moet krijgen van Kook Rekening[Mark, LeenRekening[Kook Rekening], r:Kookdag (106) van 1279ct met 4 man]*960                         *-960                        *
+*    *      *                     *Mark moet krijgen van Kook Rekening[Mark, LeenRekening[Kook Rekening], r:Kookdag (107) van 1276ct met 4 man]*957                         *-957                        *
+*    *      *                     *Mark moet krijgen van Kook Rekening[Mark, LeenRekening[Kook Rekening], r:Kookdag (108) van 1730ct met 5 man]*1384                        *-1384                       *
+*    *      *                     *Mark moet krijgen van Kook Rekening[Mark, LeenRekening[Kook Rekening], r:Kookdag (109) van 1080ct met 4 man]*810                         *-810                        *
+*    *      *                     *Mark moet krijgen van Kook Rekening[Mark, LeenRekening[Kook Rekening], r:Kookdag (110) van 790ct met 4 man] *594                         *-594                        *
+*    *      *                     *Mark moet krijgen van Kook Rekening[Mark, LeenRekening[Kook Rekening], r:Kookdag (111) van 2200ct met 9 man]*1925                        *-1925                       *
+*    *      *                     *Mark moet krijgen van Kook Rekening[Mark, LeenRekening[Kook Rekening], r:Kookdag (112) van 559ct met 5 man] *448                         *-448                        *
+*    *      *                     *Mark moet krijgen van Kook Rekening[Mark, LeenRekening[Kook Rekening], r:Kookdag (113) van 621ct met 3 man] *414                         *-414                        *
+*    *      *                     *Mark moet krijgen van Kook Rekening[Mark, LeenRekening[Kook Rekening], r:Kookdag (143) van 941ct met 4 man] *708                         *-708                        *
+*    *      *                     *Mark moet krijgen van Kook Rekening[Mark, LeenRekening[Kook Rekening], r:Kookdag (184) van 2996ct met 8 man]*2625                        *-2625                       *
+*    *      *                     *Mark moet krijgen van Kook Rekening[Mark, LeenRekening[Kook Rekening], r:Kookdag (207) van 1573ct met 7 man]*1350                        *-1350                       *
+*    *      *                     *Mark moet krijgen van Kook Rekening[Mark, LeenRekening[Kook Rekening], r:Kookdag (246) van 2323ct met 7 man]*1992                        *-1992                       *
+*    *      *                     *Mark moet krijgen van Kook Rekening[Mark, LeenRekening[Kook Rekening], r:Kookdag (254) van 1706ct met 4 man]*1281                        *-1281                       *
+**********************************************************************************************************************************************************************************************************

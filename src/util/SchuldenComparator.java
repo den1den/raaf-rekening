@@ -5,8 +5,7 @@
  */
 package util;
 
-import geld.Rekening;
-import geld.geldImpl.HasSchulden;
+import geld.HasSchulden;
 import java.util.Comparator;
 
 /**
@@ -34,7 +33,7 @@ public class SchuldenComparator implements Comparator<HasSchulden> {
 
     @Override
     public int compare(HasSchulden o1, HasSchulden o2) {
-        return Integer.compare(o1.getKrijgtNogVan().get(subject), o2.getKrijgtNogVan().get(subject));
+        return Integer.compare(o1.krijgtNogVan(subject), o2.krijgtNogVan(subject));
     }
 
     private static class ByMagnitude extends SchuldenComparator {
@@ -45,7 +44,7 @@ public class SchuldenComparator implements Comparator<HasSchulden> {
 
         @Override
         public int compare(HasSchulden o1, HasSchulden o2) {
-            return Integer.compareUnsigned(o1.getKrijgtNogVan().get(super.subject), o2.getKrijgtNogVan().get(super.subject));
+            return Integer.compareUnsigned(o1.krijgtNogVan(super.subject), o2.krijgtNogVan(super.subject));
         }
     }
 
@@ -68,7 +67,7 @@ public class SchuldenComparator implements Comparator<HasSchulden> {
                     return comp;
                 }
             }
-            return Integer.compare(o1.getKrijgtNogVan().get(), o2.getKrijgtNogVan().get());
+            return Integer.compare(o1.krijgtNogVan(), o2.krijgtNogVan());
         }
 
     }

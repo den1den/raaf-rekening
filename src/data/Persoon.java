@@ -6,11 +6,8 @@
 package data;
 
 import data.types.HasNaam;
-import geld.Referentie;
-import geld.Rekening;
-import geld.geldImpl.HasSchulden;
-import geld.geldImpl.LeenRekening;
-import geld.geldImpl.SumMap;
+import geld.HasSchulden;
+import geld.LeenRekening;
 
 /**
  *

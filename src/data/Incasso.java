@@ -8,7 +8,6 @@ package data;
 
 import data.types.HasNaam;
 import geld.Rekening;
-import geld.Rekening.Virtueel;
 
 /**
  *

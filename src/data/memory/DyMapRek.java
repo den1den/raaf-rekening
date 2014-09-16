@@ -81,15 +81,33 @@ public abstract class DyMapRek<T extends HasNaam> extends DyMapNaam<T> {
         public Incasso findRek(String naam, String rekening) {
             Incasso byRekening = getRek(rekening);
             Incasso byNaam = get(naam);
-            if (byRekening == byNaam) {
-                if (byNaam == null) {
-                    byNaam = new Incasso(naam, rekening);
-                    put(byNaam);
-                    putRek(byNaam, rekening);
+            
+            Incasso echte;
+            
+            if(byNaam == null){
+                //by naam niet gevonden
+                if(byRekening == null){
+                    //both null
+                    echte = new Incasso(naam, rekening);
+                    putRek(echte, rekening);
+                }else{
+                    echte = byRekening;
                 }
-                return byNaam;
+                put(echte);
+            }else{
+                //naam gevonden
+                if(byRekening == null){
+                    //en rekening niet
+                    echte = byNaam;
+                    putRek(echte, rekening);
+                }else if (byNaam == byRekening){ //allebij niet null
+                    echte = byNaam;
+                }else{
+                    //verschillende gevonden
+                    throw new UnsupportedOperationException("Incasso stond er al in, not yet supported, found: "+byNaam+" en "+byRekening);
+                }
             }
-            throw new UnsupportedOperationException("Not yet");
+            return echte;
         }
     }
 }

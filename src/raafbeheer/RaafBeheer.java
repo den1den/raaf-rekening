@@ -14,9 +14,9 @@ import data.Persoon;
 import data.memory.Memory;
 import file.manager.DataManager;
 import file.manager.FormatFactory;
-import geld.geldImpl.RaafRekening;
 import geld.Policy;
-import geld.geldImpl.LeenRekening;
+import geld.RaafRekening;
+import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import tijd.Datum;
 import util.diplay.ResultPrintStream;
 
 /**
@@ -35,7 +36,10 @@ public class RaafBeheer {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        File f = new File("ERROR");
+        f.createNewFile();
+        
         int version = 4;
         RaafBeheer raafBeheer;
         try {
@@ -60,6 +64,9 @@ public class RaafBeheer {
             System.out.println();
             raafBeheer.forReal();
         }
+        
+        Toolkit.getDefaultToolkit().beep();
+        f.delete();
     }
 
     private final int version;
@@ -95,21 +102,23 @@ public class RaafBeheer {
         Set<BierBonnetje> bierBonnetjes = formats.bierBonnetjes.parser.parse(files.getBierBonnetjes());
         Map<Persoon, Persoon> kookSchuldDelers = formats.kookSchuldDelers.parser.parse(files.getKookSchuldDelers());
 
-        policy = new Policy(version, memory);
-        LeenRekening kookR = new LeenRekening.Easy("Kook Rekening");
-        policy.verrekenKookdagen(kookdagen, kookSchuldDelers, kookR);
+        Datum eindeVanGoogle = new Datum(2014, 8, 6);
+        System.out.println("tot: "+eindeVanGoogle);
         
-        result.listResultaat(memory.personen.getAll(), kookR);
+        policy = new Policy(version, memory, eindeVanGoogle);
+        //LeenRekening kookR = new LeenRekening.Easy("Kook Rekening");
+        //policy.verrekenKookdagen(kookdagen, kookSchuldDelers, kookR);
+        //result.listResultaat(memory.personen.getAll(), kookR);
+        //result.listEnkel(memory.personen.get("Mark"), kookR);
 
          RaafRekening raafRekening = new RaafRekening("Raaf Rekening");
          policy.verrekenBewoonPeriodes(bewoonPeriodes, raafRekening);
-         result.listResultaat(memory.personen.getAll(), raafRekening);
 
          policy.verrekenBonnetjes(bonnetjes, raafRekening);
-         result.listResultaat(memory.personen.getAll(), raafRekening);
 
          policy.verwerkAfschriften(afschriften, bonnetjes, raafRekening);
-         result.listResultaat(memory.personen.getAll(), raafRekening);
+         
+         result.listEnkel(raafRekening);
         //result.showFactuurs(fs);
         //result.showDetailledTov(memory.personen.get("Dennis"), perR, bonR, afR);
     }

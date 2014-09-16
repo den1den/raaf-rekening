@@ -54,14 +54,4 @@ public interface HasDate {
         }
         return result;
     }
-
-    public static Comparator<Datum> getOnDay() {
-        return new Comparator<Datum>() {
-
-            @Override
-            public int compare(Datum o1, Datum o2) {
-                return o1.getStartOfDay().compareTo(o2.getStartOfDay());
-            }
-        };
-    }
 }

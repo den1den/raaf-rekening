@@ -5,24 +5,21 @@
  */
 package data;
 
-import data.BewoonPeriode.SubPeriode;
 import geld.Referentie;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 import tijd.Datum;
-import tijd.Interval;
-import tijd.Time;
+import tijd.IntervalDatums;
 
 /**
  *
  * @author Dennis
  */
-public class BewoonPeriode implements Iterable<SubPeriode> {
+public class BewoonPeriode implements Iterable<BewoonPeriode.SubPeriode> {
 
     final Persoon persoon;
-    final Interval interval;
+    final IntervalDatums interval;
 
-    public BewoonPeriode(Persoon persoon, Interval interval) {
+    public BewoonPeriode(Persoon persoon, IntervalDatums interval) {
         this.persoon = persoon;
         this.interval = interval;
     }
@@ -36,44 +33,41 @@ public class BewoonPeriode implements Iterable<SubPeriode> {
         return persoon;
     }
 
-    public Interval getInterval() {
+    public IntervalDatums getInterval() {
         return interval;
     }
 
     @Override
-    public Iterator<SubPeriode> iterator() {
-        return new Iterator<SubPeriode>() {
-            Time begin = interval.getBegin();
-            Time end = begin.nextMonth();
-
-            @Override
-            public boolean hasNext() {
-                return end.before(interval.getEnd());
-            }
-
-            @Override
-            public SubPeriode next() {
-                if (!hasNext()) {
-                    throw new NoSuchElementException();
-                }
-                SubPeriode sub = new SubPeriode(new Interval(begin, end));
-                begin = end;
-                end = end.nextMonth();
-                return sub;
-            }
-        };
+    public Iterator<BewoonPeriode.SubPeriode> iterator() {
+        return new SubPerIt();
     }
 
-    public class SubPeriode implements Referentie{
+    private class SubPerIt implements Iterator<BewoonPeriode.SubPeriode> {
 
-        final Interval subInterval;
+        Iterator<IntervalDatums> datumIt = interval.perVolMaand();
 
-        public SubPeriode(Interval subInterval) {
+        @Override
+        public boolean hasNext() {
+            return datumIt.hasNext();
+        }
+
+        @Override
+        public BewoonPeriode.SubPeriode next() {
+            return new BewoonPeriode.SubPeriode(datumIt.next());
+        }
+
+    }
+
+    public class SubPeriode implements Referentie {
+
+        final IntervalDatums subInterval;
+
+        public SubPeriode(IntervalDatums subInterval) {
             this.subInterval = subInterval;
         }
 
-        public Time getTime() {
-            return subInterval.getEnd();
+        public Datum getEind() {
+            return subInterval.getEind();
         }
 
     }

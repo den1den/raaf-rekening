@@ -5,7 +5,6 @@
  */
 package parsers;
 
-import data.memory.Memory;
 import file.StringsData;
 import java.util.ArrayList;
 import java.util.Collection;

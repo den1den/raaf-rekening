@@ -5,11 +5,8 @@
  */
 package data;
 
-import data.types.HasDate;
 import geld.Referentie;
 import java.util.Map;
-import tijd.Datum;
-import tijd.Time;
 
 /**
  *

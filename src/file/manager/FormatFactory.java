@@ -10,7 +10,6 @@ import data.Afschrift;
 import data.BewoonPeriode;
 import data.BierBonnetje;
 import data.Bonnetje;
-import data.GeregistreerdeBetaling;
 import data.Incasso;
 import data.Kookdag;
 import data.Persoon;
@@ -28,10 +27,10 @@ import parsers.ParserFactory;
 import parsers.ParserFactory.ListParser;
 import parsers.ParserFactory.Parser;
 import parsers.ParserFactory.SetParser;
-import parsers.ParserFactory.VoidParser;
-import parsers.stringparser.StringParser;
+import parsers.simple.StringParser;
+import parsers.simple.StringsParser;
 import tijd.Datum;
-import tijd.Interval;
+import tijd.IntervalDatums;
 
 /**
  *
@@ -49,6 +48,9 @@ public class FormatFactory {
 
     public FormatFactory(int version) {
         this.version = version;
+
+        bedragParser = new StringParser.Bedrag();
+
         personen = createPersoon();
         afschriften = createAfschrift();
         bonnetjes = createBonnetjes();
@@ -60,7 +62,7 @@ public class FormatFactory {
         bierBonnetjes = createBierBonnetjes();
     }
 
-    public final Format<Set<GeregistreerdeBetaling>> personen;
+    public final Format<Set<Object>> personen;
     public final Format<Set<Afschrift>> afschriften;
     public final Format<Set<Bonnetje>> bonnetjes;
     public final Format<List<Kookdag>> kookdagen;
@@ -70,10 +72,12 @@ public class FormatFactory {
     public final Format<Map<Persoon, Persoon>> kookSchuldDelers;
     public final Format<Set<BierBonnetje>> bierBonnetjes;
 
-    private Format<Set<GeregistreerdeBetaling>> createPersoon() {
+    private final StringParser<Integer> bedragParser;
+
+    private Format<Set<Object>> createPersoon() {
         String[] header;
         MyFilenameFilter filenameFilter;
-        SetParser<GeregistreerdeBetaling> parser;
+        SetParser<Object> parser;
 
         if (version >= 2) {
             header = new String[]{"Naam", "Kwijtschelden", "Betaald"};
@@ -84,7 +88,7 @@ public class FormatFactory {
         filenameFilter = new MyFilenameFilter("personen");
 
         if (version >= 2) {
-            parser = parserFactory.new SetParser<GeregistreerdeBetaling>() {
+            parser = parserFactory.new SetParser<Object>() {
 
                 @Override
                 protected int getParseLevel() {
@@ -92,10 +96,10 @@ public class FormatFactory {
                 }
 
                 @Override
-                protected GeregistreerdeBetaling parseLine(String[] strings) {
+                protected Object parseLine(String[] strings) {
                     String naam;
                     boolean kwijtschelden;
-                    int betaald;
+                    Integer betaald;
 
                     if (strings.length < 1 || strings.length > 3) {
                         throw new MyParseException(1);
@@ -112,9 +116,8 @@ public class FormatFactory {
                     }
 
                     if (++index < strings.length) {
-                        if (StringParser.INTEGER.has(strings[index])) {
-                            betaald = StringParser.INTEGER.get();
-                        } else {
+                        betaald = bedragParser.parse(strings[index]);
+                        if (betaald == null) {
                             throw new MyParseException(index);
                         }
                     } else {
@@ -126,15 +129,15 @@ public class FormatFactory {
                     } else if (p.kwijtschelden() != kwijtschelden) {
                         throw new MyParseException(0);
                     }
-
-                    return GeregistreerdeBetaling.getContant(null);
+                    System.out.println("TODO: Mark zijn betaling verwerken ergens, als het bv contant was");
+                    return null;
                 }
             };
         } else {
-            parser = parserFactory.new SetParser<GeregistreerdeBetaling>() {
+            parser = parserFactory.new SetParser<Object>() {
 
                 @Override
-                protected GeregistreerdeBetaling parseLine(String[] strings) {
+                protected Object parseLine(String[] strings) {
                     String naam;
                     boolean kwijtschelden;
 
@@ -175,8 +178,8 @@ public class FormatFactory {
         header = new String[]{"Datum", "Naam / Omschrijving", "Rekening", "Tegenrekening", "Code", "Af Bij", "Bedrag (EUR)", "MutatieSoort", "Mededelingen"};
         filenameFilter = new MyFilenameFilter("ing");
         parser = parserFactory.new SetParser<Afschrift>() {
-            final StringParser<Datum> DATUM_PARSER = StringParser.getDayParser(
-                    new SimpleDateFormat("dd-MM-yy"));
+            final StringParser<Datum> DATUM_PARSER
+                    = new StringParser.NormalDatum("dd-MM-yy");
 
             @Override
             protected Afschrift parseLine(String[] strings) {
@@ -189,16 +192,15 @@ public class FormatFactory {
                 String vanRekening;
                 String code;
                 boolean af;
-                int bedrag;
+                Integer bedrag;
                 String mutatieSoort;
                 String mededeling;
 
                 int index = 0;
 
-                if (!DATUM_PARSER.has(strings[index])) {
+                if ((datum = DATUM_PARSER.parse(strings[index])) == null) {
                     throw new MyParseException(index);
                 }
-                datum = DATUM_PARSER.get();
 
                 van = strings[++index];
 
@@ -219,10 +221,9 @@ public class FormatFactory {
                         throw new MyParseException(index);
                 }
 
-                if (!StringParser.INTEGER.has(strings[++index])) {
+                if ((bedrag = bedragParser.parse(strings[++index])) == null) {
                     throw new MyParseException(index);
                 }
-                bedrag = StringParser.INTEGER.get();
 
                 mutatieSoort = strings[++index];
 
@@ -243,11 +244,11 @@ public class FormatFactory {
         header = new String[]{"CSVID", "Bedrag (centen)", "Gekocht door", "Pas (eindigd op)", "Datum (dmy)", "Winkel", "Spullen", "..."};
         filenameFilter = new MyFilenameFilter("bonnetjes");
         parser = parserFactory.new SetParser<Bonnetje>() {
-            final StringParser<Integer> intParser = StringParser.INTEGER;
-            final StringParser<Datum> dateParser = StringParser.getFastestDayParser();
+
+            final StringParser<Datum> dateParser = new StringParser.FastDatum();
 
             private int id;
-            private int bedrag;
+            private Integer bedrag;
             private Persoon persoon;
             private String pasEindigd;
             private Datum date;
@@ -261,24 +262,23 @@ public class FormatFactory {
                 }
                 int index = 0;
 
-                if (!intParser.has(strings[index])) {
-                    throw new MyParseException(index);
+                try {
+                    id = Integer.parseInt(strings[index]);
+                } catch (NumberFormatException e) {
+                    throw new MyParseException(index, e);
                 }
-                id = intParser.get();
 
-                if (!intParser.has(strings[++index])) {
+                if ((bedrag = bedragParser.parse(strings[++index])) == null) {
                     throw new MyParseException(index);
                 }
-                bedrag = intParser.get();
 
                 String persoonNaam = strings[++index];
 
                 pasEindigd = strings[++index];
 
-                if (!dateParser.has(strings[++index])) {
+                if ((date = dateParser.parse(strings[++index])) == null) {
                     throw new MyParseException(index);
                 }
-                date = dateParser.get();
 
                 String winkelNaam = strings[++index];
 
@@ -326,28 +326,20 @@ public class FormatFactory {
                 int index = 0;
 
                 int ID;
-                int bedrag;
+                Integer bedrag;
                 Persoon kok;
                 Map<Persoon, Integer> meeters = new HashMap<>(strings.length - 3);
 
                 try {
-                    if (!StringParser.INTEGER.has(strings[index])) {
-                        throw new MyParseException(index, "No int found");
-                    }
-                    ID = StringParser.INTEGER.get();
+                    ID = Integer.parseInt(strings[index]);
                 } catch (NumberFormatException e) {
                     throw new MyParseException(index, e);
                 }
 
                 index++;
 
-                try {
-                    if (!StringParser.INTEGER.has(strings[index])) {
-                        throw new MyParseException(index, "No int found");
-                    }
-                    bedrag = StringParser.INTEGER.get();
-                } catch (NumberFormatException e) {
-                    throw new MyParseException(index, e);
+                if ((bedrag = bedragParser.parse(strings[index])) == null) {
+                    throw new MyParseException(index);
                 }
 
                 index++;
@@ -419,12 +411,14 @@ public class FormatFactory {
 
         header = new String[]{"Type", "various", "(winkel categorie)", "(winkel andere namen)"};
         filenameFilter = new MyFilenameFilter("memory");
-        
-        int size = 20/header.length;
-        
+
+        int size = 20 / header.length;
+
         this.memoryInstance = new Memory(size);
-        
-        parser = parserFactory.new SingleParser<Memory>(memoryInstance) {
+
+        parser = parserFactory.new SingleParser<Memory>( 
+             
+            memoryInstance) {
 
             private static final String typePersoon = "nickname";
             private static final String typeRekening = "rekening";
@@ -497,8 +491,7 @@ public class FormatFactory {
             protected int getParseLevel() {
                 return 0;
             }
-            
-            
+
         };
         return new Format<>(filenameFilter, header, parser);
     }
@@ -511,8 +504,9 @@ public class FormatFactory {
         header = new String[]{"Naam", "Periode (van)", "Periode (tot)", "..."};
         filenameFilter = new MyFilenameFilter("bewoners");
         parser = parserFactory.new SetParser<BewoonPeriode>() {
-            private final StringParser<Datum> dayparser
-                    = StringParser.getDayParser(new SimpleDateFormat("d-M-y"));
+            private final StringsParser<IntervalDatums> perParser
+                    = new StringsParser.IntervalParser(
+                            new StringParser.NormalDatum());
 
             @Override
             protected BewoonPeriode parseLine(String[] strings) {
@@ -526,23 +520,23 @@ public class FormatFactory {
                 BewoonPeriode last = null;
 
                 while (++index < strings.length) {
-                    Interval interval;
+                    IntervalDatums interval;
 
-                    if (!dayparser.has(strings[index])) {
-                        throw new MyParseException(index, "Could not derive time");
-                    }
-                    Datum start = dayparser.get();
+                    String start = strings[index];
                     if (++index < strings.length) {
-                        if (!dayparser.has(strings[index])) {
-                            throw new MyParseException(index, "Could not derive time");
-                        }
-                        interval = new Interval(start, dayparser.get());
+                        String end = strings[index];
+
+                        interval = perParser.parseSepa(start, end);
                     } else {
-                        interval = new Interval(start);
+                        interval = perParser.parseSepa(start);
                     }
 
                     if (last != null) {
                         instance.add(last);
+                    }
+
+                    if (interval == null) {
+                        throw new MyParseException(index, "Cant find new interval");
                     }
                     last = new BewoonPeriode(subject, interval);
                 }
@@ -564,6 +558,8 @@ public class FormatFactory {
                  
              
              
+             
+             
             new IntegerParsable()) {@Override
             protected void parseLine(String[] strings) {
                 if (strings.length != 2) {
@@ -573,11 +569,11 @@ public class FormatFactory {
                 if (!strings[i].equals("start bedrag")) {
                     throw new MyParseException(i);
                 }
-                int startBedrag;
-                if (!StringParser.INTEGER.has(strings[++i])) {
+                Integer startBedrag;
+                if ((startBedrag = bedragParser.parse(strings[++i])) == null) {
                     throw new MyParseException(i);
                 }
-                this.instance.setInteger(StringParser.INTEGER.get());
+                this.instance.setInteger(startBedrag);
             }
         };
 
@@ -618,41 +614,40 @@ public class FormatFactory {
         header = null;
         filenameFilter = new MyFilenameFilter("bierBonnetjes");
         parser = parserFactory.new SetParser<BierBonnetje>() {
-            final StringParser<Datum> DATEPARSER = StringParser.getFastestDayParser();
+            final StringParser<Datum> DATEPARSER = new StringParser.FastDatum();
 
             @Override
             protected BierBonnetje parseLine(String[] strings) {
                 String merk;
                 int kratten;
-                int totaalPrijs;
+                Integer totaalPrijs;
                 Datum datum;
                 Winkel winkel;
 
                 if (strings.length < 4 || strings.length > 5) {
                     throw new MyParseException.Length();
                 }
-                int i = 0;
-                merk = strings[i];
+                int index = 0;
+                merk = strings[index];
 
-                if (!StringParser.INTEGER.has(strings[++i])) {
-                    throw new MyParseException(i);
+                try {
+                    kratten = Integer.parseInt(strings[++index]);
+                } catch (NumberFormatException e) {
+                    throw new MyParseException(index, e);
                 }
-                kratten = StringParser.INTEGER.get();
 
-                if (!StringParser.INTEGER.has(strings[++i])) {
-                    throw new MyParseException(i);
+                if ((totaalPrijs = bedragParser.parse(strings[++index])) == null) {
+                    throw new MyParseException(index);
                 }
-                totaalPrijs = StringParser.INTEGER.get();
 
-                if (!DATEPARSER.has(strings[++i])) {
-                    throw new MyParseException(i);
+                if ((datum = DATEPARSER.parse(strings[++index])) == null) {
+                    throw new MyParseException(index);
                 }
-                datum = DATEPARSER.get();
 
-                winkel = memoryInstance.winkels.get(strings[++i]);
+                winkel = memoryInstance.winkels.get(strings[++index]);
                 if (winkel == null) {
                     winkel = new Winkel(
-                            strings[i],
+                            strings[index],
                             memoryInstance.aankoopCats.find("Bier"));
                 }
 
