@@ -19,7 +19,7 @@ import parsers.Source;
 public abstract class StringsData implements Source, Iterable<String[]> {
 
     private final String[] header;
-    final protected List<String[]> content = new LinkedList();
+    final protected List<String[]> content = new LinkedList<>();
 
     public StringsData(String[] header) {
         this.header = header;

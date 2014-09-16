@@ -35,39 +35,6 @@ public class ResultPrintStream {
 
     static final MyFormat mf = new MyFormat();
 
-    /**
-     *
-     * @param rs rekeningen TOV laatste
-     */
-    public static void showLastT(Object... rs) {
-        int max = 2;
-
-        List<String[]> TOV_ordered = getTOV_ordered(Arrays.asList(rs), rs[rs.length - 1]);
-
-        int keepUpper = 1;
-        for (int i = keepUpper; i < TOV_ordered.size() - max; i++) {
-            //keep header
-            TOV_ordered.remove(keepUpper);
-        }
-
-        System.out.println("Show " + (rs.length - 1) + " against: " + rs[rs.length - 1].toString());
-        System.out.println(new MyTxtTableHeader(TOV_ordered));
-
-        /*
-         List<TransactiesRecord> tr1 = r1.getTransacties(r2);
-         List<TransactiesRecord> tr2 = r2.getTransacties(r1);
-         System.out.println("1: "+r1.toString());
-         for (int i = 0; i < tr1.size() && i < max; i++) {
-         System.out.println(" "+tr1.get(i).toString());
-         }
-         System.out.println("2: "+r2.toString());
-         for (int i = 0; i < tr2.size() && i < max; i++) {
-         System.out.println(" "+tr2.get(i).toString());
-         }
-         System.out.println();
-         */
-    }
-
     final int version;
     PrintStream stream;
 
@@ -86,6 +53,8 @@ public class ResultPrintStream {
     }
 
     static String[][] listTransacties(List<Object> transacties, AtomicInteger saldo) {
+        throw new UnsupportedOperationException();
+        /*
         String[][] rows;
         if (transacties.isEmpty()) {
             rows = new String[][]{new String[]{"Geen transactie gevonden..."}};
@@ -132,7 +101,7 @@ public class ResultPrintStream {
                 rows[i] = row;
             }
         }
-        return rows;
+        return rows;*/
     }
 
     static String[][] lastTransacties(List<Object> trs, Integer saldo, int lines) {

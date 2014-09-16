@@ -16,13 +16,10 @@ import java.util.List;
 /**
  *
  * @author Dennis
+ * @param <X>
+ * @param <Y>
  */
 public class DataSet<X, Y> {
-
-    public static DataSet createFrom(List<Transactie.TransactiesRecord> list) {
-        Class y = Transactie.TransactiesRecord.class;
-        return histogram(y, list);
-    }
 
     String titel;
     Color color;
@@ -190,9 +187,9 @@ public class DataSet<X, Y> {
         valuesX = new ArrayList<>(3);
         Date today = new Date();
         valuesX.add(today);
-        valuesX.add(new Date(today.getYear(), today.getMonth(), today.getDay()-1));
-        valuesX.add(new Date(today.getYear(), today.getMonth(), today.getDay()-2));
-        valuesX.add(new Date(today.getYear(), today.getMonth(), today.getDay()-3));
+        //valuesX.add(new Date(today.getYear(), today.getMonth(), today.getDay()-1));
+        //valuesX.add(new Date(today.getYear(), today.getMonth(), today.getDay()-2));
+        //valuesX.add(new Date(today.getYear(), today.getMonth(), today.getDay()-3));
         valuesY = new ArrayList<>(3);
         valuesY.add(-1.);
         valuesY.add(1.);
@@ -200,7 +197,8 @@ public class DataSet<X, Y> {
         valuesY.add(0.5);
 
         DataSet a = create(titel, color, classX, valuesX, classY, valuesY, renderer);
-        return new DataSet[]{a};
+        throw new UnsupportedOperationException("Depricated dates above");
+        //return new DataSet[]{a};
     }
 
     public interface Function {

@@ -17,7 +17,7 @@ import java.util.List;
 public class ItOverIt<T> implements Iterator<T>{
     
     Iterator<Iterator<T>> it;
-    Iterator<T> current;
+    Iterator<T> curr = null;
 
     public ItOverIt(Iterator<T>... its) {
         it = java.util.Arrays.asList(its).iterator();
@@ -33,7 +33,7 @@ public class ItOverIt<T> implements Iterator<T>{
 
     @Override
     public boolean hasNext() {
-        
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override

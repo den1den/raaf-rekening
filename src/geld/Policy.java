@@ -191,6 +191,8 @@ public class Policy {
                     bonnetjes.remove(bon);
 
                     //wel referentie toevoegen
+                    throw new UnsupportedOperationException("Not yet...");
+                    /*
                     List<Transactie> trs = bon.getPersoon().getTransactiesRef(bon.getWinkel());
                     if (trs == null) {
                         throw new UnsupportedOperationException();
@@ -208,7 +210,7 @@ public class Policy {
                     vorrigeT.addReferentie(bon);
 
                     //hoeft niet dubbel
-                    return;
+                    return;*/
                 } else if (candidates.isEmpty()) {
                     refs = new ArrayList<>(1);
                     Logger.getLogger(Policy.class.getName()).log(Level.INFO, "Je moet het bonnetje zoeken van " + afschrift);
@@ -230,10 +232,11 @@ public class Policy {
                         Winkel w = bon.getWinkel();
                         if (w != soiso) {
                             //ambigious
-                            rhi = null;
-                            refs.add(afschrift);
-                            verrekMetRekening.add(true, rhi, bedrag, new ReferentieMultiple(refs));
                             throw new UnsupportedOperationException("Wat is de tegenrekeninghouder? Undertermind?");
+                            //rhi = null;
+                            //refs.add(afschrift);
+                            //verrekMetRekening.add(true, rhi, bedrag, new ReferentieMultiple(refs));
+                            
                         }
                     }
                     r = soiso;
@@ -272,7 +275,6 @@ public class Policy {
                     }
                 }
                 throw new UnknownError();
-                break;
             case "GT":
                 if (!afschrift.getMutatieSoort().equals("Internetbankieren")) {
                     throw new Error("Internetbankieren verwacht ipv: " + afschrift.getMutatieSoort());
@@ -325,9 +327,6 @@ public class Policy {
                     in = memory.incassos.findRek(afschrift);
                     rekening.betaald(bedrag, in, referentie);
                     return;
-                    
-                    
-                    throw new UnsupportedOperationException();
                 } else {
                     //bijboeking
                     if (isMededelingRaRe(afschrift)) {
@@ -339,27 +338,6 @@ public class Policy {
                         throw new UnsupportedOperationException();
                     }
                 }
-
-                try {
-                    throw new UnsupportedOperationException();
-                } catch (UnsupportedOperationException ex) {
-                    Logger.getLogger(Policy.class.getName()).log(Level.SEVERE, "GT gaat nog fout", ex);
-                }
-
-                /*
-                 if (afschrift.isAf()) {
-                 //terugboeking
-                 tegenRekeningHouder = memory.getByRekening(afschrift.getVanRekening());
-                 } else {
-
-                 if (isMededelingRaRe(afschrift.getMededeling())) {
-                 //huisrekening
-                 tegenRekeningHouder = memory.personen.findRek(afschrift);
-                 } else {
-                 throw new UnsupportedOperationException();
-                 }
-                 }*/
-                break;
             case "DV":
                 if (!afschrift.getMutatieSoort().equals("Diversen")) {
                     throw new Error("Diversen verwacht ipv: " + afschrift.getMutatieSoort());
@@ -428,7 +406,6 @@ public class Policy {
         //return van.betaald(naar, bedrag, datum, referentie);
         //return van.moetBetalen(naar, bedrag, datum, referentie);
         //return van.betaal(naar, bedrag, referentie, datum)
-        throw new UnsupportedOperationException("Not yet");
     }
 
     private boolean isMededelingRaRe(Afschrift afschrift) {
