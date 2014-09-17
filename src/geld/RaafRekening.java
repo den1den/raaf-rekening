@@ -11,8 +11,8 @@ package geld;
  */
 public class RaafRekening extends LeenRekening implements HasContant {
 
-    final String naam;
-    private final Sum kas = new Kas();
+    private final String naam;
+    private final Sum opRekening = new Kas();
     private final Sum contant = new Contant();
 
     public RaafRekening(final String naam) {
@@ -29,6 +29,104 @@ public class RaafRekening extends LeenRekening implements HasContant {
     }
 
     /**
+     * Doneer een bedrag aan deze rekening. opRekening++
+     *
+     * @param r kan null zijn
+     * @param bedrag
+     * @param referentie
+     */
+    public void donatie(Rekening r, int bedrag, Referentie referentie) {
+        if (bedrag < 0) {
+            throw new IllegalArgumentException();
+        }
+        String message = r + " heeft " + bedrag + " gedoneerd";
+        Event e = newE(r, referentie, message);
+        doDonatie(r, bedrag, e);
+    }
+
+    protected void doDonatie(Rekening r, int bedrag, Event e) {
+        opRekening.bij(bedrag, e);
+        if (r != null) {
+            System.err.println(r + " heeft gedoneerd maar merkt er zelf niets "
+                    + "van");
+        }
+    }
+
+    /**
+     * Iets gekocht bij. opRekening-- en BINNEKORT:(bij degene waar het is
+     * gekocht gaat iets bij). Geen verandering in schuld
+     *
+     * @param bij
+     * @param bedrag
+     * @param referentie
+     */
+    public void besteed(Rekening bij, int bedrag, Referentie referentie) {
+        if (bedrag < 0) {
+            throw new IllegalArgumentException();
+        }
+        String message = bij + " heeft gratis geld gekregen";
+        Event e = newE(bij, referentie, message);
+        doBesteed(bij, bedrag, e);
+    }
+
+    protected void doBesteed(Rekening r, int bedrag, Event e) {
+        opRekening.af(bedrag, e);
+        if (r != null) {
+            System.err.println(r + " heeft geld gekregen maar merkt hier zelf "
+                    + "niets van");
+        }
+    }
+
+    /**
+     * Iemand geeft geld aan <B>this</B> zodat de schuld minder word.
+     * opRekening++. <b>van</b> hoeft minder te betalen aan <b>this</b>.
+     * <b>this</b> moet meer betalen aan <b>van</b>.
+     *
+     * @param van
+     * @param bedrag
+     * @param referentie
+     */
+    public void krijgtAfbetaling(LeenRekening van, int bedrag, Referentie referentie) {
+        if (bedrag < 0) {
+            throw new IllegalArgumentException();
+        }
+        String message = van.getNaam() + " betaald zijn schuld af";
+        Event e = newE(van, referentie, message);
+        doKrijgtAfbetaling(van, bedrag, e);
+    }
+
+    protected void doKrijgtAfbetaling(LeenRekening r, int bedrag, Event e) {
+        doDonatie(r, bedrag, e);
+        doMoetBetalenAan(r, bedrag, e);
+    }
+
+    /**
+     * <b>this</b> betaald uit. opRekening--. <b>aan</b> moet meer terugbetalen
+     * aan <b>this</b>. <b>this</b> hoeft minder te betalen aan <b>van</b>.
+     *
+     * @param aan
+     * @param bedrag
+     * @param referentie
+     */
+    public void betaaldUit(LeenRekening aan, int bedrag, Referentie referentie) {
+        if (bedrag < 0) {
+            throw new IllegalArgumentException();
+        }
+        String message = aan.getNaam() + " krijgt geld terug";
+        Event e = newE(aan, referentie, message);
+
+    }
+
+    protected void doBetaaldUit(LeenRekening r, int bedrag, Event e) {
+        doBesteed(r, bedrag, e);
+        doMoetKrijgenVan(r, bedrag, e);
+    }
+
+    {
+        System.out.println("tot hier");
+    }
+
+    /**
      * this krijgt nog wat geld van iemand budget++ this moetKrijgenVan
      * gebruiker
      *
@@ -36,6 +134,7 @@ public class RaafRekening extends LeenRekening implements HasContant {
      * @param gebruiker degene die THIS wat veerschuldigd is
      * @param referentie
      */
+    @Deprecated
     public void krijgtNog(int bedrag, LeenRekening gebruiker, Referentie referentie) {
         String message = getNaam() + " krijgt nog van " + gebruiker.getNaam();
 
@@ -44,8 +143,9 @@ public class RaafRekening extends LeenRekening implements HasContant {
         doKrijgtNog(gebruiker, bedrag, e);
     }
 
-    void doKrijgtNog(LeenRekening lr, int bedrag, Event e) {
-        kas.bij(bedrag, e);
+    @Deprecated
+    protected void doKrijgtNog(LeenRekening lr, int bedrag, Event e) {
+        //opRekening.bij(bedrag, e);, krijgt nog dus heeft nog niet
         doMoetKrijgenVan(lr, bedrag, e);
     }
 
@@ -57,14 +157,16 @@ public class RaafRekening extends LeenRekening implements HasContant {
      * @param bedrag
      * @param referentie
      */
+    @Deprecated
     public void betaaldDoor(LeenRekening voorschieter, int bedrag, Referentie referentie) {
         String message = voorschieter.getNaam() + " heeft iets betaald wat eigenelijk " + getNaam() + " zou moeten";
         Event e = newE(voorschieter, referentie, message);
         doBetaaldDoor(voorschieter, bedrag, e);
     }
 
+    @Deprecated
     protected void doBetaaldDoor(LeenRekening lr, int bedrag, Event e) {
-        kas.af(bedrag, e);
+        opRekening.af(bedrag, e);
         lr.doMoetKrijgenVan(this, bedrag, e);
     }
 
@@ -75,6 +177,7 @@ public class RaafRekening extends LeenRekening implements HasContant {
      * @param bedrag
      * @param referentie
      */
+    @Deprecated
     public void plusContributie(LeenRekening van, int bedrag, Referentie referentie) {
         if (bedrag < 0) {
             throw new IllegalArgumentException();
@@ -84,35 +187,22 @@ public class RaafRekening extends LeenRekening implements HasContant {
         doPlusContri(van, bedrag, e);
     }
 
+    @Deprecated
     protected void doPlusContri(LeenRekening lr, int bedrag, Event e) {
 //budget +
-        this.kas.bij(bedrag, e);
+        this.opRekening.bij(bedrag, e);
         System.err.println("TODO2: r.af() zodat je ziet heveel er word betaald. Persoon>RaafRekening");
 //van komt in de plus te staan bij this
 //this moet nog betalen aan van
         lr.doMoetKrijgenVan(this, bedrag, e);
     }
 
-    /**
-     * Iets gekocht bij. Er gaat iets uit de kas en bij degene waar het is
-     * gekocht gaat iets bij.
-     *
-     * @param bij
-     * @param bedrag
-     * @param referentie
-     */
-    public void gekocht(Rekening bij, int bedrag, Referentie referentie) {
-        if (bedrag < 0) {
-            throw new IllegalArgumentException();
+    @Deprecated
+    protected void doGeefAan(Rekening bij, int bedrag, Event e) {
+        this.opRekening.af(bedrag, e);
+        if (bij != null) {
+            System.err.println("TODO3: " + bij + " heeft geld gerkegen maar merkt er niets van");
         }
-        String message = getNaam() + " heeft iets gekocht bij " + bij.getNaam();
-        Event e = newE(bij, referentie, message);
-        doGekocht(bij, bedrag, e);
-    }
-
-    protected void doGekocht(Rekening bij, int bedrag, Event e) {
-        this.kas.af(bedrag, e);
-        System.err.println("TODO3: bij rekening 'bij' moet er geld bij");
     }
 
     /**
@@ -123,28 +213,32 @@ public class RaafRekening extends LeenRekening implements HasContant {
      * @param aan
      * @param referentie
      */
+    @Deprecated
     public void betaald(int bedrag, Rekening aan, Referentie referentie) {
         String message = getNaam() + " heeft betaald voor een dienst bij " + aan.getNaam();
         Event e = newE(aan, referentie, message);
-        doGekocht(aan, bedrag, e);
+        doGeefAan(aan, bedrag, e);
     }
 
     /**
-     * De raaf betaald uit. De kas gaat iets uit. De schuld word groter.
+     * De raaf betaald uit. opRekekning--, Raaf krijgt geld van b, B moet terug
+     * betalen aan Raaf
      *
      * @param bedrag
-     * @param aan
+     * @param b
      * @param referentie
      */
-    public void terrugGave(int bedrag, LeenRekening aan, Referentie referentie) {
-        String message = getNaam() + " betaald uit aan " + aan.getNaam();
-        Event e = newE(aan, referentie, message);
-
+    @Deprecated
+    public void terrugGave(int bedrag, LeenRekening b, Referentie referentie) {
+        String message = getNaam() + " betaald uit aan " + b.getNaam();
+        Event e = newE(b, referentie, message);
+        doTerrugGave(b, bedrag, e);
     }
 
+    @Deprecated
     protected void doTerrugGave(LeenRekening lr, int bedrag, Event e) {
         //er gaat wat uit de kas
-        kas.af(bedrag, e);
+        doGeefAan(lr, bedrag, e);
         //aan krijgt minder schuld 
 
         //aan -

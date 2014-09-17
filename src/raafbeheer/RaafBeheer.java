@@ -25,6 +25,7 @@ import java.util.Set;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import tijd.Datum;
+import tijd.IntervalDatums;
 import util.diplay.ResultPrintStream;
 
 /**
@@ -102,10 +103,10 @@ public class RaafBeheer {
         Set<BierBonnetje> bierBonnetjes = formats.bierBonnetjes.parser.parse(files.getBierBonnetjes());
         Map<Persoon, Persoon> kookSchuldDelers = formats.kookSchuldDelers.parser.parse(files.getKookSchuldDelers());
 
-        Datum eindeVanGoogle = new Datum(2014, 8, 6);
-        System.out.println("tot: "+eindeVanGoogle);
+        IntervalDatums oude_spreadsheet = IntervalDatums.tot(new Datum(2013, 8, 6));
+        System.out.println("periode: "+oude_spreadsheet);
         
-        policy = new Policy(version, memory, eindeVanGoogle);
+        policy = new Policy(version, memory, oude_spreadsheet);
         //LeenRekening kookR = new LeenRekening.Easy("Kook Rekening");
         //policy.verrekenKookdagen(kookdagen, kookSchuldDelers, kookR);
         //result.listResultaat(memory.personen.getAll(), kookR);

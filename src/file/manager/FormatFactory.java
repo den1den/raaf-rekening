@@ -129,7 +129,8 @@ public class FormatFactory {
                     } else if (p.kwijtschelden() != kwijtschelden) {
                         throw new MyParseException(0);
                     }
-                    System.out.println("TODO: Mark zijn betaling verwerken ergens, als het bv contant was");
+                    if(betaald > 0)
+                    System.out.println("TODO: "+p+" zijn betaling  van "+betaald+ " verwerken ergens, als het bv contant was");
                     return null;
                 }
             };

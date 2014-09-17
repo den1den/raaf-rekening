@@ -141,9 +141,9 @@ public class ResultPrintStream {
                 List<String> row = new LinkedList<>();
                 if (head) {
                     row.add(onderwerp.getNaam());
-                    row.add(String.valueOf(onderwerp.krijgtNogVan()));
+                    row.add(String.valueOf(onderwerp.getKrijgtNogVan()));
                     for (HasSchulden tov : tovs) {
-                        row.add(String.valueOf(onderwerp.krijgtNogVan(tov)));
+                        row.add(String.valueOf(onderwerp.getKrijgtNogVan(tov)));
                     }
                     head = false;
                 } else {
@@ -210,7 +210,7 @@ public class ResultPrintStream {
         for (HasSchulden tov : tovs) {
             row.clear();
             row.add(tov.getNaam());
-            row.add(mf.toMoney(tov.krijgtNogVan()));
+            row.add(mf.toMoney(tov.getKrijgtNogVan()));
             row.add(" ");
             for (HasSchulden hs : tovs) {
                 row.add(" - ");
@@ -221,11 +221,11 @@ public class ResultPrintStream {
         for (HasSchulden onderwerp : onderwerps) {
             row.clear();
             row.add(onderwerp.getNaam());
-            row.add(mf.toMoney(onderwerp.krijgtNogVan()));
+            row.add(mf.toMoney(onderwerp.getKrijgtNogVan()));
             row.add(" ");
             for (int i = 0; i < tovs.length; i++) {
                 HasSchulden tov = tovs[i];
-                row.add(mf.toMoney(onderwerp.krijgtNogVan(tov)));
+                row.add(mf.toMoney(onderwerp.getKrijgtNogVan(tov)));
             }
             r.add(row.toArray(new String[row.size()]));
         }
@@ -296,7 +296,7 @@ public class ResultPrintStream {
     }
 
     public void listResultaat(Collection<? extends HasSchulden> rhs, HasSchulden tov) {
-        this.stream.println(rhs.size() + " rekeningen tegen " + tov + " (" + mf.toMoney(tov.krijgtNogVan()) + ")");
+        this.stream.println(rhs.size() + " rekeningen tegen " + tov + " (" + mf.toMoney(tov.getKrijgtNogVan()) + ")");
         this.stream.println(new MyTxtTableHeader(ResultPrintStream.getTOV_ordered(rhs, tov)));
     }
 

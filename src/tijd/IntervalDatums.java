@@ -19,8 +19,13 @@ import java.util.NoSuchElementException;
 public class IntervalDatums {
 
     static final DateFormat timeFormat = new SimpleDateFormat("dd-MM-yyyy H:ss:S");
+    static public final IntervalDatums TOT_NU = vanaf(Datum.begin);
 
-    public static IntervalDatums totNu(Datum begin) {
+    public static IntervalDatums tot(Datum eind) {
+        return new IntervalDatums(Datum.begin, eind);
+    }
+
+    public static IntervalDatums vanaf(Datum begin) {
         return new IntervalDatums(begin, Datum.nu);
     }
 
@@ -47,7 +52,17 @@ public class IntervalDatums {
     }
 
     /**
-     * 
+     * Of de datum in de periode valt (inclusief de randen van de periode)
+     *
+     * @param datum
+     * @return true <==> in periode
+     */
+    public boolean isIn(Datum datum) {
+        return datum.isIn(this);
+    }
+
+    /**
+     *
      * @return iterator over hele maanden in deze interval
      */
     public Iterator<IntervalDatums> perVolMaand() {

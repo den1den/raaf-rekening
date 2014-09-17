@@ -16,8 +16,8 @@ import java.util.List;
 public interface HasSchulden extends HasNaam{
     //SumMap getKrijgtNogVan();
     
-    int krijgtNogVan(HasSchulden iemand);
-    int krijgtNogVan();
+    int getKrijgtNogVan(HasSchulden iemand);
+    int getKrijgtNogVan();
 
     @Override
     public String getNaam();

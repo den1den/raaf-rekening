@@ -14,45 +14,58 @@ import java.util.List;
  *
  * @author Dennis
  */
-public abstract class LeenRekening implements HasSchulden, HasNaam {
+public abstract class LeenRekening extends Rekening implements HasSchulden, HasNaam {
 
     private final SumMap<HasSchulden> krijgtNogVan = new Leneingen();
     protected final List<Event> history = new LinkedList<>();
 
     public LeenRekening() {
     }
-
+/**
+ * Degene krijgt nog een bedrag van deze rekening. Deze rekening moet nog een bedrag betalen aan diegene. 
+ * @param aan degene
+ * @param bedrag
+ * @param r 
+ */
     @Override
-    public void moetBetalenAan(LeenRekening lr, int bedrag, Referentie r) {
+    public void moetBetalenAan(LeenRekening aan, int bedrag, Referentie r) {
         if (bedrag < 0) {
             throw new IllegalArgumentException();
         }
 
-        String message = getNaam() + " moet betalen aan " + lr.getNaam();
+        String message = getNaam() + " moet betalen aan " + aan.getNaam();
 
-        Event e = newE(lr, r, message);
+        Event e = newE(aan, r, message);
 
-        doBetalenAan(lr, bedrag, e);
+        doMoetBetalenAan(aan, bedrag, e);
     }
 
-    void doBetalenAan(LeenRekening lr, int bedrag, Event e) {
+    void doMoetBetalenAan(LeenRekening lr, int bedrag, Event e) {
         this.krijgtNogVan.add(lr, -bedrag, e);
         history.add(e);
         lr.krijgtNogVan.add(this, bedrag, e);
         lr.history.add(e);
     }
 
+    /**
+     * Degene moet meer terug gaan betalen aan deze rekening. En deze rekening
+     * moet minder gaan betalen aan degene.
+     *
+     * @param van degene
+     * @param bedrag
+     * @param r
+     */
     @Override
-    public void moetKrijgenVan(LeenRekening lr, int bedrag, Referentie r) {
+    public void moetKrijgenVan(LeenRekening van, int bedrag, Referentie r) {
         if (bedrag < 0) {
             throw new IllegalArgumentException();
         }
 
-        String message = getNaam() + " moet krijgen van " + lr.getNaam();
+        String message = getNaam() + " moet krijgen van " + van.getNaam();
 
-        Event e = newE(lr, r, message);
+        Event e = newE(van, r, message);
 
-        doMoetKrijgenVan(lr, bedrag, e);
+        doMoetKrijgenVan(van, bedrag, e);
     }
 
     void doMoetKrijgenVan(LeenRekening lr, int bedrag, Event e) {
@@ -63,12 +76,12 @@ public abstract class LeenRekening implements HasSchulden, HasNaam {
     }
 
     @Override
-    public int krijgtNogVan() {
+    public int getKrijgtNogVan() {
         return krijgtNogVan.get();
     }
 
     @Override
-    public int krijgtNogVan(HasSchulden iemand) {
+    public int getKrijgtNogVan(HasSchulden iemand) {
         return krijgtNogVan.get(iemand);
     }
 
@@ -95,17 +108,17 @@ public abstract class LeenRekening implements HasSchulden, HasNaam {
     protected String className() {
         return getClass().getSimpleName();
     }
-    
-    private class Leneingen extends SumMap<HasSchulden>{
+
+    private class Leneingen extends SumMap<HasSchulden> {
 
         @Override
         String getNaam() {
-            return LeenRekening.this.getNaam()+" leent";
+            return LeenRekening.this.getNaam() + " leent";
         }
-        
+
     }
-    
-    Event newE(HasNaam betreft, Referentie referentie, String message){
+
+    Event newE(HasNaam betreft, Referentie referentie, String message) {
         Event e = new Event(this, betreft, referentie, message);
         //history.add(e);
         return e;

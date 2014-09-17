@@ -44,7 +44,7 @@ public abstract class StringsParser<C> {
                 Datum tweede = dateParser.parse(entry[1]);
                 
                 return new IntervalDatums(eerst, tweede);
-            }else return IntervalDatums.totNu(eerst);
+            }else return IntervalDatums.vanaf(eerst);
         }
         
     }

@@ -21,6 +21,9 @@ public class BewoonPeriode implements Iterable<BewoonPeriode.SubPeriode> {
 
     public BewoonPeriode(Persoon persoon, IntervalDatums interval) {
         this.persoon = persoon;
+        if(interval.getBegin() == Datum.begin){
+            throw new IllegalArgumentException("Kan niet zo");
+        }
         this.interval = interval;
     }
 
@@ -40,6 +43,14 @@ public class BewoonPeriode implements Iterable<BewoonPeriode.SubPeriode> {
     @Override
     public Iterator<BewoonPeriode.SubPeriode> iterator() {
         return new SubPerIt();
+    }
+    
+    public static void main(String[] args) {
+        BewoonPeriode bp = new BewoonPeriode(new Persoon("Dennis test"), IntervalDatums.vanaf(new Datum(2012, 1, 1)));
+        System.out.println("per: "+bp);
+        for (SubPeriode bp1 : bp) {
+            System.out.println("sub: "+bp1);
+        }
     }
 
     private class SubPerIt implements Iterator<BewoonPeriode.SubPeriode> {
@@ -68,6 +79,11 @@ public class BewoonPeriode implements Iterable<BewoonPeriode.SubPeriode> {
 
         public Datum getEind() {
             return subInterval.getEind();
+        }
+
+        @Override
+        public String toString() {
+            return subInterval.toString();
         }
 
     }

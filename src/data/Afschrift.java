@@ -7,6 +7,7 @@ package data;
 
 import data.types.HasDate;
 import geld.Referentie;
+import java.util.Comparator;
 import tijd.Datum;
 
 /**
@@ -99,5 +100,13 @@ public class Afschrift
     @Override
     public Datum getDate() {
      return datum;   
+    }
+
+    public static class CompByDate implements Comparator<Afschrift>{
+
+        @Override
+        public int compare(Afschrift o1, Afschrift o2) {
+            return o1.getDate().compareTo(o2.getDate());
+        }
     }
 }

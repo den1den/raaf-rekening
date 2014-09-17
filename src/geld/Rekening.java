@@ -16,12 +16,6 @@ import java.util.List;
  * @author Dennis
  */
 public abstract class Rekening implements HasNaam{
-
-    final private List<?> geschiedenis = new LinkedList<>();
-
-    public List<?> getGeschiedenis() {
-        return new ArrayList<>(geschiedenis);
-    }
     
     public static class Virtueel extends Rekening{
         

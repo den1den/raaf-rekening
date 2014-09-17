@@ -22,9 +22,11 @@ import java.util.logging.Logger;
 public class Datum implements Comparable<Datum>, Cloneable {
 
     static final DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-    static final public Datum nu = new Datum(null);
-    static final public Datum now = nu;
-
+    
+    static final public Datum begin = new Begin();
+static final public Datum nu = new Nu();
+    static final public Datum eind = new Einde();
+    
     /**
      * must be defenced against
      */
@@ -32,21 +34,23 @@ public class Datum implements Comparable<Datum>, Cloneable {
 
     /**
      * Constructor
-     * @param c 
+     *
+     * @param c
      */
     private Datum(Calendar c) {
         this.calendar = c;
     }
-    
+
     /**
-     * Default constructor 
+     * Default constructor
      */
-    private Datum(){
+    private Datum() {
         this(getInstance());
     }
 
     /**
      * Create date at given time
+     *
      * @param millis time in milliseconds
      */
     Datum(long millis) {
@@ -60,13 +64,14 @@ public class Datum implements Comparable<Datum>, Cloneable {
         c.setTimeInMillis(calendar.getTimeInMillis());
         return c;
     }
-    
+
     /**
      * Copy
-     * @return 
+     *
+     * @return
      */
     @Override
-    protected Datum clone(){
+    protected Datum clone() {
         try {
             super.clone();
         } catch (CloneNotSupportedException ex) {
@@ -82,12 +87,13 @@ public class Datum implements Comparable<Datum>, Cloneable {
      * @param day
      */
     public Datum(int year, int month, int day) {
+        this();
         this.calendar.setLenient(false);
         this.calendar.set(year, month - 1, day);
         this.calendar.getTime(); //calculate
     }
-    
-    public static Datum from(java.util.Date date){
+
+    public static Datum from(java.util.Date date) {
         return new Datum(date.getTime());
     }
 
@@ -118,6 +124,12 @@ public class Datum implements Comparable<Datum>, Cloneable {
     @Override
     public int compareTo(Datum o) {
         //return calendar.compareTo(o.calendar);
+        if(o instanceof Einde){
+            return -1;
+        }
+        if (o instanceof Begin){
+            return 1;
+        }
         return COMP_BY_DAY.compare(this, o);
     }
 
@@ -131,31 +143,114 @@ public class Datum implements Comparable<Datum>, Cloneable {
         n.calendar.add(MONTH, 1);
         return n;
     }
-    
-    public static Comparator<Datum> COMP_BY_DAY = new Comparator<Datum>() {
+
+    public static Comparator<Datum> COMP_BY_DAY = new DatumComp() {
+
+        @Override
+        public int compareDatums(Datum o1, Datum o2) {
+            int cmp = Integer.compare(o1.jaar(), o2.jaar());
+            if (cmp == 0) {
+                cmp = Integer.compare(o1.maand(), o2.maand());
+                if (cmp == 0) {
+                    cmp = Integer.compare(o1.dag(), o2.dag());
+                }
+            }
+            return cmp;
+        }
+    };
+
+    int jaar() {
+        return calendar.get(YEAR);
+    }
+
+    int maand() {
+        return calendar.get(MONTH) + 1;
+    }
+
+    int dag() {
+        return calendar.get(DAY_OF_MONTH);
+    }
+
+    public boolean isIn(IntervalDatums periode) {
+        int a = compareTo(periode.getBegin());
+        int b = compareTo(periode.getEind());
+        return a >= 0 && b <= 0;
+    }
+
+    private static abstract class SpecialDatum extends Datum {
+
+        public SpecialDatum() {
+            super(null);
+        }
+        
+        @Override
+        public String toString(){
+            return getClass().getSimpleName();
+        }
+
+        @Override
+        int jaar() {
+            throw new UnsupportedClassVersionError();
+        }
+
+        @Override
+        int maand() {
+            throw new UnsupportedClassVersionError();
+        }
+
+        @Override
+        int dag() {
+            throw new UnsupportedClassVersionError();
+        }
+    }
+
+    static private class Einde extends SpecialDatum {
+
+        public Einde() {
+        }
+
+        @Override
+        public int compareTo(Datum o) {
+            return 1;//this is always larger
+        }
+    }
+
+    private static class Begin extends SpecialDatum {
+
+        public Begin() {
+        }
+
+        @Override
+        public int compareTo(Datum o) {
+            return -1;
+        }
+    }
+
+    public static abstract class DatumComp implements Comparator<Datum> {
 
         @Override
         public int compare(Datum o1, Datum o2) {
-            int cmp = Integer.compare(o1.jaar(), o2.jaar());
-        if(cmp == 0){
-            cmp = Integer.compare(o1.maand(), o2.maand());
-            if(cmp == 0){
-                cmp = Integer.compare(o1.dag(), o2.dag());
-            }
+            return compareDatums(o1, o2);
+            /*if (!(o1 instanceof SpecialDatum)
+                    && !(o2 instanceof SpecialDatum)) {
+                
+            } else {
+                return o2.compareTo(o1);
+            }*/
         }
-        return cmp;
+
+        protected abstract int compareDatums(Datum o1, Datum o2);
+    }
+
+    private static class Nu extends Datum {
+
+        public Nu() {
+            super();
         }
-    };
-    
-    int jaar(){
-        return calendar.get(YEAR);
-    }
-    
-    int maand(){
-        return calendar.get(MONTH) + 1;
-    }
-    
-    int dag(){
-        return calendar.get(DAY_OF_MONTH);
+
+        @Override
+        public String toString() {
+            return getClass().getName();
+        }
     }
 }
