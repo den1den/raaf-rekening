@@ -114,7 +114,7 @@ public class RaafRekening extends LeenRekening implements HasContant {
         }
         String message = aan.getNaam() + " krijgt geld terug";
         Event e = newE(aan, referentie, message);
-
+        doBetaaldUit(aan, bedrag, e);
     }
 
     protected void doBetaaldUit(LeenRekening r, int bedrag, Event e) {

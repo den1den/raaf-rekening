@@ -14,7 +14,7 @@ import data.Persoon;
 import data.memory.Memory;
 import file.manager.DataManager;
 import file.manager.FormatFactory;
-import geld.Policy;
+import geld.policy.Policy;
 import geld.RaafRekening;
 import java.awt.Toolkit;
 import java.io.File;

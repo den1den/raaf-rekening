@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package geld;
+package geld.policy;
 
 import data.Afschrift;
 import data.BewoonPeriode;
@@ -15,6 +15,11 @@ import data.Winkel;
 import data.memory.Memory;
 import data.types.HasBedrag;
 import data.types.HasDate;
+import geld.LeenRekening;
+import geld.RaafRekening;
+import geld.Referentie;
+import geld.ReferentieMultiple;
+import geld.Rekening;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -143,6 +148,8 @@ public class Policy {
             Set<Bonnetje> bonnetjes,
             RaafRekening rekening) {
         for (Bonnetje bonnetje : bonnetjes) {
+            throw new UnsupportedOperationException("Gebeuren meedere dingen hiero?");
+            rekening.besteed(rekening, version, bonnetje);
             rekening.betaaldDoor(bonnetje.getPersoon(), bonnetje.getBedrag(), bonnetje);
         }
     }

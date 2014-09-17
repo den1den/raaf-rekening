@@ -12,7 +12,7 @@ import java.util.List;
  *
  * @author Dennis
  */
-class ReferentieMultiple implements Referentie {
+public class ReferentieMultiple implements Referentie {
 
     public ReferentieMultiple(List<Referentie> refs) {
     }
