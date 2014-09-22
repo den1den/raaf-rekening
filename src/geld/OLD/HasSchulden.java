@@ -4,23 +4,23 @@
  * and open the template in the editor.
  */
 
-package geld;
+package geld.OLD;
 
 import geld.rekeningen.Event;
 import data.types.HasNaam;
+import geld.Referentie;
 import java.util.List;
 
 /**
  *
  * @author Dennis
  */
-public interface HasSchulden extends HasNaam{
+public interface HasSchulden{
     //SumMap getKrijgtNogVan();
     
     int getKrijgtNogVan(HasSchulden iemand);
     int getKrijgtNogVan();
 
-    @Override
     public String getNaam();
 
     void moetBetalenAan(LeenRekening lr, int bedrag, Referentie r);

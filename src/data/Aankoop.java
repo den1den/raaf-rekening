@@ -12,12 +12,9 @@ import data.types.HasNaam;
  *
  * @author Dennis
  */
-public class Aankoop implements HasNaam{
+public class Aankoop extends HasNaam{
 
-    String naam;
-
-    @Override
-    public String getNaam() {
-        return naam;
+    public Aankoop(String naam) {
+        super(naam);
     }
 }

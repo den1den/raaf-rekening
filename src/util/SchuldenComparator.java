@@ -5,7 +5,7 @@
  */
 package util;
 
-import geld.HasSchulden;
+import geld.OLD.HasSchulden;
 import java.util.Comparator;
 
 /**

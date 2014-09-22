@@ -232,49 +232,22 @@ public class Policy {
                      //hoeft niet dubbel
                      return;*/
                 } else if (candidates.isEmpty()) {
-                    //geen bonnetje gevonden, gaan er wel vanuit dat het vooor de raaf was...
-                    
-                    rekening.gekocht(w)
-                    
-                    refs = new ArrayList<>(1);
-                    Logger.getLogger(Policy.class.getName()).log(Level.INFO, "Je moet het bonnetje zoeken van {0}", afschrift);
 
+                    //geen bonnetje gevonden, gaan er wel vanuit dat het vooor de raaf was...
                     Winkel w = memory.winkels.getMede(afschrift.getMededeling());
                     if (w == null) {
                         w = new Winkel(afschrift.getMededeling());
                         memory.winkels.putMede(w, afschrift.getMededeling());
                     }
 
-                    r = w;
+                    rekening.besteedDirect(w, bedrag, referentie);
+
+                    Logger.getLogger(Policy.class.getName()).log(Level.INFO, "Je moet het bonnetje zoeken van {0}", afschrift);
+                    return;
                 } else { // > 1
-                    refs = new ArrayList<>(candidates.size() + 1);
 
-                    Bonnetje bon = candidates.get(0);
-                    Winkel soiso = bon.getWinkel();
-                    for (int i = 1; i < candidates.size(); i++) {
-                        bon = candidates.get(i);
-                        Winkel w = bon.getWinkel();
-                        if (w != soiso) {
-                            //ambigious
-                            throw new UnsupportedOperationException("Wat is de tegenrekeninghouder? Undertermind?");
-                            //rhi = null;
-                            //refs.add(afschrift);
-                            //verrekMetRekening.add(true, rhi, bedrag, new ReferentieMultiple(refs));
-
-                        }
-                    }
-                    r = soiso;
                 }
-                if (refs.size() > 0) {
-                    refs.add(afschrift);
-                    referentie = new ReferentieMultiple(refs);
-                } else {
-                    referentie = afschrift;
-                }
-                rekening.besteedVia(rekening, r, bedrag, referentie);
-                rekening.besteed(r, bedrag, referentie);
-
-                return;
+                throw new UnsupportedOperationException("Kan nog niets met meerde bonnetje sop dezelfde dag");
             case "OV":
                 if (!afschrift.getMutatieSoort().equals("Overschrijving")) {
                     throw new Error("Overschrijving verwacht ipv: " + afschrift.getMutatieSoort());
@@ -284,7 +257,7 @@ public class Policy {
                     if (isMededelingRaRe(afschrift)) {
                         //zeker
                         Persoon p = memory.personen.findRek(afschrift);
-                        rekening.krijgtAfbetaling(p, bedrag, referentie);
+                        rekening.krijgtTerug(p, bedrag, referentie);
                         //throw new UnsupportedOperationException("Gebeuren twee dingen tegelijk, moet in Raafrekenng complexe functies maken en in history zetter per handeling, zie Word");
                         //ResultPrintStream.lijstje(p, rekening);
                         return;
@@ -293,12 +266,12 @@ public class Policy {
                         Persoon p = memory.personen.getRek(afschrift.getVanRekening());
                         if (p != null) {
                             //persoon heeft iets erop geboekt, dus igg toevoegen aan rekening
-                            rekening.krijgtAfbetaling(p, bedrag, referentie);
+                            rekening.krijgtTerug(p, bedrag, referentie);
                         } else {
                             //kan nieuw persoon zijn maar wel rare start dan...
                             p = memory.personen.findRek(afschrift);
                             System.err.println("Niet zeker afschrift van " + p + ": " + afschrift);
-                            rekening.krijgtAfbetaling(p, bedrag, referentie);
+                            rekening.krijgtTerug(p, bedrag, referentie);
                         }
                         return;
                     }
@@ -315,7 +288,7 @@ public class Policy {
                     Incasso incasso = memory.incassos.getRek(afschrift.getVanRekening());
                     if (incasso != null) {
                         //incasso detected
-                        rekening.besteed(incasso, bedrag, referentie);
+                        rekening.besteedDirect(incasso, bedrag, referentie);
                         return;
                     }
                     Persoon p = memory.personen.findRek(afschrift);

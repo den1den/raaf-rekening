@@ -51,13 +51,12 @@ public class RekeningVLComplete extends RekeningVLeen implements realMoney {
      */
     public void besteedVia(Bonnetje b) {
         besteedVia(b.getPersoon(), b.getWinkel(), b.getBedrag(), b);
-        throw new UnknownError("Moet nog ff chekcen");
+        
     }
 
     protected void doBesteedVia(RekeningVLeen via, Rekening bij, int bedrag, Event e) {
-        doVerreken(-bedrag, e); // <--
+        via.doBesteedDirect(bij, bedrag, e);
         doMoetKrijgenVan(via, -bedrag, e);
-        bij.doVerreken(-bedrag, e);
     }
 
     

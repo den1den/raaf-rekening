@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package geld;
+package geld.OLD;
 
+import geld.OLD.HasSchulden;
 import geld.rekeningen.Event;
 import data.types.HasNaam;
 import java.util.ArrayList;

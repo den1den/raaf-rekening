@@ -8,7 +8,7 @@ package util.diplay;
 import data.Afschrift;
 import data.memory.Memory;
 import geld.rekeningen.Event;
-import geld.HasSchulden;
+import geld.OLD.HasSchulden;
 import geld.Referentie;
 import java.io.File;
 import java.io.FileNotFoundException;

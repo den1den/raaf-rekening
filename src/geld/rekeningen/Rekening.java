@@ -5,6 +5,7 @@
  */
 package geld.rekeningen;
 
+import data.Bonnetje;
 import data.types.HasNaam;
 import geld.Referentie;
 import java.util.LinkedList;
@@ -39,10 +40,19 @@ public class Rekening extends HasNaam {
         this.bankRekening.bij(bedrag, e);
     }
     
-    public void Gekocht(Rekening bij, int bedrag, Referentie referentie){
+    public void besteedDirect(Bonnetje bonnetje){
+        besteedDirect(bonnetje.getWinkel(), bonnetje.getBedrag(), bonnetje);
+    }
+    
+    public void besteedDirect(Rekening bij, int bedrag, Referentie referentie){
         String message = "{0} heeft iets gekocht bij {1}";
         Event e = newE(bij, referentie, message);
-        doVerreken(bij, -bedrag, e);
+        doBesteedDirect(bij, bedrag, e);
+    }
+    
+    protected void doBesteedDirect(Rekening bij, int bedrag, Event e){
+        doVerreken(bedrag, e);
+        bij.doVerreken(-bedrag, e);
     }
     
     protected void doVerreken(Rekening bij, int bedrag, Event e) {
