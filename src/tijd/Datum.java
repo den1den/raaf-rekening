@@ -5,7 +5,7 @@
  */
 package tijd;
 
-import data.types.HasDate;
+import data.types.HasDatum;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

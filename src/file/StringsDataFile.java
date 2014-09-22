@@ -81,7 +81,9 @@ abstract class StringsDataFile extends StringsData {
         
         if(hasHeader()){
             line = reader.readLine();
-            checkHeader(stringsFilter.read(line));
+            if(line == null || !checkHeader(stringsFilter.read(line))){
+                new IOException("Header mismatch").printStackTrace();
+            }
         }
 
         while ((line = reader.readLine()) != null) {
@@ -110,11 +112,20 @@ abstract class StringsDataFile extends StringsData {
 
     @Override
     public String[] readFirstStrings() throws IOException {
-        return stringsFilter.read(readFirstString());
+        String firstLine = readFirstString();
+        if(firstLine == null){
+            return null;
+        }
+        return stringsFilter.read(firstLine);
     }
     
     public String readFirstString() throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
         return reader.readLine();
+    }
+
+    @Override
+    public String toString() {
+        return file.getAbsolutePath();
     }
 }

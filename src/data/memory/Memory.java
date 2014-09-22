@@ -10,7 +10,7 @@ import data.Incasso;
 import data.Persoon;
 import data.Winkel;
 import file.manager.PathEntry;
-import geld.Rekening;
+import geld.rekeningen.Rekening;
 
 /**
  *

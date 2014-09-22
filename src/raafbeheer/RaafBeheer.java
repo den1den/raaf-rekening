@@ -15,7 +15,9 @@ import data.memory.Memory;
 import file.manager.DataManager;
 import file.manager.FormatFactory;
 import geld.policy.Policy;
-import geld.RaafRekening;
+import geld.rekeningen.RekeningComplete;
+import geld.rekeningen.RekeningVLComplete;
+import geld.rekeningen.hasBudget;
 import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
@@ -37,9 +39,7 @@ public class RaafBeheer {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) throws IOException {
-        File f = new File("ERROR");
-        f.createNewFile();
+    public static void main(String[] args) {
         
         int version = 4;
         RaafBeheer raafBeheer;
@@ -67,7 +67,6 @@ public class RaafBeheer {
         }
         
         Toolkit.getDefaultToolkit().beep();
-        f.delete();
     }
 
     private final int version;
@@ -119,7 +118,7 @@ public class RaafBeheer {
 
          policy.verwerkAfschriften(afschriften, bonnetjes, raafRekening);
          
-         result.listEnkel(raafRekening);
+         result.listAsSpreadsheetToFile(raafRekening);
         //result.showFactuurs(fs);
         //result.showDetailledTov(memory.personen.get("Dennis"), perR, bonR, afR);
     }
@@ -155,4 +154,11 @@ public class RaafBeheer {
         //collector.run();
     }
 
+    private static class RaafRekening extends RekeningComplete{
+
+        public RaafRekening(String naam) {
+            super(naam);
+        }
+        
+    }
 }

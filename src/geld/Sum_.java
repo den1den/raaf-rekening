@@ -5,6 +5,8 @@
  */
 package geld;
 
+import geld.rekeningen.Event;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,37 +16,29 @@ import java.util.NoSuchElementException;
  *
  * @author Dennis
  */
-public abstract class Sum implements Iterable<Integer>{
+ abstract class Sum_ implements Iterable<Integer>, HasHistory{
 
-    private int total;
+    protected int total;
     private final int startBedrag;
-    private final List<Integer> diffs = new LinkedList<>();
-    private final List<Event> history = new LinkedList<>();
+    protected final List<Integer> diffs = new LinkedList<>();
+    protected final List<Event> history = new LinkedList<>();
 
-    public Sum() {
+    public Sum_() {
         this.total = 0;
         this.startBedrag = 0;
     }
 
-    public Sum(int startBedrag) {
+    public Sum_(int startBedrag) {
         this.total = startBedrag;
         this.startBedrag = startBedrag;
     }
 
+    @Override
+    public List<Event> getHistory(){
+        return new ArrayList<>(history);
+    }
     
-    void af(int bedrag, Event e) {
-        if(bedrag < 0){
-            throw new IllegalArgumentException();
-        }
-        verreken(-bedrag, e);
-    }
-
-    void bij(int bedrag, Event e) {
-        if(bedrag < 0){
-            throw new IllegalArgumentException();
-        }
-        verreken(bedrag, e);
-    }
+    
     
     /**
      * add and record the change.
@@ -71,6 +65,10 @@ public abstract class Sum implements Iterable<Integer>{
 
     @Override
     public String toString() {
+        return naam();
+    }
+    
+    public String euros() {
         double centen = this.total;
         return "€"+centen/100;
     }

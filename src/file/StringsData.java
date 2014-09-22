@@ -120,15 +120,16 @@ public abstract class StringsData implements Source, Iterable<String[]> {
     }
 
     public boolean checkHeader(String[] against) {
-        String[] header = getHeader();
-        if (header == null) {
-            return against == null;
+        String[] thisHeader = getHeader();
+        
+        if(against == null){
+            return thisHeader == null;
         }
-        if (header.length != against.length) {
+        if (thisHeader.length != against.length) {
             return false;
         }
-        for (int i = 0; i < header.length; i++) {
-            if (!header[i].equals(against[i])) {
+        for (int i = 0; i < thisHeader.length; i++) {
+            if (!thisHeader[i].equals(against[i])) {
                 return false;
             }
         }
@@ -147,4 +148,7 @@ public abstract class StringsData implements Source, Iterable<String[]> {
     public Iterator<String[]> iterator() {
         return content.iterator();
     }
+
+    @Override
+    abstract public String toString();
 }

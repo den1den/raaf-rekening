@@ -25,4 +25,14 @@ public class AankoopCat {
     public String toString() {
         return naam;
     }
+    
+    public static final AankoopCat ONBEKEND = new Onbekend();
+
+    private static final class Onbekend extends AankoopCat {
+
+        public Onbekend() {
+            super("Onbekend");
+        }
+
+    }
 }

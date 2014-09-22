@@ -7,6 +7,7 @@
 package geld;
 
 import java.util.List;
+import tijd.Datum;
 
 /**
  *
@@ -14,7 +15,18 @@ import java.util.List;
  */
 public class ReferentieMultiple implements Referentie {
 
+    List<Referentie> refs;
+
     public ReferentieMultiple(List<Referentie> refs) {
+        if(refs.size() <= 1){
+            throw new IllegalArgumentException();
+        }
+        this.refs = refs;
+    }
+
+    @Override
+    public Datum getDatum() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }

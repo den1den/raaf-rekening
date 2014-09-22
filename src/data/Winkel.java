@@ -5,34 +5,33 @@
  */
 package data;
 
-import data.types.HasNaam;
-import geld.Rekening;
+import geld.rekeningen.Rekening;
 
 /**
  *
  * @author Dennis
  */
-public class Winkel extends Rekening implements HasNaam{
+public class Winkel extends Rekening {
 
-    final String naam;
     AankoopCat defaultAankoopCat;
 
+    public Winkel(String naam) {
+        this(naam, AankoopCat.ONBEKEND);
+    }
+
     public Winkel(String naam, AankoopCat defaultAankoopCat) {
-        this.naam = naam;
+        super(naam);
+        if (defaultAankoopCat == null) {
+            throw new IllegalArgumentException();
+        }
         this.defaultAankoopCat = defaultAankoopCat;
     }
 
-
     public void foundDefaultCat(AankoopCat defaultCat) {
-        if (defaultAankoopCat == null) {
+        if (defaultAankoopCat == AankoopCat.ONBEKEND) {
             defaultAankoopCat = defaultCat;
         } else {
             new Error("ehh? eerst: " + defaultAankoopCat + " en nu dit: " + defaultCat + " (Nothing done)").printStackTrace();
         }
-    }
-
-    @Override
-    public String getNaam() {
-        return naam;
     }
 }

@@ -24,7 +24,7 @@ public class MyFormat {
         return "€" + formatL.format(euro);
     }
     
-    public String toMoney(int cents){
+    public String formatMoney(int cents){
         if(cents < 0){
             return "-"+toAbsMoney(cents);
         }

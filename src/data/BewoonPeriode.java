@@ -86,5 +86,10 @@ public class BewoonPeriode implements Iterable<BewoonPeriode.SubPeriode> {
             return subInterval.toString();
         }
 
+        @Override
+        public Datum getDatum() {
+            return subInterval.getBegin();
+        }
+
     }
 }

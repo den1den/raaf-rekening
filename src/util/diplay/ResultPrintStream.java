@@ -7,11 +7,9 @@ package util.diplay;
 
 import data.Afschrift;
 import data.memory.Memory;
-import geld.Event;
+import geld.rekeningen.Event;
 import geld.HasSchulden;
-import geld.LeenRekening;
 import geld.Referentie;
-import geld.Sum;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -24,10 +22,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import tijd.Datum;
 import util.MyTxtTable.MyTxtTableHeader;
 import util.SchuldenComparator;
 
@@ -55,53 +55,53 @@ public class ResultPrintStream {
     static String[][] listTransacties(List<Object> transacties, AtomicInteger saldo) {
         throw new UnsupportedOperationException();
         /*
-        String[][] rows;
-        if (transacties.isEmpty()) {
-            rows = new String[][]{new String[]{"Geen transactie gevonden..."}};
-        } else {
-            rows = new String[transacties.size() + 1][];
-            int i = 0;
+         String[][] rows;
+         if (transacties.isEmpty()) {
+         rows = new String[][]{new String[]{"Geen transactie gevonden..."}};
+         } else {
+         rows = new String[transacties.size() + 1][];
+         int i = 0;
 
-            rows[i] = new String[]{"verschil", "datum", "referentie", "Code", "saldo"};
+         rows[i] = new String[]{"verschil", "datum", "referentie", "Code", "saldo"};
 
-            for (TransactiesRecord tR : transacties) {
-                i++;
+         for (TransactiesRecord tR : transacties) {
+         i++;
 
-                Transactie t = tR.getTransactie();
-                String[] row;
-                int index = 0;
-                row = new String[5];
+         Transactie t = tR.getTransactie();
+         String[] row;
+         int index = 0;
+         row = new String[5];
 
-                if (t.isAf()) {
-                    row[index] = "-";
-                    saldo.addAndGet(-t.getBedrag());
-                } else {
-                    row[index] = "+";
-                    saldo.addAndGet(+t.getBedrag());
-                }
-                row[index] += t.getBedrag();
+         if (t.isAf()) {
+         row[index] = "-";
+         saldo.addAndGet(-t.getBedrag());
+         } else {
+         row[index] = "+";
+         saldo.addAndGet(+t.getBedrag());
+         }
+         row[index] += t.getBedrag();
 
-                Referentie referentie = t.getReferentie();
-                if (referentie instanceof ReferentieMultiple) {
-                    row[++index] = ">1";
-                } else {
-                    row[++index] = String.valueOf(referentie.getTime());
-                }
+         Referentie referentie = t.getReferentie();
+         if (referentie instanceof ReferentieMultiple) {
+         row[++index] = ">1";
+         } else {
+         row[++index] = String.valueOf(referentie.getTime());
+         }
 
-                row[++index] = String.valueOf(referentie);
+         row[++index] = String.valueOf(referentie);
 
-                if (t.getReferentie() instanceof Afschrift) {
-                    row[++index] = ((Afschrift) t.getReferentie()).getCode();
-                } else {
-                    row[++index] = "";
-                }
+         if (t.getReferentie() instanceof Afschrift) {
+         row[++index] = ((Afschrift) t.getReferentie()).getCode();
+         } else {
+         row[++index] = "";
+         }
 
-                row[++index] = String.valueOf(saldo);
+         row[++index] = String.valueOf(saldo);
 
-                rows[i] = row;
-            }
-        }
-        return rows;*/
+         rows[i] = row;
+         }
+         }
+         return rows;*/
     }
 
     static String[][] lastTransacties(List<Object> trs, Integer saldo, int lines) {
@@ -124,7 +124,7 @@ public class ResultPrintStream {
 
     public static List<String[]> getTOV_allRecords(Collection<? extends HasSchulden> onderwerps, HasSchulden... tovs) {
         List<String[]> list = new LinkedList<>();
-        
+
         List<String> header = new LinkedList<>();
         header.add("Naam");
         header.add("krijgt");
@@ -132,9 +132,9 @@ public class ResultPrintStream {
             header.add("kr van: " + tov.getNaam());
         }
         header.add("Event");
-        
+
         List<Sum> tracking = new ArrayList<>(3);
-        
+
         for (HasSchulden onderwerp : onderwerps) {
             boolean head = true;
             for (Event e : onderwerp.getHistory()) {
@@ -151,32 +151,32 @@ public class ResultPrintStream {
                         row.add("");
                     }
                 }
-                
+
                 row.add(e.toString());
-                
+
                 int firstI = row.size();
                 for (int i = 0; i < tracking.size(); i++) {
                     row.add("");
                 }
-                
+
                 for (Map.Entry<Sum, Integer> entry : e.entrySet()) {
                     Sum sum = entry.getKey();
                     String val = String.valueOf(entry.getValue());
-                    
+
                     int index = tracking.indexOf(sum);
-                    if(index < 0){
+                    if (index < 0) {
                         index = tracking.size();
                         tracking.add(sum);
                         row.add(val);
-                    }else{
+                    } else {
                         row.set(firstI + index, val);
                     }
                 }
                 list.add(row.toArray(new String[row.size()]));
             }
-            
+
         }
-        
+
         for (Sum s : tracking) {
             header.add(s.naam());
         }
@@ -210,7 +210,7 @@ public class ResultPrintStream {
         for (HasSchulden tov : tovs) {
             row.clear();
             row.add(tov.getNaam());
-            row.add(mf.toMoney(tov.getKrijgtNogVan()));
+            row.add(mf.formatMoney(tov.getKrijgtNogVan()));
             row.add(" ");
             for (HasSchulden hs : tovs) {
                 row.add(" - ");
@@ -221,11 +221,11 @@ public class ResultPrintStream {
         for (HasSchulden onderwerp : onderwerps) {
             row.clear();
             row.add(onderwerp.getNaam());
-            row.add(mf.toMoney(onderwerp.getKrijgtNogVan()));
+            row.add(mf.formatMoney(onderwerp.getKrijgtNogVan()));
             row.add(" ");
             for (int i = 0; i < tovs.length; i++) {
                 HasSchulden tov = tovs[i];
-                row.add(mf.toMoney(onderwerp.getKrijgtNogVan(tov)));
+                row.add(mf.formatMoney(onderwerp.getKrijgtNogVan(tov)));
             }
             r.add(row.toArray(new String[row.size()]));
         }
@@ -296,7 +296,7 @@ public class ResultPrintStream {
     }
 
     public void listResultaat(Collection<? extends HasSchulden> rhs, HasSchulden tov) {
-        this.stream.println(rhs.size() + " rekeningen tegen " + tov + " (" + mf.toMoney(tov.getKrijgtNogVan()) + ")");
+        this.stream.println(rhs.size() + " rekeningen tegen " + tov + " (" + mf.formatMoney(tov.getKrijgtNogVan()) + ")");
         this.stream.println(new MyTxtTableHeader(ResultPrintStream.getTOV_ordered(rhs, tov)));
     }
 
@@ -311,7 +311,7 @@ public class ResultPrintStream {
     }
 
     public void listResultaat(Collection<? extends Object> rhs, Object tov, boolean dummy) {
-        this.stream.println("List: " + rhs.size() + " rekeningen tegen " + tov + " (€" + mf.toMoney(tov.hashCode()) + ")");
+        this.stream.println("List: " + rhs.size() + " rekeningen tegen " + tov + " (€" + mf.formatMoney(tov.hashCode()) + ")");
 
     }
 
@@ -323,18 +323,69 @@ public class ResultPrintStream {
         toOut();
     }
 
+    public void listAsSpreadsheetToFile(RaafRekening r) {
+        toFile();
+        stream.println("Te besteden: " + mf.formatMoney(r.getTeBesteden()) + " Op Rekening: " + mf.formatMoney(r.getOpRekeningI()));
+        stream.println();
+        stream.print(new MyTxtTableHeader(getSpreadSheet(r)));
+        toOut();
+    }
+
+    static List<String[]> getSpreadSheet(RaafRekening r) {
+        ArrayList<String[]> result = new ArrayList<>(r.getHistory().size() + 1);
+        result.add(new String[]{
+            "Datum",
+            "Class",
+            "Wie",
+            "te Besteden",
+            "op Rekening",
+            "Wat"
+        });
+
+        List<Event> history = r.getSortedHistory();
+        ListIterator<Event> it = history.listIterator();
+
+        while (it.hasNext()) {
+            Event e = it.next();
+
+            List<Integer> changes = e.getChanges(Arrays.asList(
+                    r.getKrijgtNogVanSum(),
+                    r.getOpRekening()));
+            int diffKrijgtNog = changes.get(0);
+            int diffOpRekenen = changes.get(1);
+            
+            String datum = e.getDatum().toString();
+            String cLass = e.getReferentie().getClass().getSimpleName();
+            String wieSt = Arrays.deepToString(e.showBetrokkenSmall());
+            String teBes = Integer.toString(-1 * changes.get(0));
+            String opRek = changes.get(1).toString();
+            String watSt = e.getReferentie().getRefString();
+
+            result.add(new String[]{
+                datum,
+                cLass,
+                wieSt,
+                teBes,
+                opRek,
+                watSt
+            });
+        }
+
+        return result;
+    }
+
     int fileC = 0;
-    
+
     public void toFile() {
-        File output = new File("output "+System.currentTimeMillis()+" "+hashCode()+ " " + (fileC++) + ".txt");
+        File output = new File("output " + System.currentTimeMillis() + " " + hashCode() + " " + (fileC++) + ".txt");
         try {
             stream = new PrintStream(output);
         } catch (FileNotFoundException ex) {
             Logger.getLogger(ResultPrintStream.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
-    public void toOut(){
+
+    public void toOut() {
         stream = System.out;
     }
 

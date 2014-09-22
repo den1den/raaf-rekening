@@ -50,4 +50,9 @@ public class ItMap<K> {
     public Set<Map.Entry<K, Integer>> entrySet(){
         return map.entrySet();
     }
+
+    @Override
+    public String toString() {
+        return map.toString();
+    }
 }

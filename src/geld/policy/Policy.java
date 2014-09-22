@@ -5,6 +5,7 @@
  */
 package geld.policy;
 
+import data.AankoopCat;
 import data.Afschrift;
 import data.BewoonPeriode;
 import data.Bonnetje;
@@ -14,12 +15,12 @@ import data.Persoon;
 import data.Winkel;
 import data.memory.Memory;
 import data.types.HasBedrag;
-import data.types.HasDate;
-import geld.LeenRekening;
-import geld.RaafRekening;
+import data.types.HasDatum;
 import geld.Referentie;
 import geld.ReferentieMultiple;
-import geld.Rekening;
+import geld.rekeningen.Rekening;
+import geld.rekeningen.RekeningVLComplete;
+import geld.rekeningen.RekeningVerschuld;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -58,11 +59,12 @@ public class Policy {
 
     final private String ING_INCASSO_NAAM = "ING";
     final private String UPC_INCASSO_NAAM = "UPC";
+    final private String MARKTPLAATS = "Marktplaats";
     final private String WINKEL_UNKNOWN_NAAM = "Niet bekend";
 
     public void verrekenKookdagen(List<Kookdag> allDagen,
             Map<Persoon, Persoon> kookSchuldDelers,
-            LeenRekening r) {
+            RekeningVerschuld r) {
         if (periode != IntervalDatums.TOT_NU) {
             Logger.getLogger(Policy.class.getName())
                     .log(Level.INFO, "Kookdagen aan het verekenen terwijl er een restricitie is van tot: {0}", periode);
@@ -74,7 +76,7 @@ public class Policy {
 
     private void verrekenKookdag(Kookdag kookdag,
             Map<Persoon, Persoon> kookSchuldDelers,
-            LeenRekening r) {
+            RekeningVerschuld r) {
         Persoon kok = kookdag.getKok();
         Map<Persoon, Integer> meeters = kookdag.getMeeters();
 
@@ -129,7 +131,7 @@ public class Policy {
 
     public void verrekenBewoonPeriodes(
             Collection<BewoonPeriode> bewoonPeriodes,
-            RaafRekening rekening) {
+            RekeningVerschuld rekening) {
         for (BewoonPeriode bewoonPeriode : bewoonPeriodes) {
             Persoon persoon = bewoonPeriode.getPersoon();
             for (BewoonPeriode.SubPeriode subPeriode : bewoonPeriode) {
@@ -146,30 +148,30 @@ public class Policy {
 
     public void verrekenBonnetjes(
             Set<Bonnetje> bonnetjes,
-            RaafRekening rekening) {
+            RekeningVLComplete rekening) {
         for (Bonnetje bonnetje : bonnetjes) {
-            throw new UnsupportedOperationException("Gebeuren meedere dingen hiero?");
-            rekening.besteed(rekening, version, bonnetje);
-            rekening.betaaldDoor(bonnetje.getPersoon(), bonnetje.getBedrag(), bonnetje);
+            if (bonnetje.getDatum().isIn(periode)) {
+                rekening.besteedVia(bonnetje);
+            }
         }
     }
 
-    public void verwerkAfschriften(Set<Afschrift> afschriftenSet, Set<Bonnetje> bonnetjes, RaafRekening rekening) {
+    public void verwerkAfschriften(Set<Afschrift> afschriftenSet, Set<Bonnetje> bonnetjes, RekeningVLComplete rekening) {
         ArrayList<Bonnetje> bonnetjes1 = new ArrayList<>(bonnetjes);
         Collections.sort(bonnetjes1, Bonnetje.getByDate());
-        
+
         ArrayList<Afschrift> afschriften = new ArrayList<>(afschriftenSet);
         Collections.sort(afschriften, new Afschrift.CompByDate());
-        
+
         for (Afschrift afschrift : afschriften) {
-            if (afschrift.getDate().isIn(periode)) {
+            if (afschrift.getDatum().isIn(periode)) {
                 try {
                     verwerkAfschrift(afschrift, bonnetjes1, rekening);
                 } catch (Error e) {
                     throw new Error("At afschrift: " + afschrift, e);
                 }
-            }else{
-                System.out.println("discarding afs: " + afschrift.getDate());
+            } else {
+                System.out.println("discarding afs: " + afschrift.getDatum());
             }
         }
     }
@@ -177,12 +179,12 @@ public class Policy {
     private <RL extends List<Bonnetje> & RandomAccess> void verwerkAfschrift(
             Afschrift afschrift,
             RL bonnetjes,
-            RaafRekening rekening) {
+            RekeningVLComplete rekening) {
         int bedrag = afschrift.getBedrag();
         Referentie referentie = afschrift;
 
         switch (afschrift.getCode()) {
-            case "BA": //betaalautomaat
+            case "BA": //betaalautomaat, gepind
                 if (!afschrift.getMutatieSoort().equals("Betaalautomaat")) {
                     throw new Error("Betaalautomaat verwacht ipv: " + afschrift.getMutatieSoort());
                 }
@@ -196,13 +198,13 @@ public class Policy {
                     throw new Error();
                 }
 
-                Rekening r = null;
-                List<Referentie> refs;
                 List<Bonnetje> candidates = HasBedrag.searchOn(
-                        HasDate.searchOn(bonnetjes, afschrift.getDate(), Datum.COMP_BY_DAY),
+                        HasDatum.searchOn(bonnetjes,
+                                afschrift.getDatum(),
+                                Datum.COMP_BY_DAY),
                         afschrift.getBedrag());
 
-                if (candidates.size() == 1) {
+                if (candidates.size() == 1) { //1 bonnetje gevonden die dag
                     Bonnetje bon = candidates.get(0);
 
                     //bonnetje found, kan maar 1 keer gevonden worden
@@ -230,12 +232,16 @@ public class Policy {
                      //hoeft niet dubbel
                      return;*/
                 } else if (candidates.isEmpty()) {
+                    //geen bonnetje gevonden, gaan er wel vanuit dat het vooor de raaf was...
+                    
+                    rekening.gekocht(w)
+                    
                     refs = new ArrayList<>(1);
                     Logger.getLogger(Policy.class.getName()).log(Level.INFO, "Je moet het bonnetje zoeken van {0}", afschrift);
 
                     Winkel w = memory.winkels.getMede(afschrift.getMededeling());
                     if (w == null) {
-                        w = new Winkel(afschrift.getMededeling(), null);
+                        w = new Winkel(afschrift.getMededeling());
                         memory.winkels.putMede(w, afschrift.getMededeling());
                     }
 
@@ -259,8 +265,13 @@ public class Policy {
                     }
                     r = soiso;
                 }
-                refs.add(afschrift);
-                referentie = new ReferentieMultiple(refs);
+                if (refs.size() > 0) {
+                    refs.add(afschrift);
+                    referentie = new ReferentieMultiple(refs);
+                } else {
+                    referentie = afschrift;
+                }
+                rekening.besteedVia(rekening, r, bedrag, referentie);
                 rekening.besteed(r, bedrag, referentie);
 
                 return;
@@ -315,28 +326,36 @@ public class Policy {
                     if (afschrift.getMededeling().toLowerCase().contains("voorgeschoten")) {
 
                         //wasmachine voorgeschoten
-                        rekening.betaaldDoor(p, bedrag, afschrift);
+                        Winkel marktplaats = memory.winkels.get(MARKTPLAATS);
+                        if (marktplaats == null) {
+                            marktplaats = new Winkel(MARKTPLAATS);
+                        }
+                        rekening.besteedVia(p, marktplaats, bedrag, referentie);
 
                         //ResultPrintStream.lijst2(o, p, rekening);
                         return;
                     } else if (afschrift.getMededeling().contains(" Correctie Raafrekening")
                             && afschrift.getVan().contains("D.J. van den Brand")) {
                         Logger.getLogger(Policy.class.getName()).log(Level.INFO, "Eva contant gebeure1");
-                        rekening.betaaldDoor(p, bedrag, referentie);
+                        new UnsupportedOperationException().printStackTrace();
                         return;
                     } else if (afschrift.getMededeling().equals(" 20e te veel betaald voor de huis rekening")
                             && afschrift.getVan().equals("M.M.C. Tilburgs                 ")) {
-                        rekening.terrugGave(bedrag, p, referentie);
+                        rekening.betaaldUit(p, bedrag, referentie);
                         //ResultPrintStream.lijst2(o, p, rekening);
                         return;
                     } else if (afschrift.getMededeling().equals(" Ik had 27.17 eigen geld gestort  en heb al 20 gepind, dit is rest")) {
                         Logger.getLogger(Policy.class.getName()).log(Level.INFO, "Eva contant gebeure2 (niet verrekend)");
                         //teruggave zonder de kas, meer een écht lening dus?
-                        rekening.terrugGave(bedrag, p, referentie);
+                        rekening.betaaldUit(p, bedrag, referentie);
                         return;
                     } else if (afschrift.getMededeling().equals(" Toilet papier 11-9-12")) {
-                        rekening.betaaldDoor(p, bedrag, afschrift);
-                        //ResultPrintStream.lijst2(o, p, rekening);
+                        Winkel onbekendeWinkel = memory.winkels.get(WINKEL_UNKNOWN_NAAM);
+                        if (onbekendeWinkel == null) {
+                            onbekendeWinkel = new Winkel(WINKEL_UNKNOWN_NAAM);
+                        }
+                        rekening.besteedVia(p, onbekendeWinkel, bedrag, referentie);
+                        ResultPrintStream.lijst2(o, p, rekening);
                         return;
                     }
 
@@ -378,9 +397,12 @@ public class Policy {
                     throw new Error("Incasso verwacht ipv: " + afschrift.getMutatieSoort());
                 }
                 //incasso van UPC ofzo
-                if (afschrift.getMededeling().trim().substring(0, 3).equalsIgnoreCase("upc")
-                        || afschrift.getMededeling().contains("UPC Nederland B.V.")) {
-                    Incasso incasso = memory.incassos.findRek(UPC_INCASSO_NAAM, afschrift.getVanRekening());
+                if (afschrift.getMededeling().trim().substring(0, 3)
+                        .equalsIgnoreCase("upc")
+                        || afschrift.getMededeling()
+                        .contains("UPC Nederland B.V.")) {
+                    Incasso incasso = memory.incassos.
+                            findRek(UPC_INCASSO_NAAM, afschrift.getVanRekening());
                     rekening.besteed(incasso, bedrag, referentie);
                     return;
                 } else {

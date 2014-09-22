@@ -8,12 +8,13 @@ package data;
 
 import data.types.HasNaam;
 import geld.Rekening;
+import geld.rekeningen.RekeningVerschuld;
 
 /**
  *
  * @author Dennis
  */
-public class Incasso extends Rekening.Virtueel implements HasNaam{
+public class Incasso extends RekeningVerschuld{
     
     private final String rekeningNummer;
 

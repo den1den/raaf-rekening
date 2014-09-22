@@ -129,8 +129,9 @@ public class FormatFactory {
                     } else if (p.kwijtschelden() != kwijtschelden) {
                         throw new MyParseException(0);
                     }
-                    if(betaald > 0)
-                    System.out.println("TODO: "+p+" zijn betaling  van "+betaald+ " verwerken ergens, als het bv contant was");
+                    if (betaald > 0) {
+                        System.out.println("TODO: " + p + " zijn betaling  van " + betaald + " verwerken ergens, als het bv contant was");
+                    }
                     return null;
                 }
             };
@@ -282,6 +283,18 @@ public class FormatFactory {
                 }
 
                 String winkelNaam = strings[++index];
+                
+                if (winkelNaam.isEmpty()) {
+                    if(winkel == null){
+                        throw new MyParseException(index);
+                    }
+                } else {
+                    winkel = memoryInstance.winkels.get(winkelNaam);
+                    if (winkel == null) {
+                        winkel = new Winkel(winkelNaam);
+                        memoryInstance.winkels.put(winkel);
+                    }
+                }
 
                 items = new ArrayList<>(strings.length - index);
                 while (++index < strings.length) {
@@ -290,9 +303,6 @@ public class FormatFactory {
                 }
 
                 //verfijnen
-                if (!winkelNaam.isEmpty()) {
-                    winkel = memoryInstance.winkels.get(winkelNaam);
-                }
                 if (!persoonNaam.isEmpty()) {
                     persoon = memoryInstance.personen.get(persoonNaam);
                 }
@@ -418,6 +428,7 @@ public class FormatFactory {
         this.memoryInstance = new Memory(size);
 
         parser = parserFactory.new SingleParser<Memory>( 
+             
              
             memoryInstance) {
 
@@ -557,6 +568,7 @@ public class FormatFactory {
         filenameFilter = new MyFilenameFilter("bewoners");
         parser = parserFactory.new SingleParser<IntegerParsable>(
                  
+             
              
              
              

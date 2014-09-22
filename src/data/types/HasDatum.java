@@ -18,9 +18,9 @@ import tijd.Datum;
  *
  * @author Dennis
  */
-public interface HasDate {
+public interface HasDatum {
 
-    public Datum getDate();
+    public Datum getDatum();
 
     /**
      *
@@ -30,7 +30,7 @@ public interface HasDate {
      * @param comp
      * @return All C's on Date d from List cs, or null when there are none
      */
-    public static <C extends HasDate, RL extends List<C> & RandomAccess> LinkedList<C> searchOn(
+    public static <C extends HasDatum, RL extends List<C> & RandomAccess> LinkedList<C> searchOn(
             RL cs,
             Datum d,
             Comparator<Datum> comp) {
@@ -40,8 +40,8 @@ public interface HasDate {
         if (it.hasNext()) {
             do {
                 c = it.next();
-            } while (comp.compare(c.getDate(), d) < 0);
-            while (comp.compare(c.getDate(), d) == 0) {
+            } while (comp.compare(c.getDatum(), d) < 0);
+            while (comp.compare(c.getDatum(), d) == 0) {
                 result.add(c);
                 c = it.next();
             }
@@ -50,7 +50,7 @@ public interface HasDate {
             if(result.size()>1)
             throw new Exception("Nog ff checken!");
         } catch (Exception ex) {
-            Logger.getLogger(HasDate.class.getName()).log(Level.SEVERE, "TODO", ex);
+            Logger.getLogger(HasDatum.class.getName()).log(Level.SEVERE, "TODO", ex);
         }
         return result;
     }

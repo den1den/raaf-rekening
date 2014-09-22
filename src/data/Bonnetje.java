@@ -6,7 +6,7 @@
 package data;
 
 import data.types.HasBedrag;
-import data.types.HasDate;
+import data.types.HasDatum;
 import geld.Referentie;
 import java.util.Comparator;
 import java.util.List;
@@ -16,7 +16,7 @@ import tijd.Datum;
  *
  * @author Dennis
  */
-public class Bonnetje implements Referentie, HasBedrag, HasDate{
+public class Bonnetje implements Referentie, HasBedrag, HasDatum{
 
     public static Comparator<Bonnetje> getByDate() {
         return (Bonnetje o1, Bonnetje o2) -> o1.datum.compareTo(o2.datum);
@@ -32,6 +32,9 @@ public class Bonnetje implements Referentie, HasBedrag, HasDate{
 
     public Bonnetje(int id, int bedrag, Persoon persoon, String pasEindigd,
           Datum datum, Winkel winkel, List<AankoopCat> items) {
+        if(datum == null || winkel == null){
+            throw new IllegalArgumentException();
+        }
         this.id = id;
         this.bedrag = bedrag;
         this.persoon = persoon;
@@ -56,7 +59,7 @@ public class Bonnetje implements Referentie, HasBedrag, HasDate{
     }
 
     @Override
-    public Datum getDate() {
+    public Datum getDatum() {
         return datum;
     }
 

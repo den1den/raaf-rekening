@@ -7,6 +7,7 @@ package data;
 
 import geld.Referentie;
 import java.util.Map;
+import tijd.Datum;
 
 /**
  *
@@ -54,5 +55,10 @@ public class Kookdag implements Referentie{
             tot += p;
         }
         return tot;
+    }
+
+    @Override
+    public Datum getDatum() {
+        return null;
     }
 }

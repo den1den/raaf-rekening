@@ -5,7 +5,7 @@
  */
 package data;
 
-import data.types.HasDate;
+import data.types.HasDatum;
 import geld.Referentie;
 import java.util.Comparator;
 import tijd.Datum;
@@ -15,7 +15,7 @@ import tijd.Datum;
  * @author Dennis
  */
 public class Afschrift
-        implements Referentie, HasDate {
+        implements Referentie, HasDatum {
 
     private final Datum datum;
     private final String van;
@@ -98,15 +98,23 @@ public class Afschrift
     }
 
     @Override
-    public Datum getDate() {
+    public Datum getDatum() {
      return datum;   
+    }
+    
+    /**
+     * Check of het met de pas is betaald
+     * @return 
+     */
+    public boolean isGepind(){
+        return this.code.equals("BA");
     }
 
     public static class CompByDate implements Comparator<Afschrift>{
 
         @Override
         public int compare(Afschrift o1, Afschrift o2) {
-            return o1.getDate().compareTo(o2.getDate());
+            return o1.getDatum().compareTo(o2.getDatum());
         }
     }
 }

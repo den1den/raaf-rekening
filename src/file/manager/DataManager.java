@@ -29,7 +29,7 @@ public class DataManager {
     private final FileCollector c = new FileCollector();
 
     public DataManager(FormatFactory format, boolean recursive) {
-        this(EntriesFinder.simpleBasePath(), format, recursive);
+        this(EntriesFinder.simpleBasePath(true), format, recursive);
     }
 
     public DataManager(String basePath, FormatFactory format, boolean recursive) {

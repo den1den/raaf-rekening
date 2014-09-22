@@ -5,25 +5,22 @@
  */
 package data;
 
-import data.types.HasNaam;
-import geld.HasSchulden;
-import geld.LeenRekening;
+import geld.rekeningen.RekeningVLeen;
 
 /**
  *
  * @author Dennis
  */
-public class Persoon extends LeenRekening implements HasNaam, HasSchulden{
+public class Persoon extends RekeningVLeen {
 
-    private final String naam;
     protected Boolean kwijtschelden = null;
 
     public Persoon(String naam) {
-        super();
-        if(naam == null || naam.isEmpty())
+        super(naam);
+        if (naam == null || naam.isEmpty()) {
             throw new IllegalArgumentException();
-        this.naam = naam;
-        if(naam.equalsIgnoreCase("rk")){
+        }
+        if (naam.equalsIgnoreCase("rk")) {
             throw new IllegalArgumentException();
         }
     }
@@ -43,41 +40,30 @@ public class Persoon extends LeenRekening implements HasNaam, HasSchulden{
     public void setKwijtschelden(Boolean kwijtschelden) {
         this.kwijtschelden = kwijtschelden;
     }
-/*
-    @Override
-    public String toString() {
-        return naam;
-    }
+    /*
+     @Override
+     public String toString() {
+     return naam;
+     }
 
-    @Override
-    public String getNaam() {
-        return naam;
-    }
+     @Override
+     public String getNaam() {
+     return naam;
+     }
 
-    @Override
-    public void moetBetalen(int bedrag, ReferentieInterface referentie) {
-        if(naam.equalsIgnoreCase("dennis")){
-            boolean breakpoint = true;
-        }
-        super.moetBetalen(bedrag, referentie); //To change body of generated methods, choose Tools | Templates.
-    }
+     @Override
+     public void moetBetalen(int bedrag, ReferentieInterface referentie) {
+     if(naam.equalsIgnoreCase("dennis")){
+     boolean breakpoint = true;
+     }
+     super.moetBetalen(bedrag, referentie); //To change body of generated methods, choose Tools | Templates.
+     }
 
-    @Override
-    public void krijgtNog(int bedrag, ReferentieInterface referentie) {
-        if(naam.equalsIgnoreCase("dennis")){
-            boolean breakpoint = true;
-        }
-        super.krijgtNog(bedrag, referentie); //To change body of generated methods, choose Tools | Templates.
-    }*/
-
-    @Override
-    public String toString() {
-        return getNaam();
-    }
-
-    @Override
-    public String getNaam() {
-        return naam;
-    }
-    
+     @Override
+     public void krijgtNog(int bedrag, ReferentieInterface referentie) {
+     if(naam.equalsIgnoreCase("dennis")){
+     boolean breakpoint = true;
+     }
+     super.krijgtNog(bedrag, referentie); //To change body of generated methods, choose Tools | Templates.
+     }*/
 }

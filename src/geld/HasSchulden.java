@@ -6,6 +6,7 @@
 
 package geld;
 
+import geld.rekeningen.Event;
 import data.types.HasNaam;
 import java.util.List;
 

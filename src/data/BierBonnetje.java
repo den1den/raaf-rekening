@@ -6,14 +6,14 @@
 
 package data;
 
-import data.types.HasDate;
+import data.types.HasDatum;
 import tijd.Datum;
 
 /**
  *
  * @author Dennis
  */
-public class BierBonnetje implements HasDate{
+public class BierBonnetje implements HasDatum{
     String merk;
     int kratten;
     int totaalPrijs;
@@ -29,7 +29,7 @@ public class BierBonnetje implements HasDate{
     }
     
     @Override
-    public Datum getDate() {
+    public Datum getDatum() {
         return datum;
     }
 }

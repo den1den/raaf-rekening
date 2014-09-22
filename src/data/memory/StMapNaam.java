@@ -28,11 +28,6 @@ class StMapNaam<T extends HasNaam> extends StMap<T> {
     }
     
     public void put(T t){
-        T old = map.put(t.getNaam(), t);
-        if(old != null){
-            if(old != t){
-                throw new IllegalArgumentException("Overwite of "+t+" over "+old+" not permitted");
-            }
-        }
+        super.put(t, t.getNaam());
     }
 }

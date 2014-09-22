@@ -10,7 +10,16 @@ package data.types;
  *
  * @author Dennis
  */
-public interface HasNaam {
-    public String getNaam();
-    
+public class HasNaam{
+    private final String naam;
+
+    public HasNaam(String naam) {
+        if(naam == null || naam.isEmpty())
+            throw new IllegalArgumentException();
+        this.naam = naam;
+    }
+
+    public String getNaam() {
+        return naam;
+    }
 }

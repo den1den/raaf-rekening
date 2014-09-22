@@ -5,21 +5,26 @@
  */
 package geld;
 
+import geld.rekeningen.Event;
+import data.Bonnetje;
+import data.Persoon;
+
 /**
  *
  * @author Dennis
  */
-public class RaafRekening extends LeenRekening implements HasContant {
+public class RaafRekening_ extends LeenRekening implements HasContant, HasHistory {
 
     private final String naam;
-    private final Sum opRekening = new Kas();
-    private final Sum contant = new Contant();
+    
+    private final Sum_ opRekening = new Kas();
+    private final Sum_ contant = new Contant();
 
-    public RaafRekening(final String naam) {
+    public RaafRekening_(final String naam) {
         this(naam, 10);
     }
 
-    public RaafRekening(final String naam, final int capacity) {
+    public RaafRekening_(final String naam, final int capacity) {
         this.naam = naam;
     }
 
@@ -64,7 +69,7 @@ public class RaafRekening extends LeenRekening implements HasContant {
         if (bedrag < 0) {
             throw new IllegalArgumentException();
         }
-        String message = bij + " heeft gratis geld gekregen";
+        String message = "{1} heeft gratis geld gekregen";
         Event e = newE(bij, referentie, message);
         doBesteed(bij, bedrag, e);
     }
@@ -90,7 +95,7 @@ public class RaafRekening extends LeenRekening implements HasContant {
         if (bedrag < 0) {
             throw new IllegalArgumentException();
         }
-        String message = van.getNaam() + " betaald zijn schuld af";
+        String message = "{1} betaald zijn schuld af";
         Event e = newE(van, referentie, message);
         doKrijgtAfbetaling(van, bedrag, e);
     }
@@ -112,7 +117,7 @@ public class RaafRekening extends LeenRekening implements HasContant {
         if (bedrag < 0) {
             throw new IllegalArgumentException();
         }
-        String message = aan.getNaam() + " krijgt geld terug";
+        String message = "{1} krijgt geld terug";
         Event e = newE(aan, referentie, message);
         doBetaaldUit(aan, bedrag, e);
     }
@@ -246,7 +251,55 @@ public class RaafRekening extends LeenRekening implements HasContant {
         doMoetKrijgenVan(lr, bedrag, e);
     }
 
-    private class Kas extends Sum {
+    /**
+     * Deze rekening besteed een bedrag aan iets bij een bepaalde rekening, maar
+     * dit werd voorgeschoten door via.
+     * 
+     * @param via
+     * @param bij
+     * @param bedrag
+     * @param r
+     */
+    public void besteedVia(LeenRekening via, Rekening bij, int bedrag, Referentie r) {
+        String message = "{0} heeft iets gekocht bij "
+                + "{1} voor deze rekening, moet het dus not terug "
+                + "krijgen";
+        Event e = newE(via, bij, r, message);
+        doBesteedVia(via, bij, bedrag, e);
+    }
+
+    /**
+     * see {@link #besteedVia(geld.LeenRekening, geld.Rekening, int, geld.Referentie)
+     * besteedVia(b.getPersoon(), b.getWinkel(), b.getBedrag(), b);}
+     *
+     * @param b
+     */
+    public void besteedVia(Bonnetje b) {
+        besteedVia(b.getPersoon(), b.getWinkel(), b.getBedrag(), b);
+    }
+    
+    protected void doBesteedVia(LeenRekening via, Rekening bij, int bedrag, Event e){
+        System.err.println("Besteed via op makkelijke manier, alleen moet nog (terug) betalen aan "+via.getNaam());
+        doMoetBetalenAan(via, bedrag, e);
+        //via.doBetaaldAan(bij, bedrag, e);???
+    }
+
+    /**
+     * Wat er nog te bestenden is in centen.
+     * @return 
+     */
+    public int getTeBesteden() {
+        return getKrijgtNogVan() + opRekening.get() + contant.get();
+    }
+/**
+ * Wat er nog op de rekning staat in centen.
+ * @return 
+ */
+    public int getOpRekeningI() {
+        return opRekening.get();
+    }
+
+    private class Kas extends Sum_ {
 
         @Override
         public String naam() {
@@ -255,11 +308,15 @@ public class RaafRekening extends LeenRekening implements HasContant {
 
     }
 
-    private class Contant extends Sum {
+    private class Contant extends Sum_ {
 
         @Override
         public String naam() {
             return "contant van " + RaafRekening.this.getNaam();
         }
+    }
+
+    public Sum_ getOpRekening() {
+        return opRekening;
     }
 }
