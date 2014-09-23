@@ -314,8 +314,6 @@ public class Policy {
                         return;
                     } else if (afschrift.getMededeling().equals(" 20e te veel betaald voor de huis rekening")
                             && afschrift.getVan().equals("M.M.C. Tilburgs                 ")) {
-                        rekening.krijgtTerug(p, bedrag, referentie);
-                        rekening.leentUit(p, bedrag, referentie);
                         rekening.betaaldUit(p, bedrag, referentie);
                         //ResultPrintStream.lijst2(o, p, rekening);
                         return;
@@ -330,20 +328,20 @@ public class Policy {
                             onbekendeWinkel = new Winkel(WINKEL_UNKNOWN_NAAM);
                         }
                         rekening.besteedVia(p, onbekendeWinkel, bedrag, referentie);
-                        ResultPrintStream.lijst2(o, p, rekening);
+                        //ResultPrintStream.lijst2(o, p, rekening);
                         return;
                     }
 
                     //zal wss tg incasso zijn? unzeker
                     Logger.getLogger(Policy.class.getName()).log(Level.INFO, "GT niet 100% zeker");
                     incasso = memory.incassos.findRek(afschrift);
-                    rekening.besteed(incasso, bedrag, referentie);
+                    rekening.besteedDirect(incasso, bedrag, referentie);
                     return;
                 } else {
                     //bijboeking
                     if (isMededelingRaRe(afschrift)) {
                         Persoon p = memory.personen.findRek(afschrift);
-                        rekening.krijgtAfbetaling(p, bedrag, referentie);
+                        rekening.krijgtTerug(p, bedrag, referentie);
                         return;
                     } else {
                         throw new UnsupportedOperationException();
@@ -361,8 +359,7 @@ public class Policy {
                         ing = memory.incassos.findRek(ING_INCASSO_NAAM, afschrift.getVanRekening());
                         memory.incassos.put(ing, afschrift.getVan());
                     }
-
-                    rekening.besteed(ing, bedrag, referentie);
+                    rekening.besteedDirect(ing, bedrag, referentie);
                 } else {
                     throw new Error();
                 }
@@ -378,7 +375,7 @@ public class Policy {
                         .contains("UPC Nederland B.V.")) {
                     Incasso incasso = memory.incassos.
                             findRek(UPC_INCASSO_NAAM, afschrift.getVanRekening());
-                    rekening.besteed(incasso, bedrag, referentie);
+                    rekening.besteedDirect(incasso, bedrag, referentie);
                     return;
                 } else {
                     throw new UnsupportedOperationException();
@@ -389,7 +386,7 @@ public class Policy {
                 }
                 if (isMededelingRaRe(afschrift)) {
                     Persoon p = memory.personen.findRek(afschrift);
-                    rekening.krijgtAfbetaling(p, bedrag, referentie);
+                    rekening.krijgtTerug(p, bedrag, referentie);
                     return;
                 } else {
                     throw new UnsupportedOperationException();

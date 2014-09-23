@@ -59,6 +59,10 @@ public class RekeningVLComplete extends RekeningVLeen implements HasContant {
         doMoetKrijgenVan(via, -bedrag, e);
     }
 
+    public void betaaldUit(RekeningVLeen van, int bedrag, Referentie referentie) {
+        throw new UnsupportedOperationException("Not supported yet. zie excel"); //To change body of generated methods, choose Tools | Templates.
+    }
+
     
 
     private class ContantSom extends Som {
