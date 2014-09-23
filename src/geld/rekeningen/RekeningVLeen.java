@@ -17,7 +17,11 @@ public class RekeningVLeen extends RekeningVerschuld {
         heeftGeleend = new SomMap<>(10, new LeenParams());
     }
     
-    
+    /**
+     * @param aan
+     * @param bedrag
+     * @param referentie 
+     */
     public void leentUit(RekeningVLeen aan, int bedrag, Referentie referentie){
         if(bedrag < 0)
             throw new IllegalArgumentException();
@@ -34,7 +38,12 @@ public class RekeningVLeen extends RekeningVerschuld {
         rvl.doMoetKrijgenVan(this, -bedrag, e);
         rvl.doVerreken(bedrag, e);
     }
-    
+    /**
+     * Krijgt geld terug
+     * @param van
+     * @param bedrag
+     * @param referentie 
+     */
     public void krijgtTerug(RekeningVLeen van, int bedrag, Referentie referentie){
         String message = "{0} krijgt terug van {1}";
         Event e = newE(van, referentie, message);

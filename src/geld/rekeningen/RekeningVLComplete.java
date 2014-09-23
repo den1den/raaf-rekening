@@ -13,7 +13,7 @@ import geld.Referentie;
  *
  * @author Dennis
  */
-public class RekeningVLComplete extends RekeningVLeen implements realMoney {
+public class RekeningVLComplete extends RekeningVLeen implements HasContant {
 
     private final Som contant = new ContantSom();
 

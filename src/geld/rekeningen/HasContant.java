@@ -3,15 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
-package geld.OLD;
+package geld.rekeningen;
 
 /**
  *
  * @author Dennis
  */
-interface HasContant {
-    default void doContant(){
-        throw new UnsupportedOperationException();
-    }
+public interface HasContant extends HasRekening{
+
+    Som getContant();
+    
 }

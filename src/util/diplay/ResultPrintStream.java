@@ -8,7 +8,6 @@ package util.diplay;
 import data.Afschrift;
 import data.memory.Memory;
 import geld.rekeningen.Event;
-import geld.OLD.HasSchulden;
 import geld.Referentie;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -407,6 +406,20 @@ public class ResultPrintStream {
                     mask.write(b);
                 }
             });
+        }
+    }
+
+    public static class HasSchulden {
+
+        public HasSchulden() {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    public static class Sum {
+
+        public Sum() {
+             throw new UnsupportedOperationException();
         }
     }
 }

@@ -293,8 +293,8 @@ public class Policy {
                     }
                     Persoon p = memory.personen.findRek(afschrift);
 
-                    Object o = ResultPrintStream.lijst1(p, rekening);
-
+                    //Object o = ResultPrintStream.lijst1(p, rekening);
+                    
                     //kan voorgeschoten zijn...
                     if (afschrift.getMededeling().toLowerCase().contains("voorgeschoten")) {
 
@@ -314,6 +314,8 @@ public class Policy {
                         return;
                     } else if (afschrift.getMededeling().equals(" 20e te veel betaald voor de huis rekening")
                             && afschrift.getVan().equals("M.M.C. Tilburgs                 ")) {
+                        rekening.krijgtTerug(p, bedrag, referentie);
+                        rekening.leentUit(p, bedrag, referentie);
                         rekening.betaaldUit(p, bedrag, referentie);
                         //ResultPrintStream.lijst2(o, p, rekening);
                         return;

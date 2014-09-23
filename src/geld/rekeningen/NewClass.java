@@ -7,10 +7,8 @@ package geld.rekeningen;
 
 /**
  *
- * @author Dennis
+ * @author s117115
  */
-public interface realMoney {
-
-    Som getContant();
+public class NewClass {
     
 }

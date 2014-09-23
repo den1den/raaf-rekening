@@ -5,8 +5,8 @@
  */
 package util;
 
-import geld.OLD.HasSchulden;
 import java.util.Comparator;
+import util.diplay.ResultPrintStream.HasSchulden;
 
 /**
  *
