@@ -7,13 +7,13 @@
 package data;
 
 import data.types.HasNaam;
-import geld.rekeningen.RekeningVerschuld;
+import geld.rekeningen.RekeningLeen;
 
 /**
  *
  * @author Dennis
  */
-public class Incasso extends RekeningVerschuld{
+public class Incasso extends RekeningLeen{
     
     private final String rekeningNummer;
 

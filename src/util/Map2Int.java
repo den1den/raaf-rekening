@@ -14,11 +14,11 @@ import java.util.Set;
  *
  * @author Dennis
  */
-public class ItMap<K> {
+public class Map2Int<K> {
     final Map<K, Integer> map;
     final int nullVal;
 
-    public ItMap(int intialCap, int nullVal) {
+    public Map2Int(int intialCap, int nullVal) {
         this.map = new HashMap<>(intialCap);
         this.nullVal = nullVal;
     }

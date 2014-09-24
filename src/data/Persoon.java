@@ -5,13 +5,13 @@
  */
 package data;
 
-import geld.rekeningen.RekeningVLeen;
+import geld.rekeningen.RekeningLeen;
 
 /**
  *
  * @author Dennis
  */
-public class Persoon extends RekeningVLeen {
+public class Persoon extends RekeningLeen {
 
     protected Boolean kwijtschelden = null;
 

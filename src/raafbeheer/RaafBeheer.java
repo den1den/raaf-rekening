@@ -14,8 +14,8 @@ import data.Persoon;
 import data.memory.Memory;
 import file.manager.DataManager;
 import file.manager.FormatFactory;
-import geld.policy.Policy;
-import geld.rekeningen.RekeningVLComplete;
+import geld.rekeningen.Policy;
+import geld.rekeningen.RekeningLeenBudget;
 import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
@@ -152,7 +152,7 @@ public class RaafBeheer {
         //collector.run();
     }
 
-    private static class RaafRekening extends RekeningVLComplete{
+    private static class RaafRekening extends RekeningLeenBudget{
 
         public RaafRekening(String naam) {
             super(naam);

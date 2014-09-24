@@ -3,9 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package geld.policy;
+package geld.rekeningen;
 
-import data.AankoopCat;
 import data.Afschrift;
 import data.BewoonPeriode;
 import data.Bonnetje;
@@ -17,10 +16,12 @@ import data.memory.Memory;
 import data.types.HasBedrag;
 import data.types.HasDatum;
 import geld.Referentie;
-import geld.ReferentieMultiple;
-import geld.rekeningen.Rekening;
-import geld.rekeningen.RekeningVLComplete;
-import geld.rekeningen.RekeningVerschuld;
+import geld.rekeningen.Event;
+import geld.rekeningen.Event;
+import geld.rekeningen.RekeningLeenBudget;
+import geld.rekeningen.RekeningLeen;
+import geld.rekeningen.RekeningLeen;
+import geld.rekeningen.RekeningLeenBudget;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -32,7 +33,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import tijd.Datum;
 import tijd.IntervalDatums;
-import util.diplay.ResultPrintStream;
 
 /**
  *
@@ -64,7 +64,7 @@ public class Policy {
 
     public void verrekenKookdagen(List<Kookdag> allDagen,
             Map<Persoon, Persoon> kookSchuldDelers,
-            RekeningVerschuld r) {
+            RekeningLeen r) {
         if (periode != IntervalDatums.TOT_NU) {
             Logger.getLogger(Policy.class.getName())
                     .log(Level.INFO, "Kookdagen aan het verekenen terwijl er een restricitie is van tot: {0}", periode);
@@ -76,7 +76,7 @@ public class Policy {
 
     private void verrekenKookdag(Kookdag kookdag,
             Map<Persoon, Persoon> kookSchuldDelers,
-            RekeningVerschuld r) {
+            RekeningLeen r) {
         Persoon kok = kookdag.getKok();
         Map<Persoon, Integer> meeters = kookdag.getMeeters();
 
@@ -108,19 +108,29 @@ public class Policy {
                     verantwoordelijk = persoon;
                 }
 
+                Event e;
+                String message;
                 if (persoon.equals(kok)) {
                     //kok
                     verreken = kookdag.getBedrag()
                             - kokPrijs - prijs * (m.getValue() - 1);
-                    verantwoordelijk.moetKrijgenVan(r, verreken, kookdag);
+                    message = "{1} heeft gekookt";
+                    e = new Event(message, kookdag, r, verantwoordelijk);
+                    
+                    verantwoordelijk.doKrijgtNogVanDuo(r, verreken, e);
+                    r.doRekeningBijSingle(-verreken, e);
+                    
                     total += verreken;
-
                 } else if (!persoon.kwijtschelden()) {
                     //meeter
                     verreken = prijs * (m.getValue());
-                    r.moetKrijgenVan(verantwoordelijk, verreken, kookdag);
-                    //ResultPrintStream.showLastT(kookRekening, verantwoordelijk);
-                    total -= verreken;
+                    message = "{1} heeft meegegeten";
+                    e = new Event(message, kookdag, r, verantwoordelijk);
+                    
+                    verantwoordelijk.doKrijgtNogVanDuo(r, -verreken, e);
+                    r.doRekeningBijSingle(verreken, e);
+                    
+                    total += verreken;
                 }
             }
             if (total != 0) {
@@ -131,13 +141,18 @@ public class Policy {
 
     public void verrekenBewoonPeriodes(
             Collection<BewoonPeriode> bewoonPeriodes,
-            RekeningVerschuld rekening) {
+            RekeningLeen rekening) {
         for (BewoonPeriode bewoonPeriode : bewoonPeriodes) {
             Persoon persoon = bewoonPeriode.getPersoon();
             for (BewoonPeriode.SubPeriode subPeriode : bewoonPeriode) {
                 final int bedrag = 2000;
                 if (subPeriode.getEind().isIn(periode)) {
-                    rekening.moetKrijgenVan(persoon, bedrag, subPeriode);
+                    
+                    String message = "{1} moet raafrekening betalen aan {0}";
+                    Event e = new Event(message, subPeriode, rekening, persoon);
+                    
+                    rekening.doRekeningBijSingle(bedrag, e);
+                    
                 } else {
                     System.out.println("discarding bewoon: " + subPeriode.getEind());
                 }
@@ -148,7 +163,7 @@ public class Policy {
 
     public void verrekenBonnetjes(
             Set<Bonnetje> bonnetjes,
-            RekeningVLComplete rekening) {
+            RekeningLeenBudget rekening) {
         for (Bonnetje bonnetje : bonnetjes) {
             if (bonnetje.getDatum().isIn(periode)) {
                 rekening.besteedVia(bonnetje);
@@ -156,7 +171,7 @@ public class Policy {
         }
     }
 
-    public void verwerkAfschriften(Set<Afschrift> afschriftenSet, Set<Bonnetje> bonnetjes, RekeningVLComplete rekening) {
+    public void verwerkAfschriften(Set<Afschrift> afschriftenSet, Set<Bonnetje> bonnetjes, RekeningLeenBudget rekening) {
         ArrayList<Bonnetje> bonnetjes1 = new ArrayList<>(bonnetjes);
         Collections.sort(bonnetjes1, Bonnetje.getByDate());
 
@@ -179,7 +194,7 @@ public class Policy {
     private <RL extends List<Bonnetje> & RandomAccess> void verwerkAfschrift(
             Afschrift afschrift,
             RL bonnetjes,
-            RekeningVLComplete rekening) {
+            RekeningLeenBudget rekening) {
         int bedrag = afschrift.getBedrag();
         Referentie referentie = afschrift;
 

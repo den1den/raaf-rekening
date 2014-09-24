@@ -8,11 +8,11 @@ package geld.rekeningen;
 import geld.Referentie;
 
 
-public class RekeningVLeen extends RekeningVerschuld {
+public class _RekeningVLeen {
 
-    private final SomMap<RekeningVLeen> heeftGeleend;
+    private final SomMap<_RekeningVLeen> heeftGeleend;
     
-    public RekeningVLeen(String naam) {
+    public _RekeningVLeen(String naam) {
         super(naam);
         heeftGeleend = new SomMap<>(10, new LeenParams());
     }
@@ -22,7 +22,7 @@ public class RekeningVLeen extends RekeningVerschuld {
      * @param bedrag
      * @param referentie 
      */
-    public void leentUit(RekeningVLeen aan, int bedrag, Referentie referentie){
+    public void leentUit(_RekeningVLeen aan, int bedrag, Referentie referentie){
         if(bedrag < 0)
             throw new IllegalArgumentException();
         String message = "{0} leent uit aan {1}";
@@ -30,7 +30,7 @@ public class RekeningVLeen extends RekeningVerschuld {
         doLeenUit(aan, bedrag, e);
     }
     
-    protected void doLeenUit(RekeningVLeen rvl, int bedrag, Event e){
+    protected void doLeenUit(_RekeningVLeen rvl, int bedrag, Event e){
         this.heeftGeleend.add(rvl, bedrag, e);
         this.doMoetKrijgenVan(rvl, bedrag, e);
         this.doVerreken(-bedrag, e);
@@ -44,22 +44,22 @@ public class RekeningVLeen extends RekeningVerschuld {
      * @param bedrag
      * @param referentie 
      */
-    public void krijgtTerug(RekeningVLeen van, int bedrag, Referentie referentie){
+    public void krijgtTerug(_RekeningVLeen van, int bedrag, Referentie referentie){
         String message = "{0} krijgt terug van {1}";
         Event e = newE(van, referentie, message);
         doLeenUit(van, -bedrag, e);
     }
     
-    private class LeenParams extends SomMap.SomMapParams<RekeningVLeen>{
+    private class LeenParams extends SomMap.SomMapParams<_RekeningVLeen>{
 
         @Override
         String getBeschrijvingTotaal() {
-            return "Totaal verschuldigd aan " + RekeningVLeen.this.getNaam();
+            return "Totaal verschuldigd aan " + _RekeningVLeen.this.getNaam();
         }
 
         @Override
-        String getBeschrijvingSubSom(RekeningVLeen van) {
-            return van.getNaam() + " verschuldigd aan " + RekeningVLeen.this.getNaam();
+        String getBeschrijvingSubSom(_RekeningVLeen van) {
+            return van.getNaam() + " verschuldigd aan " + _RekeningVLeen.this.getNaam();
         }
     }
     

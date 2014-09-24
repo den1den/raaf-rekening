@@ -13,11 +13,11 @@ import geld.Referentie;
  *
  * @author Dennis
  */
-public class RekeningVLComplete extends RekeningVLeen implements HasContant {
+public class RekeningLeenBudget extends RekeningVLeen {
 
     private final Som contant = new ContantSom();
 
-    public RekeningVLComplete(String naam) {
+    public RekeningLeenBudget(String naam) {
         super(naam);
     }
 
@@ -63,13 +63,18 @@ public class RekeningVLComplete extends RekeningVLeen implements HasContant {
         throw new UnsupportedOperationException("Not supported yet. zie excel"); //To change body of generated methods, choose Tools | Templates.
     }
 
+    @Override
+    public Som getBankRekening() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
     
 
     private class ContantSom extends Som {
 
         @Override
         public String beschrijving() {
-            return "Contant geld van " + RekeningVLComplete.this.getNaam();
+            return "Contant geld van " + RekeningLeenBudget.this.getNaam();
         }
 
     }

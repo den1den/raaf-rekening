@@ -7,8 +7,8 @@ package geld.rekeningen;
 
 /**
  *
- * @author s117115
+ * @author Dennis
  */
-public interface HasRekening {
-    Som getRekening();
+interface HasRekening {
+    
 }

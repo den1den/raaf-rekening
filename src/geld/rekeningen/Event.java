@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Arrays;
 import tijd.Datum;
-import util.ItMap;
+import util.Map2Int;
 
 /**
  *
@@ -25,7 +25,11 @@ public class Event implements Comparable<Event>, HasDatum{
     private final HasNaam[] betreft;
     private final Referentie referentie;
     private final String message;
-    private final ItMap<Som> indexes;
+    private final Map2Int<Som> indexes;
+
+    Event(String message, Referentie referentie, HasNaam... betreft) {
+        this(betreft, referentie, message);
+    }
 
     Event(HasNaam[] betreft, Referentie referentie, String message) {
         if (!message.contains("{") && betreft.length > 0) {
@@ -42,7 +46,7 @@ public class Event implements Comparable<Event>, HasDatum{
         this.betreft = betreft;
         this.referentie = referentie;
         this.message = java.text.MessageFormat.format(message, arguments);
-        this.indexes = new ItMap<>(2, -1);
+        this.indexes = new Map2Int<>(2, -1);
     }
 
     @Override
@@ -59,12 +63,13 @@ public class Event implements Comparable<Event>, HasDatum{
         return indexes.keySet();
     }
 
+    @Deprecated
     public List<Integer> getChanges(List<Som> sums) {
         List<Integer> changes = new ArrayList<>(sums.size());
         for (Som sum : sums) {
             int index = indexes.get(sum);
             if (index != -1) {
-                changes.add(sum.get(index));
+                //changes.add(sum.get(index));
             } else {
                 changes.add(0);
             }
@@ -76,10 +81,11 @@ public class Event implements Comparable<Event>, HasDatum{
         return indexes.entrySet();
     }
 
+    @Deprecated
     public Set<Map.Entry<Som, Integer>> entrySet() {
         Set<Map.Entry<Som, Integer>> entries = entrySetIndex();
         for (Map.Entry<Som, Integer> entry : entries) {
-            entry.setValue(entry.getKey().get(entry.getValue()));
+            //entry.setValue(entry.getKey().get(entry.getValue()));
         }
         return entries;
     }

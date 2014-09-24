@@ -66,6 +66,9 @@ public class SomMap<K extends HasNaam> {
             return params.getBeschrijvingSubSom(van);
         }
 
+        public SomMap getParent(){
+            return SomMap.this;
+        }
     }
 
     private class TotalSom extends Som {

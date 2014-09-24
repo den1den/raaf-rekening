@@ -15,59 +15,47 @@ import java.util.List;
  *
  * @author Dennis
  */
-public class Rekening extends HasNaam {
+public class Rekening extends HasNaam{
 
     private final Som bankRekening;
+    private final Som contant;
 
-    public Rekening(String naam) {
+    public Rekening(String naam){
+        this(naam, false);
+    }
+    
+    public Rekening(String naam, boolean contant) {
         super(naam);
         this.bankRekening = new BankRekening();
+        if (contant) {
+            this.contant = new ContantRekening();
+        } else {
+            this.contant = null;
+        }
     }
-    
-    public void Af(int bedrag, Referentie referentie){
-        String message = "Er gaat iets af";
-        Event e = newE(referentie, message);
-        this.bankRekening.af(bedrag, e);
-    }
-    
-    protected void doVerreken(int bedrag, Event e){
+
+    protected void doRekeningBijSingle(int bedrag, Event e) {
         this.bankRekening.put(bedrag, e);
     }
-    
-    public void Bij(int bedrag, Referentie referentie){
-        String message = "Er gaat iets bij";
-        Event e = newE(referentie, message);
-        this.bankRekening.bij(bedrag, e);
+
+    protected void doRekeningBijDuo(Rekening bij, int bedrag, Event e) {
+        doRekeningBijSingle(bedrag, e);
+        bij.doRekeningBijSingle(-bedrag, e);
     }
     
-    public void besteedDirect(Bonnetje bonnetje){
-        besteedDirect(bonnetje.getWinkel(), bonnetje.getBedrag(), bonnetje);
-    }
-    
-    public void besteedDirect(Rekening bij, int bedrag, Referentie referentie){
-        String message = "{0} heeft iets gekocht bij {1}";
-        Event e = newE(bij, referentie, message);
-        doBesteedDirect(bij, bedrag, e);
-    }
-    
-    protected void doBesteedDirect(Rekening bij, int bedrag, Event e){
-        doVerreken(bedrag, e);
-        bij.doVerreken(-bedrag, e);
-    }
-    
-    protected void doVerreken(Rekening bij, int bedrag, Event e) {
-        doVerreken(bedrag, e);
-        bij.doVerreken(-bedrag, e);
+    private void doPin(int bedrag, Event e) {
+        bankRekening.af(bedrag, e);
+        contant.bij(bedrag, e);
     }
 
     private final List<Event> allHistory = new LinkedList<>();
 
-    private Event newE(Referentie referentie, String message){
+    protected Event newE(Referentie referentie, String message) {
         Event e = new Event(new HasNaam[]{this}, referentie, message);
         allHistory.add(e);
         return e;
     }
-    
+
     protected Event newE(HasNaam betrokken0, Referentie referentie, String message) {
         Event e = new Event(new HasNaam[]{this, betrokken0}, referentie, message);
         allHistory.add(e);
@@ -80,6 +68,12 @@ public class Rekening extends HasNaam {
         return e;
     }
 
+    public List<Event> getAllHistory() {
+        return allHistory;
+    }
+
+    
+
     private class BankRekening extends Som {
 
         @Override
@@ -89,8 +83,12 @@ public class Rekening extends HasNaam {
 
     }
 
-    public Som getBankRekening() {
-        return bankRekening;
+    private class ContantRekening extends Som {
+
+        @Override
+        public String beschrijving() {
+            return "Contant geld van " + Rekening.this.getNaam();
+        }
+
     }
-    
 }
