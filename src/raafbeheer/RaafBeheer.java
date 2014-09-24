@@ -26,7 +26,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import tijd.Datum;
 import tijd.IntervalDatums;
-import util.diplay.ResultPrintStream;
 
 /**
  *
@@ -158,5 +157,19 @@ public class RaafBeheer {
             super(naam);
         }
         
+    }
+
+    private static class ResultPrintStream {
+
+        public ResultPrintStream() {
+        }
+
+        private ResultPrintStream(int version) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        private void listAsSpreadsheetToFile(RaafRekening raafRekening) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
     }
 }

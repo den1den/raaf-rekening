@@ -6,14 +6,13 @@
 package util;
 
 import java.util.Comparator;
-import util.diplay.ResultPrintStream.HasSchulden;
 
 /**
  *
  * @author Dennis
  */
-public class SchuldenComparator implements Comparator<HasSchulden> {
-
+public class SchuldenComparator {
+/*
     private final HasSchulden subject;
 
     public SchuldenComparator(HasSchulden subject) {
@@ -70,5 +69,5 @@ public class SchuldenComparator implements Comparator<HasSchulden> {
             return Integer.compare(o1.getKrijgtNogVan(), o2.getKrijgtNogVan());
         }
 
-    }
+    }*/
 }

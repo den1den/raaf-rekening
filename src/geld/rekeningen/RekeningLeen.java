@@ -5,8 +5,6 @@
  */
 package geld.rekeningen;
 
-import geld.Referentie;
-
 public class RekeningLeen extends Rekening {
 
     private final SomMap<RekeningLeen> krijgtNogVan;

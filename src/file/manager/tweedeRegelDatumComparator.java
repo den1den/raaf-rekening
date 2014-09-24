@@ -10,8 +10,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Comparator;
-import parsers.MyParseException;
-import parsers.simple.StringParser;
 import parsers.simple.StringParserSmart;
 import tijd.Datum;
 

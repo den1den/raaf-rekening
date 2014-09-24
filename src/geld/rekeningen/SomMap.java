@@ -46,7 +46,7 @@ public class SomMap<K extends HasNaam> {
         s.put(value, e);
     }
 
-    abstract static class SomMapParams<K> {
+    abstract static class SomMapParams<K extends HasNaam> {
 
         abstract String getBeschrijvingTotaal();
 

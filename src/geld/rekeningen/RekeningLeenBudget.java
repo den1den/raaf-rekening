@@ -5,8 +5,7 @@
  */
 package geld.rekeningen;
 
-import data.Bonnetje;
-import data.Persoon;
+import data.Incasso;
 import geld.Referentie;
 
 /**
@@ -44,33 +43,18 @@ public class RekeningLeenBudget extends RekeningLeen{
      * @param bedrag
      * @param r
      */
-    public void besteedVia(RekeningLeen via, Rekening bij, int bedrag, Referentie r) {
+    public void besteedVia_(RekeningLeen via, Rekening bij, int bedrag, Referentie r) {
         String message = "{1} heeft iets gekocht bij "
                 + "{2} voor {0}, {1} moet het dus not terug "
                 + "krijgen van {0}";
         Event e = newE(via, bij, r, message);
-        doBesteedVia(via, bij, bedrag, e);
-    }
-
-    /**
-     * see {@link #besteedVia(geld.LeenRekening, geld.Rekening, int, geld.Referentie)
-     * besteedVia(b.getPersoon(), b.getWinkel(), b.getBedrag(), b);}
-     *
-     * @param b
-     */
-    public void besteedVia(Bonnetje b) {
-        besteedVia(b.getPersoon(), b.getWinkel(), b.getBedrag(), b);
-    }
-
-    protected void doBesteedVia(RekeningLeen via, Rekening bij, int bedrag, Event e) {
+        
         via.doRekeningBijDuo(bij, bedrag, e);
         doKrijgtNogVanDuo(via, -bedrag, e);
     }
 
-    @Override
-    protected void doKrijgtNogVanDuo(RekeningLeen lr, int bedrag, Event e) {
-        this.budget.put(bedrag, e);
-        super.doKrijgtNogVanDuo(lr, bedrag, e);
+    void doVerwachtKostenVanDuo(Incasso incasso, int bedrag, Event e) {
+        new UnsupportedOperationException("Not supported yet.").printStackTrace(); //To change body of generated methods, choose Tools | Templates.
     }
 
     private class Budget extends Som {

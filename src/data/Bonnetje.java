@@ -19,7 +19,12 @@ import tijd.Datum;
 public class Bonnetje implements Referentie, HasBedrag, HasDatum{
 
     public static Comparator<Bonnetje> getByDate() {
-        return (Bonnetje o1, Bonnetje o2) -> o1.datum.compareTo(o2.datum);
+        return new Comparator<Bonnetje>() {
+
+            public int compare(Bonnetje o1, Bonnetje o2) {
+                return o1.datum.compareTo(o2.datum);
+            }
+        };
     }
 
     final private int id;

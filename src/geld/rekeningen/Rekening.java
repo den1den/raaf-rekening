@@ -5,7 +5,6 @@
  */
 package geld.rekeningen;
 
-import data.Bonnetje;
 import data.types.HasNaam;
 import geld.Referentie;
 import java.util.LinkedList;

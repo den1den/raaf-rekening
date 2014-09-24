@@ -15,7 +15,6 @@ import data.Kookdag;
 import data.Persoon;
 import data.Winkel;
 import data.memory.Memory;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;

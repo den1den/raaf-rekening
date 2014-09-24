@@ -9,10 +9,10 @@ import data.types.HasDatum;
 import data.types.HasNaam;
 import geld.Referentie;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Arrays;
 import tijd.Datum;
 import util.Map2Int;
 

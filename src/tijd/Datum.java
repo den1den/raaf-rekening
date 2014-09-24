@@ -5,11 +5,17 @@
  */
 package tijd;
 
-import data.types.HasDatum;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import static java.util.Calendar.*;
+import static java.util.Calendar.DAY_OF_MONTH;
+import static java.util.Calendar.HOUR_OF_DAY;
+import static java.util.Calendar.MILLISECOND;
+import static java.util.Calendar.MINUTE;
+import static java.util.Calendar.MONTH;
+import static java.util.Calendar.SECOND;
+import static java.util.Calendar.YEAR;
+import static java.util.Calendar.getInstance;
 import java.util.Comparator;
 import java.util.TimeZone;
 import java.util.logging.Level;

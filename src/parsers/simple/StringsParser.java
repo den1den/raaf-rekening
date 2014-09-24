@@ -7,7 +7,6 @@
 package parsers.simple;
 
 import parsers.MyParseException;
-import parsers.simple.StringParser;
 import tijd.Datum;
 import tijd.IntervalDatums;
 
