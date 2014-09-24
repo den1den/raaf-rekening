@@ -152,6 +152,7 @@ public class Policy {
                     Event e = new Event(message, subPeriode, rekening, persoon);
                     
                     rekening.doRekeningBijSingle(bedrag, e);
+                    rekening.doKrijgtNogVanDuo(persoon, bedrag, e);
                     
                 } else {
                     System.out.println("discarding bewoon: " + subPeriode.getEind());
@@ -254,10 +255,13 @@ public class Policy {
                         w = new Winkel(afschrift.getMededeling());
                         memory.winkels.putMede(w, afschrift.getMededeling());
                     }
+                    
+                    Event e = rekening.newE(referentie, "{0} kocht iets bij {1}");
 
-                    rekening.besteedDirect(w, bedrag, referentie);
+                    rekening.doBudgetBijSingle(-bedrag, e);
+                    rekening.doRekeningBijDuo(w, -bedrag, e);
 
-                    Logger.getLogger(Policy.class.getName()).log(Level.INFO, "Je moet het bonnetje zoeken van {0}", afschrift);
+                    //Logger.getLogger(Policy.class.getName()).log(Level.INFO, "Je moet het bonnetje zoeken van {0}", afschrift);
                     return;
                 } else { // > 1
 
@@ -269,27 +273,29 @@ public class Policy {
                 }
                 //overboeking
                 if (!afschrift.isAf()) {
+                    RekeningLeen rl;
+                    
                     if (isMededelingRaRe(afschrift)) {
                         //zeker
-                        Persoon p = memory.personen.findRek(afschrift);
-                        rekening.krijgtTerug(p, bedrag, referentie);
+                        rl = memory.personen.findRek(afschrift);
                         //throw new UnsupportedOperationException("Gebeuren twee dingen tegelijk, moet in Raafrekenng complexe functies maken en in history zetter per handeling, zie Word");
                         //ResultPrintStream.lijstje(p, rekening);
-                        return;
                     } else {
                         //niet zeker
-                        Persoon p = memory.personen.getRek(afschrift.getVanRekening());
-                        if (p != null) {
+                        rl = memory.personen.getRek(afschrift.getVanRekening());
+                        if (rl != null) {
                             //persoon heeft iets erop geboekt, dus igg toevoegen aan rekening
-                            rekening.krijgtTerug(p, bedrag, referentie);
                         } else {
                             //kan nieuw persoon zijn maar wel rare start dan...
-                            p = memory.personen.findRek(afschrift);
-                            System.err.println("Niet zeker afschrift van " + p + ": " + afschrift);
-                            rekening.krijgtTerug(p, bedrag, referentie);
+                            rl = memory.personen.findRek(afschrift);
+                            System.err.println("Niet zeker afschrift van " + rl + ": " + afschrift);
                         }
-                        return;
                     }
+                    
+                    Event e = rekening.newE(afschrift,
+                            "{1} betaald schuld af aan {0}");
+                    rekening.doKrijgtNogVanDuo(rl, -bedrag, e);
+                    rekening.doRekeningBijDuo(rl, bedrag, e);
                 }
                 throw new UnknownError();
             case "GT":
