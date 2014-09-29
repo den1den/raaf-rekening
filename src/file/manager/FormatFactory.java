@@ -19,9 +19,13 @@ import data.ContantRecord;
 import data.ContantRecord.DoubleContantRecordSet;
 import data.Winkel;
 import data.memory.Memory;
+import data.types.HasNaam;
 import file.StringsData;
+import geld.Referentie;
+import geld.rekeningen.Event;
 import geld.rekeningen.Rekening;
 import geld.rekeningen.RekeningLeen;
+import geld.rekeningen.RekeningLeenBudget;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -63,7 +67,7 @@ public class FormatFactory {
         kookdagen = createKookdagen();
         memoryFormat = createMemory();
         bewoonPeriodes = createBewoonPeriodes();
-        raafRekening = createRekening();
+        init = createInit();
         kookSchuldDelers = createKookSchuldDelers();
         bierBonnetjes = createBierBonnetjes();
         betaaldVias = createBetaaldVias();
@@ -77,7 +81,7 @@ public class FormatFactory {
     public final Format<List<Kookdag>> kookdagen;
     public final Format<Memory> memoryFormat;
     public final Format<Set<BewoonPeriode>> bewoonPeriodes;
-    public final Format<IntegerParsable> raafRekening;
+    public final Format<RekeningLeenBudget> init;
     public final Format<Map<Persoon, Persoon>> kookSchuldDelers;
     public final Format<Set<BierBonnetje>> bierBonnetjes;
     public final Format<Set<BetaaldVia>> betaaldVias;
@@ -441,13 +445,6 @@ public class FormatFactory {
 
         parser = parserFactory.new SingleParser<Memory>( 
              
-             
-             
-             
-             
-             
-             
-             
             memoryInstance) {
 
             private static final String typePersoon = "nickname";
@@ -477,7 +474,19 @@ public class FormatFactory {
                     case typeRekening:
                         p = instance.personen.find(subject);
                         while (++index < strings.length) {
-                            instance.personen.putRek(p, strings[index]);
+                            String s = strings[index];
+                            double digits = 0;
+                            for (char chaR : s.toCharArray()) {
+                                if (Character.isDigit(chaR)) {
+                                    digits++;
+                                }
+                            }
+                            digits /= s.length();
+                            if (digits >= .95) {
+                                instance.personen.putRek(p, s);
+                            } else {
+                                instance.personen.put(p, s);
+                            }
                         }
                         break;
                     case typeIncasso:
@@ -597,46 +606,50 @@ public class FormatFactory {
         return new Format<>(filenameFilter, header, parser);
     }
 
-    private Format<IntegerParsable> createRekening() {
+    private Format<RekeningLeenBudget> createInit() {
         String[] header;
         MyFilenameFilter filenameFilter;
-        Parser<IntegerParsable> parser;
+        Parser<RekeningLeenBudget> parser;
 
-        header = null;
-        filenameFilter = new MyFilenameFilter("bewoners");
-        parser = parserFactory.new SingleParser<IntegerParsable>(
-                 
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-            new IntegerParsable()) {@Override
+        header = new String[]{"initialization file"};
+        filenameFilter = new MyFilenameFilter("init");
+        parser = parserFactory.new SimpleParserRef<RekeningLeenBudget>() {
+
+            @Override
             protected void parseLine(String[] strings) {
                 if (strings.length != 2) {
                     throw new MyParseException.Length();
                 }
-                int i = 0;
-                if (!strings[i].equals("start bedrag")) {
-                    throw new MyParseException(i);
+
+                String subject = strings[0];
+                Integer bedrag = bedragParser.parse(strings[1]);
+                if (bedrag == null) {
+                    throw new MyParseException(1, "Geen bedrag gevonden");
                 }
-                Integer startBedrag;
-                if ((startBedrag = bedragParser.parse(strings[++i])) == null) {
-                    throw new MyParseException(i);
+                if (subject.startsWith(".")) {
+                    subject = subject.substring(1);
+                    if (subject.equals("budget")) {
+                        instance.initBudget(getRef(), bedrag);
+                        return;
+                    } else if (subject.equals("rekening")) {
+                        instance.initBank(getRef(), bedrag);
+                        return;
+                    }
+                } else {
+                    Persoon p = memoryInstance.personen.get(subject);
+                    if (p != null) {
+                        instance.initSchuld(p, getRef(), bedrag);
+                        return;
+                    }
                 }
-                this.instance.setInteger(startBedrag);
+                throw new MyParseException(0, "?");
+            }
+
+            @Override
+            protected RekeningLeenBudget init(int size) {
+                return new RekeningLeenBudget("Raafrekening");
             }
         };
-
         return new Format<>(filenameFilter, header, parser);
     }
 
@@ -869,26 +882,28 @@ public class FormatFactory {
 
             @Override
             protected Afrekening parseLine(String[] strings) {
-                if(strings.length != 2)
+                if (strings.length != 2) {
                     throw new MyParseException.Length();
-                
+                }
+
                 int index = 0;
-                
+
                 Persoon a = memoryInstance.personen.get(strings[index]);
-                if(a == null)
+                if (a == null) {
                     throw new MyParseException(index, "Persoon niet gevonden");
-                
+                }
+
                 Datum d;
                 String dateString = strings[++index];
-                if(dateString.equals(pick_eind)){
+                if (dateString.equals(pick_eind)) {
                     d = null;
-                }else{
+                } else {
                     d = DATEPARSER.parse(dateString);
-                    if(d == null){
+                    if (d == null) {
                         throw new MyParseException(index, "Datum niet gevonden");
                     }
                 }
-                
+
                 return new Afrekening(a, d);
             }
         };

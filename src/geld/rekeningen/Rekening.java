@@ -15,15 +15,15 @@ import java.util.List;
  *
  * @author Dennis
  */
-public class Rekening extends HasNaam{
+public class Rekening extends HasNaam {
 
     private final Som bankRekening;
     private final Som contant;
 
-    public Rekening(String naam){
+    public Rekening(String naam) {
         this(naam, false);
     }
-    
+
     public Rekening(String naam, boolean contant) {
         super(naam);
         this.bankRekening = new BankRekening();
@@ -50,7 +50,7 @@ public class Rekening extends HasNaam{
         doRekeningBijSingle(bedrag, e);
         bij.doRekeningBijSingle(-bedrag, e);
     }
-    
+
     private void doPin(int bedrag, Event e) {
         bankRekening.af(bedrag, e);
         contant.bij(bedrag, e);
@@ -58,19 +58,19 @@ public class Rekening extends HasNaam{
 
     private final List<Event> allHistory = new LinkedList<>();
 
-    protected Event newE(Referentie referentie, String message) {
+    public Event newE(Referentie referentie, String message) {
         Event e = new Event(new HasNaam[]{this}, referentie, message);
         allHistory.add(e);
         return e;
     }
 
-    protected Event newE(HasNaam betrokken0, Referentie referentie, String message) {
+    public Event newE(HasNaam betrokken0, Referentie referentie, String message) {
         Event e = new Event(new HasNaam[]{this, betrokken0}, referentie, message);
         allHistory.add(e);
         return e;
     }
 
-    protected Event newE(HasNaam betrokken0, HasNaam betrokken1, Referentie referentie, String message) {
+    public Event newE(HasNaam betrokken0, HasNaam betrokken1, Referentie referentie, String message) {
         Event e = new Event(new HasNaam[]{this, betrokken0, betrokken1}, referentie, message);
         allHistory.add(e);
         return e;
@@ -80,7 +80,15 @@ public class Rekening extends HasNaam{
         return new ArrayList<>(allHistory);
     }
 
-    
+    protected Event newEInit(Referentie referentie) {
+        String message = "Initialization";
+        return newE(referentie, message);
+    }
+
+    protected Event newEInit(HasNaam hasNaam, Referentie referentie) {
+        String message = "Initialization";
+        return newE(hasNaam, referentie, message);
+    }
 
     private class BankRekening extends Som {
 
@@ -98,5 +106,11 @@ public class Rekening extends HasNaam{
             return "Contant geld van " + Rekening.this.getNaam();
         }
 
+    }
+
+    public void initBank(Referentie referentie, int bedrag) {
+        Event e = newEInit(referentie);
+        bankRekening.init();
+        doRekeningBijSingle(bedrag, e);
     }
 }

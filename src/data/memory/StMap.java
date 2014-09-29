@@ -26,6 +26,8 @@ class StMap<T> implements Iterable<T>{
     }
     
     protected String filter(String index) {
+        if(index.isEmpty())
+            throw new IllegalArgumentException();
         return index.toUpperCase();
     }
     

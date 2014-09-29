@@ -21,6 +21,7 @@ public abstract class Som implements Iterable<Record>{
     
     private final int startBedrag;
     private final LinkedList<Record> records = new LinkedList<>();
+    private boolean init = false;
 
     public static class Record {
         public final int diff;
@@ -145,5 +146,12 @@ public abstract class Som implements Iterable<Record>{
     @Override
     public Iterator<Record> iterator() {
         return records.iterator();
+    }
+    
+    public void init(){
+        if(init){
+            throw new IllegalStateException();
+        }
+        init = true;
     }
 }

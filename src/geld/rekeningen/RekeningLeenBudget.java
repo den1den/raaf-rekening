@@ -68,4 +68,10 @@ public class RekeningLeenBudget extends RekeningLeen{
             return "Budget van "+RekeningLeenBudget.this.getNaam();
         }
     }
+    
+    public void initBudget(Referentie referentie, int bedrag){
+        Event e = newEInit(referentie);
+        budget.init();
+        doBudgetBijSingle(bedrag, e);
+    }
 }

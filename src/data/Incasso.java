@@ -18,8 +18,7 @@ public class Incasso extends RekeningLeen{
 
     public Incasso(String naam, String rekeningNummer) {
         super(naam);
-        if(naam == null || naam.isEmpty() ||
-                rekeningNummer == null ){
+        if( rekeningNummer == null ){
             throw new IllegalArgumentException();
         }
         this.rekeningNummer = rekeningNummer;

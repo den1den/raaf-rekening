@@ -140,7 +140,7 @@ public class RaafBeheer {
         result.listAsSpreadsheet(raafRekening);
 
         result.toOut();
-        result.listPersoonDetailed(memory.personen.get("Erik"));
+        result.listPersoonDetailed(memory.personen.get("J.M. BENSINK"));
         for (Persoon p : memory.personen) {
             result.listPersoon(p);
         }

@@ -19,11 +19,10 @@ import data.memory.Memory;
 import data.types.HasBedrag;
 import data.types.HasDatum;
 import geld.Referentie;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.RandomAccess;
@@ -199,22 +198,26 @@ public class Policy {
         r.doKrijgtNogVanDuo(via, bedrag, e);
     }
 
-    public void verwerkAfschriften(Set<Afschrift> afschriftenSet, Set<Bonnetje> bonnetjes, RekeningLeenBudget rekening) {
+    public List<Event> verwerkAfschriften(Set<Afschrift> afschriftenSet, Set<Bonnetje> bonnetjes, RekeningLeenBudget rekening) {
         ArrayList<Bonnetje> bonnetjes1 = new ArrayList<>(bonnetjes);
         Collections.sort(bonnetjes1, Bonnetje.getByDate());
 
         ArrayList<Afschrift> afschriften = new ArrayList<>(afschriftenSet);
         Collections.sort(afschriften, new Afschrift.CompByDate());
+        
+        List<Event> result = new LinkedList<>();
 
         for (Afschrift afschrift : afschriften) {
             if (afschrift.getDatum().isIn(periode)) {
                 try {
-                    verwerkAfschrift(afschrift, bonnetjes1, rekening);
+                    Event e = verwerkAfschrift(afschrift, bonnetjes1, rekening);
+                    result.add(e);
                 } catch (Error e) {
                     throw new Error("At afschrift: " + afschrift, e);
                 }
             }
         }
+        return result;
     }
 
     private <RL extends List<Bonnetje> & RandomAccess> Event verwerkAfschrift(
@@ -425,8 +428,14 @@ public class Policy {
                     //defeniatly ing
                     Incasso ing = memory.incassos.get(ING_INCASSO_NAAM);
                     if (ing == null) {
-                        ing = memory.incassos.findRek(ING_INCASSO_NAAM, afschrift.getVanRekening());
-                        memory.incassos.put(ing, afschrift.getVan());
+                        String vanRek = afschrift.getVanRekening();
+                        if(!vanRek.isEmpty()){
+                            ing = new Incasso(ING_INCASSO_NAAM, vanRek);
+                            memory.incassos.putRek(ing, vanRek);
+                        }else{
+                            ing = new Incasso(ING_INCASSO_NAAM, "");
+                        }
+                        memory.incassos.put(ing);
                     }
 
                     message = "{0} moet bankosten betalen aan {1}";

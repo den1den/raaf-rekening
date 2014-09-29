@@ -5,6 +5,8 @@
  */
 package geld.rekeningen;
 
+import geld.Referentie;
+
 public class RekeningLeen extends Rekening {
 
     private final SomMap<RekeningLeen> krijgtNogVan;
@@ -47,5 +49,11 @@ public class RekeningLeen extends Rekening {
             return van.getNaam() + " verschuldigd aan " + RekeningLeen.this.getNaam();
         }
 
+    }
+    
+    public void initSchuld(RekeningLeen rl, Referentie referentie, int bedrag){
+        Event e = newEInit(rl, referentie);
+        krijgtNogVan.init(rl);
+        doKrijgtNogVanDuo(rl, bedrag, e);
     }
 }

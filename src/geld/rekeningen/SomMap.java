@@ -37,19 +37,29 @@ public abstract class SomMap<K extends HasNaam> implements Iterable<Som> {
         if (key == null || e == null) {
             throw new IllegalArgumentException();
         }
+        Som s = getFind(key);
+
+        total.put(value, e);
+        s.put(value, e);
+    }
+    
+    private Som getFind(K key){
         Som s = all.get(key);
         if (s == null) {
             s = new SubSom(key);
             all.put(key, s);
         }
-
-        total.put(value, e);
-        s.put(value, e);
+        return s;
     }
 
     abstract String getBeschrijvingTotaal();
 
     abstract String getBeschrijvingSubSom(K van);
+
+    void init(K rl) {
+        Som s = getFind(rl);
+        s.init();
+    }
 
     public class SubSom extends Som {
 

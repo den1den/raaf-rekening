@@ -60,15 +60,12 @@ public class ResultPrintStream {
         List<Event> events = raafRekening.getAllHistory();
         HasDatum.sort(events, Datum.COMP_BY_DAY);
 
-        List<String[]> listEvents = listEvents(events, false, true, budget, bankRekening, krijgtNogVanTotaal, contant);
+        List<String[]> listEvents = listEvents(events, true, budget, bankRekening, krijgtNogVanTotaal, contant);
         
         outputStream.println(new MyTxtTable.MyTxtTableHeader(listEvents, ""));
     }
 
-    public static List<String[]> listEvents(List<Event> events, boolean allowAdd, final boolean totalCollumn, Som... tovs) {
-        if (allowAdd) {
-            throw new UnsupportedOperationException();
-        }
+    public static List<String[]> listEvents(List<Event> events, final boolean totalCollumn, Som... tovs) {
         ArrayList<Som> tovsArrayList = Arrays.asListNoNull(tovs);
         ArrayList<Integer> tovsTotals = new ArrayList<>(tovsArrayList.size());
 

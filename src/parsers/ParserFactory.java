@@ -6,6 +6,7 @@
 package parsers;
 
 import file.StringsData;
+import geld.Referentie;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -13,18 +14,20 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import tijd.Datum;
 
 /**
  *
  * @author Dennis
  */
 public class ParserFactory {
-    
+
     private int currentParseLevel = 0;
 
     /**
      * To parse Strings arrays into objects.
-     * @param <P> 
+     *
+     * @param <P>
      * @param <To> the output format in Raafrekening
      */
     public abstract class Parser<To> {
@@ -73,10 +76,46 @@ public class ParserFactory {
          */
         abstract protected void parseData(StringsData data);
     }
-    
-    public abstract class SimpleParser<To> extends Parser<To>{
+
+    /**
+     * Single parser with init
+     *
+     * @param <To>
+     */
+    public abstract class SimpleParser<To> extends Parser<To> {
+
+        StringsData curr;
+        int lineNumber = 0;
+
         @Override
-        protected void parseData(StringsData data){
+        protected void parseData(StringsData data) {
+            curr = data;
+            lineNumber = 0;
+            for (String[] fileLine : data) {
+                try {
+                    parseLine(fileLine);
+                    lineNumber++;
+                } catch (MyParseException ex) {
+                    ex.setSourceAndNumber(data, lineNumber);
+                    throw new RuntimeException(ex);
+                }
+            }
+        }
+
+        abstract protected void parseLine(String[] strings);
+
+        @Override
+        protected abstract To init(int size);
+    }
+
+    public abstract class SimpleParserRef<To> extends SimpleParser<To> {
+
+        public Referentie getRef() {
+            return new Referentie.RefVanFile(curr, lineNumber);
+        }
+
+        @Override
+        protected void parseData(StringsData data) {
             int lineNumber = 0;
             for (String[] fileLine : data) {
                 try {
@@ -88,9 +127,13 @@ public class ParserFactory {
                 }
             }
         }
-        abstract protected void parseLine(String[] strings);
     }
 
+    /**
+     * Single parser on instance
+     *
+     * @param <P>
+     */
     public abstract class SingleParser<P> extends Parser<P> {
 
         public SingleParser(P instance) {
@@ -117,6 +160,35 @@ public class ParserFactory {
         }
 
         protected abstract void parseLine(String[] strings);
+
+    }
+
+    public abstract class SingleParserReference<P> extends SingleParser<P> {
+
+        public SingleParserReference(P instance) {
+            super(instance);
+        }
+
+        StringsData curr;
+        int lineNumber = 0;
+
+        Referentie getRef() {
+            return new Referentie.RefVanFile(curr, lineNumber);
+        }
+
+        @Override
+        protected void parseData(StringsData data) {
+            curr = data;
+            for (String[] fileLine : data) {
+                try {
+                    parseLine(fileLine);
+                    lineNumber++;
+                } catch (MyParseException ex) {
+                    ex.setSourceAndNumber(data, lineNumber);
+                    throw new RuntimeException(ex);
+                }
+            }
+        }
 
     }
 
@@ -156,14 +228,14 @@ public class ParserFactory {
             return new ArrayList<>(size);
         }
     }
-    
-    public abstract class MapParser<P> extends SimpleParser<Map<P, P>>{
+
+    public abstract class MapParser<P> extends SimpleParser<Map<P, P>> {
 
         @Override
         protected Map<P, P> init(int size) {
             return new HashMap<>(size);
         }
-        
+
     }
 
     public abstract class VoidParser<P> extends SimpleParser<Void> {

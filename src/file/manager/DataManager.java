@@ -189,7 +189,7 @@ public class DataManager {
         bonnetjes = c.collect(format.bonnetjes);
         bierBonnetjes = c.collect(format.bierBonnetjes);
         kookSchuldDelers = c.collect(format.kookSchuldDelers);
-        raafRekening = c.collect(format.raafRekening);
+        raafRekening = c.collect(format.init);
         afschriften = c.collectING(format.afschriften);
         betaaldVias = c.collect(format.betaaldVias);
         contant = c.collect(format.contantRecords);
