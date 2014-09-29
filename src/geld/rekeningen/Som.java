@@ -154,4 +154,8 @@ public abstract class Som implements Iterable<Record>{
         }
         init = true;
     }
+    
+    public int size(){
+        return this.records.size();
+    }
 }

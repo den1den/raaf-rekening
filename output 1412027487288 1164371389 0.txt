@@ -1,0 +1,43 @@
+******************************************************************************************************************************************************************
+*Datum     *Event                                              *Budget van test*Totaal (0)*Op de bank van test*Totaal (0)*Totaal verschuldigd aan test*Totaal (0)*
+******************************************************************************************************************************************************************
+*20-03-2012*Dennis heeft iets gekocht bij Jan Linders voor test*-€0.79         * -€0.79   *                   *"         *-€0.79                      * -€0.79   *
+*25-03-2013*Dennis heeft iets gekocht bij Jan Linders voor test*-€1.18         * -€1.97   *                   *"         *-€1.18                      * -€1.97   *
+*02-04-2013*Dennis heeft iets gekocht bij Jan Linders voor test*-€1.39         * -€3.36   *                   *"         *-€1.39                      * -€3.36   *
+*23-04-2013*Dennis heeft iets gekocht bij Jan Linders voor test*-€1.29         * -€4.65   *                   *"         *-€1.29                      * -€4.65   *
+*07-05-2013*Dennis heeft iets gekocht bij Jan Linders voor test*-€12.76        * -€17.41  *                   *"         *-€12.76                     * -€17.41  *
+*15-05-2013*Boris heeft iets gekocht bij Jan Linders voor test *-€2.9          * -€19.50  *                   *"         *-€2.9                       * -€19.50  *
+*17-05-2013*Dennis heeft iets gekocht bij Jan Linders voor test*-€1.29         * -€20.79  *                   *"         *-€1.29                      * -€20.79  *
+*03-06-2013*Dennis heeft iets gekocht bij Jan Linders voor test*-€3.28         * -€24.7   *                   *"         *-€3.28                      * -€24.7   *
+*24-06-2013*Dennis heeft iets gekocht bij Jan Linders voor test*-€1.96         * -€26.3   *                   *"         *-€1.96                      * -€26.3   *
+*31-07-2013*Dennis heeft iets gekocht bij Jan Linders voor test*-€1.15         * -€27.18  *                   *"         *-€1.15                      * -€27.18  *
+*05-08-2013*Dennis heeft iets gekocht bij Jan Linders voor test*-€4.99         * -€32.17  *                   *"         *-€4.99                      * -€32.17  *
+*05-08-2013*Dennis heeft iets gekocht bij Jan Linders voor test*-€1.89         * -€34.6   *                   *"         *-€1.89                      * -€34.6   *
+*TOTALEN:  *12                                                 *               *-€34.6    *                   *€0.0      *                            *-€34.6    *
+******************************************************************************************************************************************************************
+
+Overzicht van 28 Personen tov test{
+*****************************************************************************************************************************************
+* Datum      * Diff * Total * Event  [Showing:Boris verschuldigd aan test]       * Referentie                                           *
+*****************************************************************************************************************************************
+* 15-05-2013 * -209 * -209  * Boris heeft iets gekocht bij Jan Linders voor test * Bonnetje 209 15-05-2013 Winkel Jan Linders [voedsel] *
+*****************************************************************************************************************************************
+
+**********************************************************************************************************************************************************
+* Datum      * Diff  * Total * Event  [Showing:Dennis verschuldigd aan test]       * Referentie                                                          *
+**********************************************************************************************************************************************************
+* 05-08-2013 * -499  * -499  * Dennis heeft iets gekocht bij Jan Linders voor test * Bonnetje 499 05-08-2013 Winkel Jan Linders [nonfood]                *
+* 20-03-2012 * -79   * -578  * Dennis heeft iets gekocht bij Jan Linders voor test * Bonnetje 79 20-03-2012 Winkel Jan Linders [bakpapier]               *
+* 07-05-2013 * -1276 * -1854 * Dennis heeft iets gekocht bij Jan Linders voor test * Bonnetje 1276 07-05-2013 Winkel Jan Linders [nonfood]               *
+* 02-04-2013 * -139  * -1993 * Dennis heeft iets gekocht bij Jan Linders voor test * Bonnetje 139 02-04-2013 Winkel Jan Linders [voedsel]                *
+* 23-04-2013 * -129  * -2122 * Dennis heeft iets gekocht bij Jan Linders voor test * Bonnetje 129 23-04-2013 Winkel Jan Linders [tierips]                *
+* 03-06-2013 * -328  * -2450 * Dennis heeft iets gekocht bij Jan Linders voor test * Bonnetje 328 03-06-2013 Winkel Jan Linders [schoonmaak, schoonmaak] *
+* 17-05-2013 * -129  * -2579 * Dennis heeft iets gekocht bij Jan Linders voor test * Bonnetje 129 17-05-2013 Winkel Jan Linders [voedsel]                *
+* 31-07-2013 * -115  * -2694 * Dennis heeft iets gekocht bij Jan Linders voor test * Bonnetje 115 31-07-2013 Winkel Jan Linders [schoonmaak]             *
+* 25-03-2013 * -118  * -2812 * Dennis heeft iets gekocht bij Jan Linders voor test * Bonnetje 118 25-03-2013 Winkel Jan Linders [schoonmaak]             *
+* 24-06-2013 * -196  * -3008 * Dennis heeft iets gekocht bij Jan Linders voor test * Bonnetje 196 24-06-2013 Winkel Jan Linders [voedsel]                *
+* 05-08-2013 * -189  * -3197 * Dennis heeft iets gekocht bij Jan Linders voor test * Bonnetje 189 05-08-2013 Winkel Jan Linders [voedsel]                *
+**********************************************************************************************************************************************************
+
+}
+

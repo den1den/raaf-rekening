@@ -17,6 +17,7 @@ import static java.util.Calendar.SECOND;
 import static java.util.Calendar.YEAR;
 import static java.util.Calendar.getInstance;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -184,6 +185,20 @@ public class Datum implements Comparable<Datum>, Cloneable {
         int a = compareTo(periode.getBegin());
         int b = compareTo(periode.getEind());
         return a >= 0 && b <= 0;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof Datum){
+            Datum objDatum = (Datum)obj;
+            return compareTo(objDatum) == 0;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        throw new UnsupportedOperationException();
     }
 
     private static abstract class SpecialDatum extends Datum {

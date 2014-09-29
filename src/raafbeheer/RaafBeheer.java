@@ -13,7 +13,6 @@ import data.BierBonnetje;
 import data.Bonnetje;
 import data.Kookdag;
 import data.Persoon;
-import data.ContantRecord;
 import data.ContantRecord.DoubleContantRecordSet;
 import data.memory.Memory;
 import file.manager.DataManager;
@@ -107,6 +106,7 @@ public class RaafBeheer {
         DoubleContantRecordSet stortingsRecords = formats.contantRecords.parser.parse(files.getStortingen());
         Set<Afrekening> afrekenings = formats.afrekenings.parser.parse(files.getAfrekenings());
         Afrekening.match(afrekenings, bewoonPeriodes);
+        RekeningLeenBudget raafRekening = formats.init.parser.parse(files.getInit());
 
         IntervalDatums oude_spreadsheet = IntervalDatums.tot(new Datum(2013, 8, 6));
         System.out.println("periode: " + oude_spreadsheet);
@@ -117,23 +117,15 @@ public class RaafBeheer {
         //result.listResultaat(memory.personen.getAll(), kookR);
         //result.listEnkel(memory.personen.get("Mark"), kookR);
 
-        RekeningLeenBudget raafRekening = new RekeningLeenBudget("Raaf Rekening");
-
+        raafRekening = new RekeningLeenBudget("test");
         policy.verrekenBewoonPeriodes(bewoonPeriodes, raafRekening);
-        result.toFile();
-        result.listAsSpreadsheet(raafRekening);
-
         policy.verrekenAfBetaaldVias(betaaldVias, raafRekening);
-        result.toFile();
-        result.listAsSpreadsheet(raafRekening);
-
         policy.verrekenBonnetjes(bonnetjes, raafRekening);
-        result.toFile();
-        result.listAsSpreadsheet(raafRekening);
-
         policy.verwerkContants(afschriften, stortingsRecords, raafRekening);
+
         result.toFile();
         result.listAsSpreadsheet(raafRekening);
+        result.listPersoonTOVorNOT(memory.personen.getAll(), raafRekening);
 
         policy.verwerkAfschriften(afschriften, bonnetjes, raafRekening);
         result.toFile();

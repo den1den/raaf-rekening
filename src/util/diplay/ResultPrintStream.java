@@ -19,6 +19,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -61,8 +62,8 @@ public class ResultPrintStream {
         HasDatum.sort(events, Datum.COMP_BY_DAY);
 
         List<String[]> listEvents = listEvents(events, true, budget, bankRekening, krijgtNogVanTotaal, contant);
-        
-        outputStream.println(new MyTxtTable.MyTxtTableHeader(listEvents, ""));
+
+        outputStream.println(new MyTxtTable.MyTxtTableHeader(listEvents, false, ""));
     }
 
     public static List<String[]> listEvents(List<Event> events, final boolean totalCollumn, Som... tovs) {
@@ -128,7 +129,7 @@ public class ResultPrintStream {
         for (Som tov : tovsArrayList) {
             int total = tov.getTotal();
             if (totalCollumn) {
-                int calced = tovsTotals.get((index-1) / 2);
+                int calced = tovsTotals.get((index - 1) / 2);
                 index++;
                 if (calced != total) {
                     line[index] = "CALC_FAIL{" + bedragToString(calced) + "}";
@@ -165,36 +166,81 @@ public class ResultPrintStream {
     }
 
     public void listPersoon(Persoon p) {
-        String line = "Overzicht van: "+p.getNaam();
-        if(p.kwijtschelden()){
+        String line = "Overzicht van: " + p.getNaam();
+        if (p.kwijtschelden()) {
             line += " word kwijtgescholden voor eten";
         }
-        
-        
+
         Som bank = p.getBankRekening();
         SomMap<RekeningLeen> krijgtNogVan = p.getKrijgtNogVan();
-        
-        line += " krijgtNog totaal: "+krijgtNogVan.getTotal();
-        
+
+        line += " krijgtNog totaal: " + krijgtNogVan.getTotal();
+
         outputStream.println(line);
     }
-    
-    public void listPersoonDetailed(Persoon p){
-        String line = "Overzicht van: "+p.getNaam() + System.lineSeparator();
-        line += " bank: "+p.getBankRekening() + System.lineSeparator();
+
+    public void listPersoonDetailed(Persoon p) {
+        String line = "Overzicht van: " + p.getNaam() + System.lineSeparator();
+        line += " bank: " + p.getBankRekening() + System.lineSeparator();
         for (Som ss : p.getKrijgtNogVan()) {
-            line += "  som:"+ss.beschrijving() + System.lineSeparator();
+            line += "  som:" + ss.beschrijving() + System.lineSeparator();
             int totaal = ss.getTotal(0);
             for (Som.Record r : ss) {
                 totaal += r.diff;
-                line += "  "+(totaal)+" "+r.history + System.lineSeparator();
+                line += "  " + (totaal) + " " + r.history + System.lineSeparator();
             }
-            line += "  TOTAAL: "+totaal+"ct" + System.lineSeparator();
+            line += "  TOTAAL: " + totaal + "ct" + System.lineSeparator();
         }
         outputStream.print(line);
     }
 
     public void toOut() {
         this.outputStream = System.out;
+    }
+
+    public void listPersoonTOVorNOT(Collection<Persoon> ps, RekeningLeen raafRekening) {
+        String line = "Overzicht van " + ps.size() + " Personen tov " + raafRekening.getNaam() + "{" + System.lineSeparator();
+        for (Persoon p : ps) {
+            Som s = raafRekening.getKrijgtNogVan().get(p);
+            if(s != null){
+                line += new MyTxtTable.MyTxtTableHeader(tov(p, s), true).toString()+System.lineSeparator();
+            }
+        }
+        line += "}"+System.lineSeparator();
+        this.outputStream.println(line);
+    }
+
+    public void listPersoonTOV(Persoon get, RekeningLeen raafRekening) {
+        String line = "Overzicht van " + get.getNaam() + " tov " + raafRekening.getNaam() + System.lineSeparator();
+        Som s = raafRekening.getKrijgtNogVan().get(get);
+        if (s == null) {
+            line += "geen schuld";
+        } else {
+            line += new MyTxtTable.MyTxtTableHeader(tov(get, s), true).toString();
+        }
+        this.outputStream.println(line);
+    }
+
+    private static List<String[]> tov(Persoon p, Som s) {
+        List<String[]> result;
+        String[] lines;
+        result = new ArrayList<>(s.size() + 1);
+
+        lines = new String[]{"Datum", "Diff", "Total", "Event  [Showing:" + s.beschrijving() + "]", "Referentie"};
+        result.add(lines);
+
+        int total = 0;
+        for (Som.Record r : s) {
+            total += r.diff;
+            lines = new String[]{
+                r.history.getDatum().toString(),
+                Integer.toString(r.diff),
+                Integer.toString(total),
+                r.history.getMessage(),
+                r.history.getReferentie().getRefString()
+            };
+            result.add(lines);
+        }
+        return result;
     }
 }

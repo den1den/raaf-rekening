@@ -24,10 +24,21 @@ public class MyTxtTable {
     private final String NULL;
 
     public MyTxtTable(List<String[]> rows) {
-        this(rows, "null");
+        this(rows, false);
     }
 
-    public MyTxtTable(List<String[]> rows, String nulL) {
+    public MyTxtTable(List<String[]> rows, boolean wide) {
+        this(rows, wide, "null");
+    }
+    
+    public MyTxtTable(List<String[]> rows, boolean wide, String nulL){
+        if(wide){
+            for (String[] row : rows) {
+                for (int i = 0; i < row.length; i++) {
+                    row[i] = " "+row[i].trim()+" ";
+                }
+            }
+        }
         this.rows = rows;
         this.NULL = nulL;
         colWidth = new LinkedList<>();
@@ -110,8 +121,12 @@ public class MyTxtTable {
             super(rows);
         }
 
-        public MyTxtTableHeader(List<String[]> rows, String nulL) {
-            super(rows, nulL);
+        public MyTxtTableHeader(List<String[]> rows, boolean wide) {
+            super(rows, wide);
+        }
+
+        public MyTxtTableHeader(List<String[]> rows, boolean wide, String nulL) {
+            super(rows, wide, nulL);
         }
 
         @Override

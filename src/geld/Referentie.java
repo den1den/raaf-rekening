@@ -35,6 +35,8 @@ public abstract class Referentie {
         final int line;
 
         public RefVanFile(StringsData file, int line) {
+            if(file == null || line < 0)
+                throw new IllegalArgumentException();
             this.file = file;
             this.line = line;
         }

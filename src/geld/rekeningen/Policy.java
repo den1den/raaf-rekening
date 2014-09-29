@@ -19,6 +19,7 @@ import data.memory.Memory;
 import data.types.HasBedrag;
 import data.types.HasDatum;
 import geld.Referentie;
+import geld.ReferentieMultiple;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -601,8 +602,9 @@ public class Policy {
         ContantRecord cr = candidates.get(0);
         cr.setAfschrift(afschrift);
         Persoon eigenaar = cr.getEigenaar();
+        Referentie r = new ReferentieMultiple(cr, afschrift);
 
-        Event e = raafRekening.newE(eigenaar, cr, "{1} heeft geld gestort bij {0}");
+        Event e = raafRekening.newE(eigenaar, r, "{1} heeft geld gestort bij {0}");
         contantRecords.remove(cr);
 
         eigenaar.doKrijgtNogVanDuo(raafRekening, bedrag, e);
@@ -620,8 +622,9 @@ public class Policy {
         ContantRecord cr = candidates.get(0);
         cr.setAfschrift(afschrift);
         Persoon eigenaar = cr.getEigenaar();
+        Referentie r = new ReferentieMultiple(cr, afschrift);
         
-        Event e = raafRekening.newE(eigenaar, cr, "{1} heeft geld gepind bij {0}");
+        Event e = raafRekening.newE(eigenaar, r, "{1} heeft geld gepind bij {0}");
         contantRecords.remove(cr);
         
         raafRekening.doKrijgtNogVanDuo(eigenaar, bedrag, e);

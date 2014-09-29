@@ -29,6 +29,10 @@ public abstract class SomMap<K extends HasNaam> implements Iterable<Som> {
     public Som getTotal() {
         return total;
     }
+    
+    public Som get(K k){
+        return all.get(k);
+    }
 
     /**
      * Add a value to the sum of the key.
@@ -44,7 +48,7 @@ public abstract class SomMap<K extends HasNaam> implements Iterable<Som> {
     }
     
     private Som getFind(K key){
-        Som s = all.get(key);
+        Som s = get(key);
         if (s == null) {
             s = new SubSom(key);
             all.put(key, s);

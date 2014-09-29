@@ -58,19 +58,19 @@ public class Rekening extends HasNaam {
 
     private final List<Event> allHistory = new LinkedList<>();
 
-    public Event newE(Referentie referentie, String message) {
+    protected Event newE(Referentie referentie, String message) {
         Event e = new Event(new HasNaam[]{this}, referentie, message);
         allHistory.add(e);
         return e;
     }
 
-    public Event newE(HasNaam betrokken0, Referentie referentie, String message) {
+    protected Event newE(HasNaam betrokken0, Referentie referentie, String message) {
         Event e = new Event(new HasNaam[]{this, betrokken0}, referentie, message);
         allHistory.add(e);
         return e;
     }
 
-    public Event newE(HasNaam betrokken0, HasNaam betrokken1, Referentie referentie, String message) {
+    protected Event newE(HasNaam betrokken0, HasNaam betrokken1, Referentie referentie, String message) {
         Event e = new Event(new HasNaam[]{this, betrokken0, betrokken1}, referentie, message);
         allHistory.add(e);
         return e;
@@ -81,13 +81,13 @@ public class Rekening extends HasNaam {
     }
 
     protected Event newEInit(Referentie referentie) {
-        String message = "Initialization";
-        return newE(referentie, message);
+        String message = "Initialization ({0})";
+        return new Event(new HasNaam[]{this}, referentie, message);
     }
 
     protected Event newEInit(HasNaam hasNaam, Referentie referentie) {
-        String message = "Initialization";
-        return newE(hasNaam, referentie, message);
+        String message = "Initialization ({0},{1})";
+        return new Event(new HasNaam[]{this, hasNaam}, referentie, message);
     }
 
     private class BankRekening extends Som {

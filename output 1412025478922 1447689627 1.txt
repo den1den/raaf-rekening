@@ -1,0 +1,40 @@
+*********************************************************************************************************************************************************************************************************
+*Datum     *Event                                                                                     *Budget van test*Totaal (0)*Op de bank van test*Totaal (0)*Totaal verschuldigd aan test*Totaal (0)*
+*********************************************************************************************************************************************************************************************************
+*23-10-2012*Eva wil bedrag afbetalen aan test maar geeft geld aan Dennis: Heeft geen internetbankieren*               *"         *                   *"         *€0.0                        * €0.0     *
+*30-12-2012*Eva wil bedrag afbetalen aan test maar geeft geld aan Dennis: Heeft geen internetbankieren*               *"         *                   *"         *€0.0                        * €0.0     *
+*21-01-2013*Eva wil bedrag afbetalen aan test maar geeft geld aan Dennis: Heeft geen internetbankieren*               *"         *                   *"         *€0.0                        * €0.0     *
+*TOTALEN:  *3                                                                                         *               *€0.0      *                   *€0.0      *                            *€0.0      *
+*********************************************************************************************************************************************************************************************************
+
+Overzicht van: Eva
+ bank: Op de bank van Eva€-100.0
+  som:test verschuldigd aan Eva
+  5000 Eva wil bedrag afbetalen aan test maar geeft geld aan Dennis: Heeft geen internetbankieren[m:[RekeningLeenBudget test, Persoon Eva, Persoon Dennis], r:30-12-2012 heeft Persoon Eva €50.0 betaald via Persoon Dennis omdat:Heeft geen internetbankieren]
+  7500 Eva wil bedrag afbetalen aan test maar geeft geld aan Dennis: Heeft geen internetbankieren[m:[RekeningLeenBudget test, Persoon Eva, Persoon Dennis], r:21-01-2013 heeft Persoon Eva €25.0 betaald via Persoon Dennis omdat:Heeft geen internetbankieren]
+  10000 Eva wil bedrag afbetalen aan test maar geeft geld aan Dennis: Heeft geen internetbankieren[m:[RekeningLeenBudget test, Persoon Eva, Persoon Dennis], r:23-10-2012 heeft Persoon Eva €25.0 betaald via Persoon Dennis omdat:Heeft geen internetbankieren]
+  TOTAAL: 10000ct
+  som:Raafrekening verschuldigd aan Eva
+  -2500 Eva moet raafrekening betalen aan Raafrekening[m:[RekeningLeenBudget Raafrekening, Persoon Eva], r:[05-09-2012, 05-10-2012]]
+  -5000 Eva moet raafrekening betalen aan Raafrekening[m:[RekeningLeenBudget Raafrekening, Persoon Eva], r:[05-10-2012, 05-11-2012]]
+  -7500 Eva moet raafrekening betalen aan Raafrekening[m:[RekeningLeenBudget Raafrekening, Persoon Eva], r:[05-11-2012, 05-12-2012]]
+  -10000 Eva moet raafrekening betalen aan Raafrekening[m:[RekeningLeenBudget Raafrekening, Persoon Eva], r:[05-12-2012, 05-01-2013]]
+  TOTAAL: -10000ct
+Overzicht van: Dennis
+ bank: Op de bank van Dennis€100.0
+  som:test verschuldigd aan Dennis
+  -5000 Eva wil bedrag afbetalen aan test maar geeft geld aan Dennis: Heeft geen internetbankieren[m:[RekeningLeenBudget test, Persoon Eva, Persoon Dennis], r:30-12-2012 heeft Persoon Eva €50.0 betaald via Persoon Dennis omdat:Heeft geen internetbankieren]
+  -7500 Eva wil bedrag afbetalen aan test maar geeft geld aan Dennis: Heeft geen internetbankieren[m:[RekeningLeenBudget test, Persoon Eva, Persoon Dennis], r:21-01-2013 heeft Persoon Eva €25.0 betaald via Persoon Dennis omdat:Heeft geen internetbankieren]
+  -10000 Eva wil bedrag afbetalen aan test maar geeft geld aan Dennis: Heeft geen internetbankieren[m:[RekeningLeenBudget test, Persoon Eva, Persoon Dennis], r:23-10-2012 heeft Persoon Eva €25.0 betaald via Persoon Dennis omdat:Heeft geen internetbankieren]
+  TOTAAL: -10000ct
+  som:Raafrekening verschuldigd aan Dennis
+  -2000 Dennis moet raafrekening betalen aan Raafrekening[m:[RekeningLeenBudget Raafrekening, Persoon Dennis], r:[01-11-2012, 01-12-2012]]
+  -4000 Dennis moet raafrekening betalen aan Raafrekening[m:[RekeningLeenBudget Raafrekening, Persoon Dennis], r:[01-12-2012, 01-01-2013]]
+  -6000 Dennis moet raafrekening betalen aan Raafrekening[m:[RekeningLeenBudget Raafrekening, Persoon Dennis], r:[01-01-2013, 01-02-2013]]
+  -8000 Dennis moet raafrekening betalen aan Raafrekening[m:[RekeningLeenBudget Raafrekening, Persoon Dennis], r:[01-02-2013, 01-03-2013]]
+  -10000 Dennis moet raafrekening betalen aan Raafrekening[m:[RekeningLeenBudget Raafrekening, Persoon Dennis], r:[01-03-2013, 01-04-2013]]
+  -12000 Dennis moet raafrekening betalen aan Raafrekening[m:[RekeningLeenBudget Raafrekening, Persoon Dennis], r:[01-04-2013, 01-05-2013]]
+  -14000 Dennis moet raafrekening betalen aan Raafrekening[m:[RekeningLeenBudget Raafrekening, Persoon Dennis], r:[01-05-2013, 01-06-2013]]
+  -16000 Dennis moet raafrekening betalen aan Raafrekening[m:[RekeningLeenBudget Raafrekening, Persoon Dennis], r:[01-06-2013, 01-07-2013]]
+  -18000 Dennis moet raafrekening betalen aan Raafrekening[m:[RekeningLeenBudget Raafrekening, Persoon Dennis], r:[01-07-2013, 01-08-2013]]
+  TOTAAL: -18000ct

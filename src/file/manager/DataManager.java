@@ -156,7 +156,7 @@ public class DataManager {
     private StringsData bonnetjes;
     private StringsData bierBonnetjes;
     private StringsData kookSchuldDelers;
-    private StringsData raafRekening;
+    private StringsData init;
     private StringsData afschriften;
     private StringsData betaaldVias;
     private StringsData contant;
@@ -172,12 +172,14 @@ public class DataManager {
         bonnetjes.read();
         bierBonnetjes.read();
         kookSchuldDelers.read();
-        raafRekening.read();
+        init.read();
         afschriften.read();
         betaaldVias.read();
         contant.read();
         afrekenings.read();
     }/**
+     * Check for excistence of crucial files: Personen Kookdagen/**
+     * Check for excistence of crucial files: Personen Kookdagen/**
      * Check for excistence of crucial files: Personen Kookdagen/**
      * Check for excistence of crucial files: Personen Kookdagen
      */
@@ -189,7 +191,7 @@ public class DataManager {
         bonnetjes = c.collect(format.bonnetjes);
         bierBonnetjes = c.collect(format.bierBonnetjes);
         kookSchuldDelers = c.collect(format.kookSchuldDelers);
-        raafRekening = c.collect(format.init);
+        init = c.collect(format.init);
         afschriften = c.collectING(format.afschriften);
         betaaldVias = c.collect(format.betaaldVias);
         contant = c.collect(format.contantRecords);
@@ -224,8 +226,8 @@ public class DataManager {
         return kookSchuldDelers;
     }
 
-    public StringsData getRaafRekening() {
-        return raafRekening;
+    public StringsData getInit() {
+        return init;
     }
 
     public StringsData getBierBonnetjes() {

@@ -1,0 +1,18 @@
+******************************************************************************************************************************************************************
+*Datum     *Event                                              *Budget van test*Totaal (0)*Op de bank van test*Totaal (0)*Totaal verschuldigd aan test*Totaal (0)*
+******************************************************************************************************************************************************************
+*20-03-2012*Dennis heeft iets gekocht bij Jan Linders voor test*-€0.79         * -€0.79   *                   *"         *-€0.79                      * -€0.79   *
+*25-03-2013*Dennis heeft iets gekocht bij Jan Linders voor test*-€1.18         * -€1.97   *                   *"         *-€1.18                      * -€1.97   *
+*02-04-2013*Dennis heeft iets gekocht bij Jan Linders voor test*-€1.39         * -€3.36   *                   *"         *-€1.39                      * -€3.36   *
+*23-04-2013*Dennis heeft iets gekocht bij Jan Linders voor test*-€1.29         * -€4.65   *                   *"         *-€1.29                      * -€4.65   *
+*07-05-2013*Dennis heeft iets gekocht bij Jan Linders voor test*-€12.76        * -€17.41  *                   *"         *-€12.76                     * -€17.41  *
+*15-05-2013*Boris heeft iets gekocht bij Jan Linders voor test *-€2.9          * -€19.50  *                   *"         *-€2.9                       * -€19.50  *
+*17-05-2013*Dennis heeft iets gekocht bij Jan Linders voor test*-€1.29         * -€20.79  *                   *"         *-€1.29                      * -€20.79  *
+*03-06-2013*Dennis heeft iets gekocht bij Jan Linders voor test*-€3.28         * -€24.7   *                   *"         *-€3.28                      * -€24.7   *
+*24-06-2013*Dennis heeft iets gekocht bij Jan Linders voor test*-€1.96         * -€26.3   *                   *"         *-€1.96                      * -€26.3   *
+*31-07-2013*Dennis heeft iets gekocht bij Jan Linders voor test*-€1.15         * -€27.18  *                   *"         *-€1.15                      * -€27.18  *
+*05-08-2013*Dennis heeft iets gekocht bij Jan Linders voor test*-€1.89         * -€29.7   *                   *"         *-€1.89                      * -€29.7   *
+*05-08-2013*Dennis heeft iets gekocht bij Jan Linders voor test*-€4.99         * -€34.6   *                   *"         *-€4.99                      * -€34.6   *
+*TOTALEN:  *12                                                 *               *-€34.6    *                   *€0.0      *                            *-€34.6    *
+******************************************************************************************************************************************************************
+

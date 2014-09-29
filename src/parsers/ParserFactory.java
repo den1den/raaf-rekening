@@ -116,7 +116,8 @@ public class ParserFactory {
 
         @Override
         protected void parseData(StringsData data) {
-            int lineNumber = 0;
+            curr = data;
+            lineNumber = 0;
             for (String[] fileLine : data) {
                 try {
                     parseLine(fileLine);
