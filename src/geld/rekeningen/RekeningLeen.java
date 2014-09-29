@@ -15,7 +15,11 @@ public class RekeningLeen extends Rekening {
 
     public RekeningLeen(String naam, boolean contant) {
         super(naam, contant);
-        krijgtNogVan = new SomMap<>(10, new VerschuldDigdParams());
+        krijgtNogVan = new VerschuldigdMap(10);
+    }
+
+    public SomMap<RekeningLeen> getKrijgtNogVan() {
+        return krijgtNogVan;
     }
     
     protected void doKrijgtNogVanSingle(RekeningLeen lr, int bedrag, Event e) {
@@ -27,7 +31,11 @@ public class RekeningLeen extends Rekening {
         lr.doKrijgtNogVanSingle(this, -bedrag, e);
     }
 
-    private class VerschuldDigdParams extends SomMap.SomMapParams<RekeningLeen> {
+    private class VerschuldigdMap extends SomMap<RekeningLeen> {
+
+        public VerschuldigdMap(int initialCapacity) {
+            super(initialCapacity);
+        }
 
         @Override
         String getBeschrijvingTotaal() {

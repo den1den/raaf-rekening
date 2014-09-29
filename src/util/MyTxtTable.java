@@ -21,10 +21,15 @@ public class MyTxtTable {
     List<Integer> colWidth;
     int totalWidth;
     char c = '*';
-    private String NULL = "null";
+    private final String NULL;
 
     public MyTxtTable(List<String[]> rows) {
+        this(rows, "null");
+    }
+
+    public MyTxtTable(List<String[]> rows, String nulL) {
         this.rows = rows;
+        this.NULL = nulL;
         colWidth = new LinkedList<>();
         for (String[] row : rows) {
             int currWidth = 1;
@@ -34,14 +39,14 @@ public class MyTxtTable {
                     row[i] = NULL;
                     field = NULL;
                 }
-                    if (i >= colWidth.size()) {
-                        colWidth.add(field.length());
-                    } else {
-                        int oldWidth = colWidth.get(i);
-                        if (field.length() > oldWidth) {
-                            colWidth.set(i, field.length());
-                        }
+                if (i >= colWidth.size()) {
+                    colWidth.add(field.length());
+                } else {
+                    int oldWidth = colWidth.get(i);
+                    if (field.length() > oldWidth) {
+                        colWidth.set(i, field.length());
                     }
+                }
             }
         }
         totalWidth = 1;
@@ -63,8 +68,8 @@ public class MyTxtTable {
         }
         return sb.toString();
     }
-    
-    public String[] toLines(){
+
+    public String[] toLines() {
         LinkedList<String> lines = new LinkedList<>();
         for (StringTokenizer st = new StringTokenizer(toString(), System.lineSeparator()); st.hasMoreTokens();) {
             String line = st.nextToken();
@@ -105,6 +110,10 @@ public class MyTxtTable {
             super(rows);
         }
 
+        public MyTxtTableHeader(List<String[]> rows, String nulL) {
+            super(rows, nulL);
+        }
+
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder((totalWidth + 2) * (rows.size() + 2));
@@ -123,4 +132,5 @@ public class MyTxtTable {
             return sb.toString();
         }
     }
+    
 }

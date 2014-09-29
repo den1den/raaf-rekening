@@ -28,11 +28,11 @@ import java.util.logging.Logger;
 public class Datum implements Comparable<Datum>, Cloneable {
 
     static final DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-    
+
     static final public Datum begin = new Begin();
-static final public Datum nu = new Nu();
+    static final public Datum nu = new Nu();
     static final public Datum eind = new Einde();
-    
+
     /**
      * must be defenced against
      */
@@ -130,10 +130,10 @@ static final public Datum nu = new Nu();
     @Override
     public int compareTo(Datum o) {
         //return calendar.compareTo(o.calendar);
-        if(o instanceof Einde){
+        if (o instanceof Einde) {
             return -1;
         }
-        if (o instanceof Begin){
+        if (o instanceof Begin) {
             return 1;
         }
         return COMP_BY_DAY.compare(this, o);
@@ -154,6 +154,9 @@ static final public Datum nu = new Nu();
 
         @Override
         public int compareDatums(Datum o1, Datum o2) {
+            if(o1 == null || o2 == null){
+                throw new IllegalArgumentException();
+            }
             int cmp = Integer.compare(o1.jaar(), o2.jaar());
             if (cmp == 0) {
                 cmp = Integer.compare(o1.maand(), o2.maand());
@@ -188,9 +191,9 @@ static final public Datum nu = new Nu();
         public SpecialDatum() {
             super(null);
         }
-        
+
         @Override
-        public String toString(){
+        public String toString() {
             return getClass().getSimpleName();
         }
 
@@ -238,11 +241,11 @@ static final public Datum nu = new Nu();
         public int compare(Datum o1, Datum o2) {
             return compareDatums(o1, o2);
             /*if (!(o1 instanceof SpecialDatum)
-                    && !(o2 instanceof SpecialDatum)) {
+             && !(o2 instanceof SpecialDatum)) {
                 
-            } else {
-                return o2.compareTo(o1);
-            }*/
+             } else {
+             return o2.compareTo(o1);
+             }*/
         }
 
         protected abstract int compareDatums(Datum o1, Datum o2);

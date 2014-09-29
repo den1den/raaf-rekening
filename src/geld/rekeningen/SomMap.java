@@ -7,6 +7,8 @@ package geld.rekeningen;
 
 import data.types.HasNaam;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -14,26 +16,25 @@ import java.util.Map;
  * @author Dennis
  * @param <K>
  */
-public class SomMap<K extends HasNaam> {
+public abstract class SomMap<K extends HasNaam> implements Iterable<Som> {
 
-    private final SomMapParams params;
     private final Map<K, Som> all;
     private final Som total;
 
-    SomMap(int initialCapacity, SomMapParams<K> params) {
-        if (params == null) {
-            throw new IllegalArgumentException();
-        }
-        this.params = params;
+    SomMap(int initialCapacity) {
         this.all = new HashMap<>(initialCapacity);
         this.total = new TotalSom();
+    }
+
+    public Som getTotal() {
+        return total;
     }
 
     /**
      * Add a value to the sum of the key.
      */
     public void add(K key, int value, Event e) {
-        if(key == null || e == null){
+        if (key == null || e == null) {
             throw new IllegalArgumentException();
         }
         Som s = all.get(key);
@@ -46,14 +47,11 @@ public class SomMap<K extends HasNaam> {
         s.put(value, e);
     }
 
-    abstract static class SomMapParams<K extends HasNaam> {
+    abstract String getBeschrijvingTotaal();
 
-        abstract String getBeschrijvingTotaal();
+    abstract String getBeschrijvingSubSom(K van);
 
-        abstract String getBeschrijvingSubSom(K van);
-    }
-
-    private class SubSom extends Som {
+    public class SubSom extends Som {
 
         final K van;
 
@@ -63,11 +61,7 @@ public class SomMap<K extends HasNaam> {
 
         @Override
         public String beschrijving() {
-            return params.getBeschrijvingSubSom(van);
-        }
-
-        public SomMap getParent(){
-            return SomMap.this;
+            return getBeschrijvingSubSom(van);
         }
     }
 
@@ -75,8 +69,13 @@ public class SomMap<K extends HasNaam> {
 
         @Override
         public String beschrijving() {
-            return params.getBeschrijvingTotaal();
+            return getBeschrijvingTotaal();
         }
 
+    }
+
+    @Override
+    public Iterator<Som> iterator() {
+        return new HashSet<>(all.values()).iterator();
     }
 }

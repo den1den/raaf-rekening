@@ -15,7 +15,7 @@ import tijd.Datum;
  * @author Dennis
  */
 public class Afschrift
-        implements Referentie, HasDatum {
+        extends Referentie implements HasDatum {
 
     private final Datum datum;
     private final String van;

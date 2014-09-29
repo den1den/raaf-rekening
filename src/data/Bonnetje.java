@@ -16,7 +16,7 @@ import tijd.Datum;
  *
  * @author Dennis
  */
-public class Bonnetje implements Referentie, HasBedrag, HasDatum{
+public class Bonnetje extends Referentie implements HasBedrag, HasDatum{
 
     public static Comparator<Bonnetje> getByDate() {
         return new Comparator<Bonnetje>() {

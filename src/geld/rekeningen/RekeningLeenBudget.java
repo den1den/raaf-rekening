@@ -24,6 +24,10 @@ public class RekeningLeenBudget extends RekeningLeen{
     public RekeningLeenBudget(String naam, boolean contant) {
         super(naam, contant);
     }
+
+    public Som getBudget() {
+        return budget;
+    }
     
     protected void doBudgetBijDuo(RekeningLeenBudget bij, int bedrag, Event e){
         doBudgetBijSingle(bedrag, e);

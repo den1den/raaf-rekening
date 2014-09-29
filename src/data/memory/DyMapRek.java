@@ -110,4 +110,9 @@ public abstract class DyMapRek<T extends HasNaam> extends DyMapNaam<T> {
             return echte;
         }
     }
+
+    @Override
+    public String toString() {
+        return super.toString()+" rek:"+rekening.toString();
+    }
 }

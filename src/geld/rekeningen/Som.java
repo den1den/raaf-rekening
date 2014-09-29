@@ -5,20 +5,33 @@
  */
 package geld.rekeningen;
 
+import geld.rekeningen.Som.Record;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Vector;
+import util.Map2Ints;
 
 /**
  *
  * @author Dennis
  */
-public abstract class Som {
-
+public abstract class Som implements Iterable<Record>{
+    
     private final int startBedrag;
+    private final LinkedList<Record> records = new LinkedList<>();
 
-    private final LinkedList<Integer> added = new LinkedList<>();
+    public static class Record {
+        public final int diff;
+        public final Event history;
 
-    private final List<Event> history = new LinkedList<>();
+        public Record(int diff, Event history) {
+            this.diff = diff;
+            this.history = history;
+        }
+        
+    }
 
     public Som() {
         this.startBedrag = 0;
@@ -28,36 +41,48 @@ public abstract class Som {
         this.startBedrag = startBedrag;
     }
 
-    int getTotal() {
-        int total = startBedrag;
-        for (Integer diff : added) {
-            total += diff;
-        }
-        return total;
-    }
-
-    int getTotal(int atIndex) {
-        if (atIndex < 0 || atIndex >= added.size()) {
-            throw new IllegalArgumentException();
-        }
-        int total = startBedrag;
-
-        int index = 0;
-        for (Integer diff : added) {
-            if (index == atIndex) {
-                return total;
-            }
-            total += diff;
-            index++;
-        }
-        return total;
+    public LinkedList<Record> getRecords() {
+        return records;
     }
 
     int put(int diff, Event e) {
-        int index = added.size();
-        added.add(diff);
-        history.add(e);
+        records.add(new Record(diff, e));
+        
+        int index = records.size();
+        e.addSum(this, index);
         return index;
+    }
+
+    public int getDiff(int index) throws IndexOutOfBoundsException {
+        checkChangeIndex(index);
+        return records.get(index - 1).diff;
+    }
+    
+    public Event getHistory(int index) {
+        checkChangeIndex(index);
+        return records.get(index - 1).history;
+    }
+
+    public int getTotal() {
+        int total = startBedrag;
+        for (Record r : records) {
+            total += r.diff;
+        }
+        return total;
+    }
+
+    public int getTotal(int index) {
+        checkIndex(index);
+
+        int i = 0;
+        int total = startBedrag;
+
+        Iterator<Record> it = records.iterator();
+        while (i < index) {
+            total += it.next().diff;
+            i++;
+        }
+        return total;
     }
 
     void af(int bedrag, Event e) {
@@ -74,9 +99,51 @@ public abstract class Som {
         put(bedrag, e);
     }
 
-    public List<Event> getHistory() {
-        return history;
+    abstract public String beschrijving();
+
+    @Override
+    public String toString() {
+        int totaal = getTotal();
+        return beschrijving() + "€" + totaal / 100 + "." + totaal % 100;
     }
 
-    abstract public String beschrijving();
+    /**
+     *
+     * @param key
+     * @param indexes
+     * @return
+     */
+    public int getTotalDiff(List<Integer> indexes) {
+        int diff = 0;
+        Iterator<Integer> it = indexes.iterator();
+        if (!it.hasNext()) {
+            throw new IllegalAccessError();
+        }
+
+        Integer index = it.next();
+        diff += getDiff(index);
+        while (it.hasNext()) {
+            index = it.next();
+            diff += getDiff(index);
+        }
+        
+        return diff;
+    }
+
+    private void checkIndex(int index) {
+        if (index < 0 || index > records.size()) {
+            throw new IndexOutOfBoundsException("Index: " + index + ", numChanges: " + (index));
+        }
+    }
+
+    private void checkChangeIndex(int index) {
+        if (index < 1 || index > records.size()) {
+            throw new IndexOutOfBoundsException("Index: " + index + ", numChanges: " + (index));
+        }
+    }
+
+    @Override
+    public Iterator<Record> iterator() {
+        return records.iterator();
+    }
 }

@@ -5,12 +5,16 @@
  */
 package raafbeheer;
 
+import data.Afrekening;
 import data.Afschrift;
+import data.BetaaldVia;
 import data.BewoonPeriode;
 import data.BierBonnetje;
 import data.Bonnetje;
 import data.Kookdag;
 import data.Persoon;
+import data.ContantRecord;
+import data.ContantRecord.DoubleContantRecordSet;
 import data.memory.Memory;
 import file.manager.DataManager;
 import file.manager.FormatFactory;
@@ -26,6 +30,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import tijd.Datum;
 import tijd.IntervalDatums;
+import util.diplay.ResultPrintStream;
 
 /**
  *
@@ -37,8 +42,8 @@ public class RaafBeheer {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        
-        int version = 4;
+
+        int version = 5;
         RaafBeheer raafBeheer;
         try {
             raafBeheer = new RaafBeheer(version);
@@ -62,7 +67,7 @@ public class RaafBeheer {
             System.out.println();
             raafBeheer.forReal();
         }
-        
+
         Toolkit.getDefaultToolkit().beep();
     }
 
@@ -98,24 +103,48 @@ public class RaafBeheer {
         Set<Bonnetje> bonnetjes = formats.bonnetjes.parser.parse(files.getBonnetjes());
         Set<BierBonnetje> bierBonnetjes = formats.bierBonnetjes.parser.parse(files.getBierBonnetjes());
         Map<Persoon, Persoon> kookSchuldDelers = formats.kookSchuldDelers.parser.parse(files.getKookSchuldDelers());
+        Set<BetaaldVia> betaaldVias = formats.betaaldVias.parser.parse(files.getBetaaldVias());
+        DoubleContantRecordSet stortingsRecords = formats.contantRecords.parser.parse(files.getStortingen());
+        Set<Afrekening> afrekenings = formats.afrekenings.parser.parse(files.getAfrekenings());
+        Afrekening.match(afrekenings, bewoonPeriodes);
 
         IntervalDatums oude_spreadsheet = IntervalDatums.tot(new Datum(2013, 8, 6));
-        System.out.println("periode: "+oude_spreadsheet);
-        
+        System.out.println("periode: " + oude_spreadsheet);
+
         policy = new Policy(version, memory, oude_spreadsheet);
         //LeenRekening kookR = new LeenRekening.Easy("Kook Rekening");
         //policy.verrekenKookdagen(kookdagen, kookSchuldDelers, kookR);
         //result.listResultaat(memory.personen.getAll(), kookR);
         //result.listEnkel(memory.personen.get("Mark"), kookR);
 
-         RaafRekening raafRekening = new RaafRekening("Raaf Rekening");
-         policy.verrekenBewoonPeriodes(bewoonPeriodes, raafRekening);
+        RekeningLeenBudget raafRekening = new RekeningLeenBudget("Raaf Rekening");
 
-         policy.verrekenBonnetjes(bonnetjes, raafRekening);
+        policy.verrekenBewoonPeriodes(bewoonPeriodes, raafRekening);
+        result.toFile();
+        result.listAsSpreadsheet(raafRekening);
 
-         policy.verwerkAfschriften(afschriften, bonnetjes, raafRekening);
-         
-         result.listAsSpreadsheetToFile(raafRekening);
+        policy.verrekenAfBetaaldVias(betaaldVias, raafRekening);
+        result.toFile();
+        result.listAsSpreadsheet(raafRekening);
+
+        policy.verrekenBonnetjes(bonnetjes, raafRekening);
+        result.toFile();
+        result.listAsSpreadsheet(raafRekening);
+
+        policy.verwerkContants(afschriften, stortingsRecords, raafRekening);
+        result.toFile();
+        result.listAsSpreadsheet(raafRekening);
+
+        policy.verwerkAfschriften(afschriften, bonnetjes, raafRekening);
+        result.toFile();
+        result.listAsSpreadsheet(raafRekening);
+
+        result.toOut();
+        result.listPersoonDetailed(memory.personen.get("Erik"));
+        for (Persoon p : memory.personen) {
+            result.listPersoon(p);
+        }
+
         //result.showFactuurs(fs);
         //result.showDetailledTov(memory.personen.get("Dennis"), perR, bonR, afR);
     }
@@ -149,27 +178,5 @@ public class RaafBeheer {
 
         //Collector collector = new Collector(directory, recursive);
         //collector.run();
-    }
-
-    private static class RaafRekening extends RekeningLeenBudget{
-
-        public RaafRekening(String naam) {
-            super(naam);
-        }
-        
-    }
-
-    private static class ResultPrintStream {
-
-        public ResultPrintStream() {
-        }
-
-        private ResultPrintStream(int version) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
-
-        private void listAsSpreadsheetToFile(RaafRekening raafRekening) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
     }
 }

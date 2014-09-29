@@ -7,6 +7,7 @@ package geld.rekeningen;
 
 import data.types.HasNaam;
 import geld.Referentie;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -31,6 +32,14 @@ public class Rekening extends HasNaam{
         } else {
             this.contant = null;
         }
+    }
+
+    public Som getContant() {
+        return contant;
+    }
+
+    public Som getBankRekening() {
+        return bankRekening;
     }
 
     protected void doRekeningBijSingle(int bedrag, Event e) {
@@ -68,7 +77,7 @@ public class Rekening extends HasNaam{
     }
 
     public List<Event> getAllHistory() {
-        return allHistory;
+        return new ArrayList<>(allHistory);
     }
 
     

@@ -6,15 +6,22 @@
 package file.manager;
 
 import data.AankoopCat;
+import data.Afrekening;
 import data.Afschrift;
+import data.BetaaldVia;
 import data.BewoonPeriode;
 import data.BierBonnetje;
 import data.Bonnetje;
 import data.Incasso;
 import data.Kookdag;
 import data.Persoon;
+import data.ContantRecord;
+import data.ContantRecord.DoubleContantRecordSet;
 import data.Winkel;
 import data.memory.Memory;
+import file.StringsData;
+import geld.rekeningen.Rekening;
+import geld.rekeningen.RekeningLeen;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -59,6 +66,9 @@ public class FormatFactory {
         raafRekening = createRekening();
         kookSchuldDelers = createKookSchuldDelers();
         bierBonnetjes = createBierBonnetjes();
+        betaaldVias = createBetaaldVias();
+        contantRecords = createContantRecords();
+        afrekenings = createAfrekenings();
     }
 
     public final Format<Set<Object>> personen;
@@ -70,6 +80,9 @@ public class FormatFactory {
     public final Format<IntegerParsable> raafRekening;
     public final Format<Map<Persoon, Persoon>> kookSchuldDelers;
     public final Format<Set<BierBonnetje>> bierBonnetjes;
+    public final Format<Set<BetaaldVia>> betaaldVias;
+    public final Format<DoubleContantRecordSet> contantRecords;
+    public final Format<Set<Afrekening>> afrekenings;
 
     private final StringParser<Integer> bedragParser;
 
@@ -282,9 +295,9 @@ public class FormatFactory {
                 }
 
                 String winkelNaam = strings[++index];
-                
+
                 if (winkelNaam.isEmpty()) {
-                    if(winkel == null){
+                    if (winkel == null) {
                         throw new MyParseException(index);
                     }
                 } else {
@@ -429,6 +442,12 @@ public class FormatFactory {
         parser = parserFactory.new SingleParser<Memory>( 
              
              
+             
+             
+             
+             
+             
+             
             memoryInstance) {
 
             private static final String typePersoon = "nickname";
@@ -450,47 +469,48 @@ public class FormatFactory {
                 String subject = strings[++index];
                 switch (type) {
                     case typePersoon:
-                        Persoon p = memoryInstance.personen.find(subject);
+                        Persoon p = instance.personen.find(subject);
                         while (index < strings.length) {
-                            memoryInstance.personen.put(p, strings[index++]);
+                            instance.personen.put(p, strings[index++]);
                         }
                         break;
                     case typeRekening:
-                        p = memoryInstance.personen.find(subject);
+                        p = instance.personen.find(subject);
                         while (++index < strings.length) {
-                            memoryInstance.personen.putRek(p, strings[index]);
+                            instance.personen.putRek(p, strings[index]);
                         }
                         break;
                     case typeIncasso:
                         String rek = strings[++index];
                         Incasso i = new Incasso(subject, rek);
-                        memoryInstance.incassos.put(i, rek);
+                        instance.incassos.put(i);
+                        instance.incassos.putRek(i, rek);
                         break;
                     case typeWinkel:
                         String categorieNaam = strings[++index];
-                        AankoopCat defaultCat = memoryInstance.aankoopCats.find(categorieNaam);
+                        AankoopCat defaultCat = instance.aankoopCats.find(categorieNaam);
 
                         String[] medeDelingen
                                 = new String[strings.length - 1 - index];
 
                         System.arraycopy(strings, index, medeDelingen, 0, medeDelingen.length);
 
-                        Winkel w = memoryInstance.winkels.get(subject);
+                        Winkel w = instance.winkels.get(subject);
                         if (w == null) {
                             w = new Winkel(subject, defaultCat);
-                            memoryInstance.winkels.put(w, subject);
+                            instance.winkels.put(w, subject);
                         } else {
                             w.foundDefaultCat(defaultCat);
                         }
                         for (String mededeling : medeDelingen) {
-                            memoryInstance.winkels.putMede(w, mededeling);
+                            instance.winkels.putMede(w, mededeling);
                         }
                         break;
                     case typeAankoopCat:
-                        AankoopCat cat = memoryInstance.aankoopCats.find(subject);
+                        AankoopCat cat = instance.aankoopCats.find(subject);
 
                         while (++index < strings.length) {
-                            memoryInstance.aankoopCats.put(cat, strings[index]);
+                            instance.aankoopCats.put(cat, strings[index]);
                         }
                         break;
                     default:
@@ -512,48 +532,67 @@ public class FormatFactory {
         MyFilenameFilter filenameFilter;
         SetParser<BewoonPeriode> parser;
 
-        header = new String[]{"Naam", "Periode (van)", "Periode (tot)", "..."};
+        header = new String[]{"Naam", "Periode (van)", "Periode (tot)", "bedrag", "..."};
         filenameFilter = new MyFilenameFilter("bewoners");
-        parser = parserFactory.new SetParser<BewoonPeriode>() {
-            private final StringsParser<IntervalDatums> perParser
-                    = new StringsParser.IntervalParser(
-                            new StringParser.NormalDatum());
+        if (version >= 5) {
+            parser = parserFactory.new SetParser<BewoonPeriode>() {
+                private final StringsParser<IntervalDatums> perParser
+                        = new StringsParser.IntervalParser(
+                                new StringParser.NormalDatum());
+                //private final StringParser<Integer> bedragParser = new StringParser.Bedrag();
+                private Integer bedrag = null;
 
-            @Override
-            protected BewoonPeriode parseLine(String[] strings) {
-                if (strings.length < 2) {
-                    throw new MyParseException.Length();
+                @Override
+                protected BewoonPeriode parseLine(String[] strings) {
+                    if (strings.length < 2) {
+                        throw new MyParseException.Length();
+                    }
+                    int index = 0;
+
+                    //find subject for this line
+                    Persoon subject = memoryInstance.personen.find(strings[index]);
+                    BewoonPeriode last = null;
+
+                    while (++index < strings.length) {
+                        IntervalDatums interval;
+
+                        String start = strings[index];
+
+                        if (++index < strings.length) {
+                            String end = strings[index];
+                            interval = perParser.parseSepa(start, end);
+                        } else {
+                            interval = perParser.parseSepa(start);
+                        }
+                        if (interval == null) {
+                            throw new MyParseException(index, "Interval onleesbaar");
+                        }
+                        if (interval.isNegative()) {
+                            throw new MyParseException(index, "Interval is negatief");
+                        }
+
+                        if (++index < strings.length) {
+                            //nieuw bedrag
+                            this.bedrag = bedragParser.parse(strings[index]);
+                            if (bedrag == null) {
+                                throw new MyParseException(index, "Bedrag onleesbaar");
+                            }
+                        } else if (bedrag == null) {
+                            throw new MyParseException(index, "Geen bedrag opgegeven");
+                        }
+
+                        if (last != null) {
+                            instance.add(last);
+                        }
+
+                        last = new BewoonPeriode(subject, interval, bedrag);
+                    }
+                    return last;
                 }
-
-                int index = 0;
-
-                Persoon subject = memoryInstance.personen.find(strings[index]);
-                BewoonPeriode last = null;
-
-                while (++index < strings.length) {
-                    IntervalDatums interval;
-
-                    String start = strings[index];
-                    if (++index < strings.length) {
-                        String end = strings[index];
-
-                        interval = perParser.parseSepa(start, end);
-                    } else {
-                        interval = perParser.parseSepa(start);
-                    }
-
-                    if (last != null) {
-                        instance.add(last);
-                    }
-
-                    if (interval == null) {
-                        throw new MyParseException(index, "Cant find new interval");
-                    }
-                    last = new BewoonPeriode(subject, interval);
-                }
-                return last;
-            }
-        };
+            };
+        } else {
+            throw new UnsupportedOperationException("Wrong version (must be >= 5): " + version);
+        }
 
         return new Format<>(filenameFilter, header, parser);
     }
@@ -567,6 +606,15 @@ public class FormatFactory {
         filenameFilter = new MyFilenameFilter("bewoners");
         parser = parserFactory.new SingleParser<IntegerParsable>(
                  
+             
+             
+             
+             
+             
+             
+             
+             
+             
              
              
              
@@ -666,6 +714,185 @@ public class FormatFactory {
                 return new BierBonnetje(merk, kratten, totaalPrijs, datum, winkel);
             }
         };
+        return new Format<>(filenameFilter, header, parser);
+    }
+
+    private Format<Set<BetaaldVia>> createBetaaldVias() {
+        String[] header;
+        MyFilenameFilter filenameFilter;
+        SetParser<BetaaldVia> parser;
+
+        header = new String[]{"datum", "onderwerp", "betaald", "via", "rede", "(Is een contante transactie via iemand naar de Raaf)"};
+        filenameFilter = new MyFilenameFilter("af-betaald-via");
+        parser = parserFactory.new SetParser<BetaaldVia>() {
+            final StringParser<Datum> DATEPARSER = new StringParser.NormalDatum("dd-MM-yyyy");
+
+            final private String SAME_STRING = "idem";
+
+            private RekeningLeen onderwerp = null;
+            private Persoon via = null;
+            private String rede = null;
+
+            @Override
+            protected BetaaldVia parseLine(String[] strings) {
+                if (strings.length < 5) {
+                    throw new MyParseException.Length();
+                }
+                Datum datum;
+                Integer bedrag;
+
+                int index = 0;
+
+                datum = DATEPARSER.parse(strings[index]);
+                if (datum == null) {
+                    throw new MyParseException(index);
+                }
+
+                String onderwerpString = strings[++index];
+                if (onderwerpString.isEmpty() || onderwerpString.equals(SAME_STRING)) {
+                    if (onderwerp == null) {
+                        throw new MyParseException(index, "Vorrige onderwerp niet gevonden");
+                    }
+                } else {
+                    onderwerp = memoryInstance.personen.get(onderwerpString);
+                    if (onderwerp == null) {
+                        onderwerp = memoryInstance.incassos.get(onderwerpString);
+                        if (onderwerp == null) {
+                            throw new MyParseException(index, "Onderwerp niet bekend: " + onderwerpString);
+                        }
+                    }
+                }
+
+                bedrag = bedragParser.parse(strings[++index]);
+                if (bedrag == null) {
+                    throw new MyParseException(index, "Bedrag niet gevonden");
+                }
+
+                String viaString = strings[++index];
+                if (viaString.isEmpty() || viaString.equals(SAME_STRING)) {
+                    if (via == null) {
+                        throw new MyParseException(index, "Vorrige via niet gevonden");
+                    }
+                } else {
+                    via = memoryInstance.personen.find(viaString);
+                }
+
+                String redeString = strings[++index];
+                if (redeString.isEmpty()) {
+                    throw new MyParseException(index, "rede is empty");
+                }
+                if (redeString.equals(SAME_STRING)) {
+                    if (rede == null) {
+                        throw new MyParseException(index, "Laatste rede niet gevonden");
+                    }
+                } else {
+                    rede = redeString;
+                }
+
+                return new BetaaldVia(datum, onderwerp, bedrag, via, rede);
+            }
+        };
+
+        return new Format<>(filenameFilter, header, parser);
+    }
+
+    private Format<DoubleContantRecordSet> createContantRecords() {
+        String[] header;
+        MyFilenameFilter filenameFilter;
+        ParserFactory.SimpleParser<DoubleContantRecordSet> parser;
+
+        header = new String[]{"datum", "bedrag (-isPin, +Storting)", "eigenaar (of GEVONDEN)", "opmerking"};
+        filenameFilter = new MyFilenameFilter("contant");
+        parser = parserFactory.new SimpleParser<DoubleContantRecordSet>() {
+            final StringParser<Datum> DATEPARSER = new StringParser.NormalDatum("dd-MM-yyyy");
+            final private String NONE_RECORD = "GEVONDEN";
+
+            @Override
+            protected void parseLine(String[] strings) {
+                if (strings.length != 4) {
+                    throw new MyParseException.Length();
+                }
+                Datum datum;
+                Integer bedrag;
+                Persoon eigenaar;
+                String opmerking;
+
+                int index = 0;
+
+                datum = DATEPARSER.parse(strings[index]);
+                if (datum == null) {
+                    throw new MyParseException(index, "Datum niet gevonden");
+                }
+
+                bedrag = bedragParser.parse(strings[++index]);
+                if (bedrag == null) {
+                    throw new MyParseException(index, "Bedrag niet gevonden");
+                }
+                if (bedrag == 0) {
+                    throw new MyParseException(index, "Rare storing/pin met bedrag: " + bedrag);
+                }
+
+                String eigenaarString = strings[++index];
+                if (eigenaarString.equals(NONE_RECORD)) {
+                    eigenaar = null;
+                } else {
+                    eigenaar = memoryInstance.personen.find(eigenaarString);
+                }
+
+                opmerking = strings[++index];
+                if (opmerking == null || opmerking.isEmpty()) {
+                    throw new MyParseException(index, "Geen opmerking");
+                }
+
+                instance.add(new ContantRecord(datum, bedrag, eigenaar, opmerking));
+            }
+
+            @Override
+            protected DoubleContantRecordSet init(int size) {
+                return new DoubleContantRecordSet(size);
+            }
+        };
+
+        return new Format<>(filenameFilter, header, parser);
+    }
+
+    private Format<Set<Afrekening>> createAfrekenings() {
+        String[] header;
+        MyFilenameFilter filenameFilter;
+        ParserFactory.SetParser<Afrekening> parser;
+
+        header = new String[]{"persoon", "datum"};
+        filenameFilter = new MyFilenameFilter("afrekening");
+        parser = parserFactory.new SetParser<Afrekening>() {
+            final StringParser<Datum> DATEPARSER = new StringParser.NormalDatum("dd-MM-yyyy");
+            final String pick_eind = "eind";
+
+            @Override
+            protected Afrekening parseLine(String[] strings) {
+                if(strings.length != 2)
+                    throw new MyParseException.Length();
+                
+                int index = 0;
+                
+                Persoon a = memoryInstance.personen.get(strings[index]);
+                if(a == null)
+                    throw new MyParseException(index, "Persoon niet gevonden");
+                
+                Datum d;
+                String dateString = strings[++index];
+                if(dateString.equals(pick_eind)){
+                    d = null;
+                }else{
+                    d = DATEPARSER.parse(dateString);
+                    if(d == null){
+                        throw new MyParseException(index, "Datum niet gevonden");
+                    }
+                }
+                
+                return new Afrekening(a, d);
+            }
+        };
+
         return new Format<>(filenameFilter, header, parser);
     }
 }

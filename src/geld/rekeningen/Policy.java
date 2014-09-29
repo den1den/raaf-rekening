@@ -6,19 +6,24 @@
 package geld.rekeningen;
 
 import data.Afschrift;
+import data.BetaaldVia;
 import data.BewoonPeriode;
 import data.Bonnetje;
 import data.Incasso;
 import data.Kookdag;
 import data.Persoon;
+import data.ContantRecord;
+import data.ContantRecord.DoubleContantRecordSet;
 import data.Winkel;
 import data.memory.Memory;
 import data.types.HasBedrag;
 import data.types.HasDatum;
 import geld.Referentie;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.RandomAccess;
@@ -109,21 +114,21 @@ public class Policy {
                     verreken = kookdag.getBedrag()
                             - kokPrijs - prijs * (m.getValue() - 1);
                     message = "{1} heeft gekookt";
-                    e = new Event(message, kookdag, r, verantwoordelijk);
-                    
+                    e = r.newE(verantwoordelijk, kookdag, message);
+
                     verantwoordelijk.doKrijgtNogVanDuo(r, verreken, e);
                     r.doRekeningBijSingle(-verreken, e);
-                    
+
                     total += verreken;
                 } else if (!persoon.kwijtschelden()) {
                     //meeter
                     verreken = prijs * (m.getValue());
                     message = "{1} heeft meegegeten";
-                    e = new Event(message, kookdag, r, verantwoordelijk);
-                    
+                    e = r.newE(verantwoordelijk, kookdag, message);
+
                     verantwoordelijk.doKrijgtNogVanDuo(r, -verreken, e);
                     r.doRekeningBijSingle(verreken, e);
-                    
+
                     total += verreken;
                 }
             }
@@ -135,23 +140,22 @@ public class Policy {
 
     public void verrekenBewoonPeriodes(
             Collection<BewoonPeriode> bewoonPeriodes,
-            RekeningLeen rekening) {
+            RekeningLeenBudget rekening) {
         for (BewoonPeriode bewoonPeriode : bewoonPeriodes) {
             Persoon persoon = bewoonPeriode.getPersoon();
+            final int bedrag = bewoonPeriode.getBedrag();
             for (BewoonPeriode.SubPeriode subPeriode : bewoonPeriode) {
-                final int bedrag = 2000;
                 if (subPeriode.getEind().isIn(periode)) {
-                    
+
                     String message = "{1} moet raafrekening betalen aan {0}";
-                    Event e = new Event(message, subPeriode, rekening, persoon);
-                    
-                    rekening.doRekeningBijSingle(bedrag, e);
+                    Event e = rekening.newE(persoon, subPeriode, message);
+
+                    rekening.doBudgetBijSingle(bedrag, e);
                     rekening.doKrijgtNogVanDuo(persoon, bedrag, e);
-                    
+
                 } else {
-                    System.out.println("discarding bewoon: " + subPeriode.getEind());
+                    //System.out.println("discarding bewoon: " + subPeriode.getEind());
                 }
-                //persoon.betaaldNog(verrekMetRekening, bedrag, subPeriode);
             }
         }
     }
@@ -161,33 +165,35 @@ public class Policy {
             RekeningLeenBudget rekening) {
         for (Bonnetje bonnetje : bonnetjes) {
             if (bonnetje.getDatum().isIn(periode)) {
-                
+
                 RekeningLeen betlaadDoor = bonnetje.getPersoon();
                 Rekening betaaldBij = bonnetje.getWinkel();
                 int bedrag = bonnetje.getBedrag();
-                
+
                 String message = "{1} heeft iets gekocht bij {2} voor {0}";
                 Event e = rekening.newE(betlaadDoor, betaaldBij, bonnetje, message);
-                
+
                 betaaldBij.doRekeningBijDuo(betlaadDoor, bedrag, e);
                 betlaadDoor.doKrijgtNogVanDuo(rekening, bedrag, e);
                 rekening.doBudgetBijSingle(-bedrag, e);
             }
         }
     }
-    private static Event besteedVia(RekeningLeenBudget r, RekeningLeen via, Rekening bij, int bedrag, Referentie referentie, String message){
+
+    private static Event besteedVia(RekeningLeenBudget r, RekeningLeen via, Rekening bij, int bedrag, Referentie referentie, String message) {
         Event e = r.newE(via, bij, referentie, message);
         besteedVia(r, via, bij, bedrag, e);
         return e;
     }
-    private static void besteedVia(RekeningLeenBudget r, RekeningLeen via, Rekening bij, int bedrag, Event e){
-        if(bedrag < 0){
+
+    private static void besteedVia(RekeningLeenBudget r, RekeningLeen via, Rekening bij, int bedrag, Event e) {
+        if (bedrag < 0) {
             throw new IllegalArgumentException();
         }
         //betaal
         bij.doRekeningBijDuo(via, bedrag, e);
         via.doKrijgtNogVanDuo(r, bedrag, e);
-        
+
         //betaal terug
         via.doRekeningBijDuo(r, bedrag, e);
         r.doKrijgtNogVanDuo(via, bedrag, e);
@@ -207,8 +213,6 @@ public class Policy {
                 } catch (Error e) {
                     throw new Error("At afschrift: " + afschrift, e);
                 }
-            } else {
-                System.out.println("discarding afs: " + afschrift.getDatum());
             }
         }
     }
@@ -278,8 +282,8 @@ public class Policy {
                         w = new Winkel(afschrift.getMededeling());
                         memory.winkels.putMede(w, afschrift.getMededeling());
                     }
-                    
-                    e = rekening.newE(referentie, "{0} kocht iets bij {1}");
+
+                    e = rekening.newE(w, referentie, "{0} kocht iets bij {1}");
 
                     rekening.doBudgetBijSingle(-bedrag, e);
                     rekening.doRekeningBijDuo(w, -bedrag, e);
@@ -297,7 +301,7 @@ public class Policy {
                 //overboeking
                 if (!afschrift.isAf()) {
                     RekeningLeen rl;
-                    
+
                     if (isMededelingRaRe(afschrift)) {
                         //zeker
                         rl = memory.personen.findRek(afschrift);
@@ -314,12 +318,12 @@ public class Policy {
                             System.err.println("Niet zeker afschrift van " + rl + ": " + afschrift);
                         }
                     }
-                    
-                    e = rekening.newE(afschrift,
+
+                    e = rekening.newE(rl, afschrift,
                             "{1} betaald schuld af aan {0}");
                     rekening.doKrijgtNogVanDuo(rl, -bedrag, e);
                     rekening.doRekeningBijDuo(rl, bedrag, e);
-                    
+
                     return e;
                 }
                 throw new UnknownError();
@@ -334,20 +338,18 @@ public class Policy {
                     Incasso incasso = memory.incassos.getRek(afschrift.getVanRekening());
                     if (incasso != null) {
                         //incasso detected
-                        
+
                         message = "{1} incassert bij {0}";
                         e = rekening.newE(incasso, referentie, message);
-                        
+
                         rekening.doBudgetBijSingle(-bedrag, e);
                         incasso.doRekeningBijDuo(rekening, bedrag, e);
-                        rekening.doVerwachtKostenVanDuo(incasso, -bedrag, e);
-                        
+
                         return e;
                     }
                     Persoon p = memory.personen.findRek(afschrift);
 
                     //Object o = ResultPrintStream.lijst1(p, rekening);
-                    
                     //kan voorgeschoten zijn...
                     message = "{1} heeft voorgeschoten voor {0} bij een aankoop bij {2}";
                     if (afschrift.getMededeling().toLowerCase().contains("voorgeschoten")) {
@@ -357,15 +359,18 @@ public class Policy {
                         if (marktplaats == null) {
                             marktplaats = new Winkel(MARKTPLAATS);
                         }
-                        
 
                         //ResultPrintStream.lijst2(o, p, rekening);
                         return besteedVia(rekening, p, marktplaats, bedrag,
                                 referentie, message);
                     } else if (afschrift.getMededeling().contains(" Correctie Raafrekening")
                             && afschrift.getVan().contains("D.J. van den Brand")) {
-                        Logger.getLogger(Policy.class.getName()).log(Level.INFO, "Eva contant gebeure1");
-                        throw new UnsupportedOperationException();
+                        message = "Eva gebeure: {0} geeft geld terug aan {1}";
+                        e = rekening.newE(p, referentie, message);
+                        p.doRekeningBijDuo(p, bedrag, e);
+                        rekening.doKrijgtNogVanDuo(p, bedrag, e);
+                        Logger.getLogger(Policy.class.getName()).log(Level.FINE, "Eva contant gebeure1");
+                        return e;
                     } else if (afschrift.getMededeling().equals(" 20e te veel betaald voor de huis rekening")
                             && afschrift.getVan().equals("M.M.C. Tilburgs                 ")) {
                         message = "{0} betaald uit aan {1}";
@@ -374,33 +379,38 @@ public class Policy {
                         rekening.doKrijgtNogVanDuo(p, bedrag, e);
                         return e;
                     } else if (afschrift.getMededeling().equals(" Ik had 27.17 eigen geld gestort  en heb al 20 gepind, dit is rest")) {
-                        Logger.getLogger(Policy.class.getName()).log(Level.INFO, "Eva contant gebeure2 (niet verrekend)");
+                        Logger.getLogger(Policy.class.getName()).log(Level.FINE, "Eva contant gebeure2 (niet verrekend)");
                         //teruggave zonder de kas, meer een écht lening dus?
-                        throw new UnsupportedOperationException();
-                        //rekening.betaaldUit(p, bedrag, referentie);
+                        
+                        message = "{0} betaald uit aan {1}: eva gebeuren";
+                        e = rekening.newE(p, referentie, message);
+                        
+                        p.doRekeningBijDuo(rekening, bedrag, e);
+                        rekening.doKrijgtNogVanDuo(p, bedrag, e);
+                        return e;
                     } else if (afschrift.getMededeling().equals(" Toilet papier 11-9-12")) {
                         Winkel onbekendeWinkel = memory.winkels.get(WINKEL_UNKNOWN_NAAM);
                         if (onbekendeWinkel == null) {
                             onbekendeWinkel = new Winkel(WINKEL_UNKNOWN_NAAM);
                         }
                         message = "{0} betaald uit aan {1} die iets heeft gekocht bij {2}";
-                        
+
                         return besteedVia(rekening, p, onbekendeWinkel, bedrag, referentie, message);
                     }
 
                     //zal wss tg incasso zijn? unzeker
                     Logger.getLogger(Policy.class.getName()).log(Level.INFO, "GT niet 100% zeker");
                     incasso = memory.incassos.findRek(afschrift);
-                    throw new UnknownError("Waar komt dit vandaan? "+incasso);
+                    throw new UnknownError("Waar komt dit vandaan? " + incasso);
                 } else {
                     //bijboeking
                     if (isMededelingRaRe(afschrift)) {
                         Persoon p = memory.personen.findRek(afschrift);
                         message = "{1} betaald handmatig schuld af aan {0}";
                         e = rekening.newE(p, referentie, message);
-                        
+
                         p.doKrijgtNogVanDuo(rekening, bedrag, e);
-                        
+
                         return e;
                     } else {
                         throw new UnsupportedOperationException();
@@ -418,13 +428,13 @@ public class Policy {
                         ing = memory.incassos.findRek(ING_INCASSO_NAAM, afschrift.getVanRekening());
                         memory.incassos.put(ing, afschrift.getVan());
                     }
-                    
-                    message = "{0} moet bankosten betalen aan {1}";                    
+
+                    message = "{0} moet bankosten betalen aan {1}";
                     e = rekening.newE(ing, referentie, message);
-                    
+
                     rekening.doBudgetBijSingle(-bedrag, e);
                     ing.doRekeningBijDuo(rekening, bedrag, e);
-                    
+
                 } else {
                     throw new Error();
                 }
@@ -442,10 +452,10 @@ public class Policy {
                             findRek(UPC_INCASSO_NAAM, afschrift.getVanRekening());
                     message = "{0} krijgt een incasso van {1}";
                     e = rekening.newE(incasso, referentie, message);
-                    
+
                     rekening.doBudgetBijSingle(-bedrag, e);
                     incasso.doRekeningBijDuo(rekening, bedrag, e);
-                    
+
                     return e;
                 } else {
                     throw new UnsupportedOperationException();
@@ -458,22 +468,14 @@ public class Policy {
                     Persoon p = memory.personen.findRek(afschrift);
                     message = "{0} krijgt periodieke overschrijving van {1}";
                     e = rekening.newE(p, referentie, message);
-                    
+
                     rekening.doBudgetBijSingle(bedrag, e);
                     p.doKrijgtNogVanDuo(rekening, bedrag, e);
-                    
+
                     return e;
                 } else {
                     throw new UnsupportedOperationException();
                 }
-            case "ST":
-                if (!afschrift.getMutatieSoort().equals("Storting")) {
-                    throw new Error("Storting verwacht ipv: " + afschrift.getMutatieSoort());
-                }
-                if (afschrift.isAf()) {
-                    throw new Error("Rare storting...");
-                }
-                throw new Error("Contant nog niet implemented2");
             case "GM":
                 if (!afschrift.getMutatieSoort().equals("Geldautomaat")) {
                     throw new Error("Geldautomaat verwacht ipv: " + afschrift.getMutatieSoort());
@@ -488,7 +490,7 @@ public class Policy {
                 throw new Error("Code: " + afschrift.getCode() + " niet bekend");
         }
         //if(true)
-            //throw new UnknownError();
+        //throw new UnknownError();
     }
 
     private boolean isMededelingRaRe(Afschrift afschrift) {
@@ -505,4 +507,115 @@ public class Policy {
         return isRaRa;
     }
 
+    public void verrekenAfBetaaldVias(Set<BetaaldVia> betaaldVias, RekeningLeenBudget raafRekening) {
+        for (BetaaldVia betaaldVia : betaaldVias) {
+            if (betaaldVia.getDatum().isIn(periode)) {
+                verrekenAfBetaaldVia(betaaldVia, raafRekening);
+            }
+        }
+    }
+
+    private void verrekenAfBetaaldVia(BetaaldVia betaaldVia, RekeningLeenBudget raafRekening) {
+        RekeningLeen onderwerp = betaaldVia.getOnderwerp();
+        Persoon via = betaaldVia.getVia();
+        int bedrag = betaaldVia.getBedrag();
+        if (bedrag < 0) {
+            throw new UnsupportedOperationException("Bedrag is kleiner dan 0 :(");
+        }
+        String message = "{1} wil bedrag afbetalen aan {0} maar geeft geld aan {2}: " + betaaldVia.getRede();
+        Event e = raafRekening.newE(onderwerp, via, betaaldVia, message);
+
+        via.doRekeningBijDuo(onderwerp, bedrag, e);
+        raafRekening.doKrijgtNogVanDuo(onderwerp, -bedrag, e);
+        raafRekening.doKrijgtNogVanDuo(via, bedrag, e);
+    }
+
+    public void verwerkContants(Set<Afschrift> afschriften, DoubleContantRecordSet contantRecords, RekeningLeenBudget raafRekening) {
+        for (Afschrift afschrift : new ArrayList<>(afschriften)) {
+            if (afschrift.getDatum().isIn(periode)) {
+                if (afschrift.getCode().equals("ST")) {
+                    if (!afschrift.getMutatieSoort().equals("Storting")) {
+                        throw new Error("Storting verwacht ipv: " + afschrift.getMutatieSoort());
+                    }
+                    if (afschrift.isAf()) {
+                        throw new Error("Assert: storting is altijd geld erbij");
+                    }
+                    verwerkStorting(afschrift, contantRecords.stortingen(), raafRekening);
+                    afschriften.remove(afschrift);
+                } else if (afschrift.getCode().equals("GM")) {
+                    if (!afschrift.getMutatieSoort().equals("Geldautomaat")) {
+                        throw new Error("Geldautomaat verwacht ipv: " + afschrift.getMutatieSoort());
+                    }
+                    if (!afschrift.isAf()) {
+                        throw new Error("Assert: pinnen is altijd geld eraf");
+                    }
+                    verwerkPin(afschrift, contantRecords.pins(), raafRekening);
+                    afschriften.remove(afschrift);
+                }
+            }
+        }
+    }
+
+    private static List<ContantRecord> search(Set<ContantRecord> records, Afschrift a) {
+        Datum d = a.getDatum();
+        List<ContantRecord> candidates = HasDatum.search(records, d, Datum.COMP_BY_DAY);
+
+        int bedrag = a.getBedrag();
+        candidates = HasBedrag.search(candidates, bedrag);
+
+        if (a.isAf()) {
+            //van rekening af dus:
+            for (ContantRecord cr : new ArrayList<>(candidates)) {
+                if(!cr.isPin()){
+                    candidates.remove(cr);
+                }
+            }
+        }else{
+            //bij rekening erbij dus:
+            for (ContantRecord cr : new ArrayList<>(candidates)) {
+                if(!cr.isStorting()){
+                    candidates.remove(cr);
+                }
+            }
+        }
+        return candidates;
+    }
+
+    private void verwerkStorting(Afschrift afschrift, Set<ContantRecord> contantRecords, RekeningLeenBudget raafRekening) {
+        int bedrag = afschrift.getBedrag();
+
+        List<ContantRecord> candidates = search(contantRecords, afschrift);
+
+        if (candidates.size() != 1) {
+            throw new Error("Storting: " + afschrift + " niet gevonden!");
+        }
+        ContantRecord cr = candidates.get(0);
+        cr.setAfschrift(afschrift);
+        Persoon eigenaar = cr.getEigenaar();
+
+        Event e = raafRekening.newE(eigenaar, cr, "{1} heeft geld gestort bij {0}");
+        contantRecords.remove(cr);
+
+        eigenaar.doKrijgtNogVanDuo(raafRekening, bedrag, e);
+        raafRekening.doRekeningBijDuo(eigenaar, bedrag, e);
+    }
+
+    private void verwerkPin(Afschrift afschrift, Set<ContantRecord> contantRecords, RekeningLeenBudget raafRekening) {
+        int bedrag = afschrift.getBedrag();
+        
+        List<ContantRecord> candidates = search(contantRecords, afschrift);
+        
+        if(candidates.size() != 1){
+            throw new Error("Pin: "+afschrift+" niet gevonden!");
+        }
+        ContantRecord cr = candidates.get(0);
+        cr.setAfschrift(afschrift);
+        Persoon eigenaar = cr.getEigenaar();
+        
+        Event e = raafRekening.newE(eigenaar, cr, "{1} heeft geld gepind bij {0}");
+        contantRecords.remove(cr);
+        
+        raafRekening.doKrijgtNogVanDuo(eigenaar, bedrag, e);
+        eigenaar.doRekeningBijDuo(raafRekening, bedrag, e);
+    }
 }

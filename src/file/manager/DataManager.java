@@ -29,7 +29,7 @@ public class DataManager {
     private final FileCollector c = new FileCollector();
 
     public DataManager(FormatFactory format, boolean recursive) {
-        this(EntriesFinder.simpleBasePath(true), format, recursive);
+        this(EntriesFinder.simpleBasePath(false), format, recursive);
     }
 
     public DataManager(String basePath, FormatFactory format, boolean recursive) {
@@ -53,20 +53,7 @@ public class DataManager {
         this.recursive = recursive;
     }
 
-    /**
-     * Check for excistence of crucial files: Personen Kookdagen
-     */
-    public void collect() {
-        personen = c.collect(format.personen);
-        kookdagen = c.collects(format.kookdagen);
-        memory = c.collect(format.memoryFormat);
-        bewoonperiode = c.collect(format.bewoonPeriodes);
-        bonnetjes = c.collect(format.bonnetjes);
-        bierBonnetjes = c.collect(format.bierBonnetjes);
-        kookSchuldDelers = c.collect(format.kookSchuldDelers);
-        raafRekening = c.collect(format.raafRekening);
-        afschriften = c.collectING(format.afschriften);
-    }
+    
 
     private class FileCollector {
 
@@ -171,6 +158,9 @@ public class DataManager {
     private StringsData kookSchuldDelers;
     private StringsData raafRekening;
     private StringsData afschriften;
+    private StringsData betaaldVias;
+    private StringsData contant;
+    private StringsData afrekenings;
 
     public void read() throws IOException {
         personen.read();
@@ -184,6 +174,26 @@ public class DataManager {
         kookSchuldDelers.read();
         raafRekening.read();
         afschriften.read();
+        betaaldVias.read();
+        contant.read();
+        afrekenings.read();
+    }/**
+     * Check for excistence of crucial files: Personen Kookdagen/**
+     * Check for excistence of crucial files: Personen Kookdagen
+     */
+    public void collect() {
+        personen = c.collect(format.personen);
+        kookdagen = c.collects(format.kookdagen);
+        memory = c.collect(format.memoryFormat);
+        bewoonperiode = c.collect(format.bewoonPeriodes);
+        bonnetjes = c.collect(format.bonnetjes);
+        bierBonnetjes = c.collect(format.bierBonnetjes);
+        kookSchuldDelers = c.collect(format.kookSchuldDelers);
+        raafRekening = c.collect(format.raafRekening);
+        afschriften = c.collectING(format.afschriften);
+        betaaldVias = c.collect(format.betaaldVias);
+        contant = c.collect(format.contantRecords);
+        afrekenings = c.collect(format.afrekenings);
     }
 
     public StringsData getPersonen() {
@@ -224,5 +234,17 @@ public class DataManager {
 
     public StringsData getAfschriften() {
         return afschriften;
+    }
+
+    public StringsData getBetaaldVias() {
+        return betaaldVias;
+    }
+
+    public StringsData getStortingen() {
+        return contant;
+    }
+
+    public StringsData getAfrekenings() {
+        return afrekenings;
     }
 }

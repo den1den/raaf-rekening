@@ -10,11 +10,13 @@ import data.types.HasNaam;
 import geld.Referentie;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import tijd.Datum;
-import util.Map2Int;
+import util.Map2Ints;
+import util.Map2Ints.Map2IntsAcending;
 
 /**
  *
@@ -25,7 +27,7 @@ public class Event implements Comparable<Event>, HasDatum{
     private final HasNaam[] betreft;
     private final Referentie referentie;
     private final String message;
-    private final Map2Int<Som> indexes;
+    private final Map2Ints<Som> indexesPerSom = new Map2IntsAcending<>(2);
 
     Event(String message, Referentie referentie, HasNaam... betreft) {
         this(betreft, referentie, message);
@@ -35,59 +37,45 @@ public class Event implements Comparable<Event>, HasDatum{
         if (!message.contains("{") && betreft.length > 0) {
             throw new UnsupportedOperationException("Lazy");
         }
-        if (referentie == null) {
+        if (referentie == null || betreft.length < 1) {
             throw new IllegalArgumentException();
         }
-        for (int i = 0; i < betreft.length; i++) {
-            if(betreft[i] == null)
+        for (HasNaam betreft1 : betreft) {
+            if (betreft1 == null) {
                 throw new IllegalArgumentException();
+            }
         }
-        Object[] arguments = betreft;
         this.betreft = betreft;
         this.referentie = referentie;
-        this.message = java.text.MessageFormat.format(message, arguments);
-        this.indexes = new Map2Int<>(2, -1);
+        this.message = message;
+        
+        Object[] arguments = new String[betreft.length];
+        for (int i = 0; i < betreft.length; i++) {
+            arguments[i] = betreft[i].getNaam();
+        }
+        this.messageFormatted = java.text.MessageFormat.format(message, arguments);
+        if(messageFormatted.contains("{"))
+            throw new Error("Wss niet genoeg argumenten ("+betreft.length+") voor: "+message);
     }
+    
+    private String messageFormatted;
 
     @Override
     public String toString() {
         String m = Arrays.deepToString(betreft);
-        return message + "[m:" + m + ", r:" + referentie.getRefString() + "]";
+        return messageFormatted + "[m:" + m + ", r:" + referentie.getRefString() + "]";
     }
 
     void addSum(Som s, int index) {
-        indexes.put(s, index);
+        indexesPerSom.put(s, index);
     }
 
     public Set<Som> getSums() {
-        return indexes.keySet();
+        return indexesPerSom.keySet();
     }
-
-    @Deprecated
-    public List<Integer> getChanges(List<Som> sums) {
-        List<Integer> changes = new ArrayList<>(sums.size());
-        for (Som sum : sums) {
-            int index = indexes.get(sum);
-            if (index != -1) {
-                //changes.add(sum.get(index));
-            } else {
-                changes.add(0);
-            }
-        }
-        return changes;
-    }
-
-    public Set<Map.Entry<Som, Integer>> entrySetIndex() {
-        return indexes.entrySet();
-    }
-
-    @Deprecated
-    public Set<Map.Entry<Som, Integer>> entrySet() {
-        Set<Map.Entry<Som, Integer>> entries = entrySetIndex();
-        for (Map.Entry<Som, Integer> entry : entries) {
-            //entry.setValue(entry.getKey().get(entry.getValue()));
-        }
-        return entries;
+    
+    public Set<Map.Entry<Som, List<Integer>>> entrySet(){
+        return indexesPerSom.entrySet();
     }
 
     @Override
@@ -102,6 +90,10 @@ public class Event implements Comparable<Event>, HasDatum{
 
     public Referentie getReferentie() {
         return referentie;
+    }
+
+    public String getMessage() {
+        return messageFormatted;
     }
     
     public String[] showBetrokken(){

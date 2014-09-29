@@ -13,7 +13,7 @@ import tijd.Datum;
  *
  * @author Dennis
  */
-public class ReferentieMultiple implements Referentie {
+public class ReferentieMultiple extends Referentie {
 
     List<Referentie> refs;
 
@@ -26,6 +26,11 @@ public class ReferentieMultiple implements Referentie {
 
     @Override
     public Datum getDatum() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String toString() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     

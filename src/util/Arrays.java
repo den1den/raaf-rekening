@@ -6,11 +6,28 @@
 
 package util;
 
+import geld.rekeningen.Som;
+import java.util.ArrayList;
+
 /**
  *
  * @author Dennis
  */
 public abstract class Arrays {
+
+    public static <T> ArrayList<T> asList(T[] ts) {
+        return Arrays.asList(ts);
+    }
+    
+    public static <T> ArrayList<T> asListNoNull(T[] ts) {
+        ArrayList<T> list = new ArrayList<>(ts.length);
+        for (T t : ts) {
+            if(t != null){
+                list.add(t);
+            }
+        }
+        return list;
+    }
 
     private Arrays() {
     }

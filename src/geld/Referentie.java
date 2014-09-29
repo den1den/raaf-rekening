@@ -12,13 +12,16 @@ import tijd.Datum;
  *
  * @author Dennis
  */
-public interface Referentie {
-    default String getRefString(){
+public abstract class Referentie {
+    public String getRefString(){
         return toString();
     }
     /**
      * De tijd van de referentie.
      * @return de datum en null als deze er niet is.
      */
-    Datum getDatum();
+    public abstract Datum getDatum();
+
+    @Override
+    abstract public String toString();
 }

@@ -71,6 +71,12 @@ public class IntervalDatums {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    public boolean isNegative() {
+        if(begin == null || eind == null)
+            throw new IllegalArgumentException();
+        return !begin.before(eind);
+    }
+
     private class VolMaandIterator implements Iterator<IntervalDatums> {
 
         private Datum begin = getBegin();

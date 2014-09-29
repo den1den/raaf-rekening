@@ -13,7 +13,7 @@ import tijd.Datum;
  *
  * @author Dennis
  */
-public class Kookdag implements Referentie{
+public class Kookdag extends Referentie{
     public final int id;
     private final int totaalBedrag;
     private final Persoon kok;
@@ -39,11 +39,6 @@ public class Kookdag implements Referentie{
     public Map<Persoon, Integer> getMeeters() {
         return eters;
     }
-
-    @Override
-    public String getRefString() {
-        return "Kookdag ("+id+") van "+getBedrag()+"ct met "+getTotaalEters()+" man";
-    }
     
     /**
      * geen kwijtschelden
@@ -60,5 +55,10 @@ public class Kookdag implements Referentie{
     @Override
     public Datum getDatum() {
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return "Kookdag ("+id+") van "+getBedrag()+"ct met "+getTotaalEters()+" man";
     }
 }

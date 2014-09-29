@@ -67,6 +67,10 @@ public class ParserFactory {
             return Integer.MAX_VALUE;
         }
 
+        /**
+         *
+         * @param data
+         */
         abstract protected void parseData(StringsData data);
     }
     

@@ -7,6 +7,7 @@ package data.memory;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -14,7 +15,7 @@ import java.util.Set;
  * @author Dennis
  * @param <T>
  */
-class StMap<T> {
+class StMap<T> implements Iterable<T>{
 
     private final int intialCapacity;
     private final java.util.Map<String, T> map;
@@ -65,5 +66,15 @@ class StMap<T> {
 
     public int size() {
         return map.size();
+    }
+
+    @Override
+    public String toString() {
+        return map.toString();
+    }
+
+    @Override
+    public Iterator<T> iterator() {
+        return new HashSet<>(this.map.values()).iterator();
     }
 }

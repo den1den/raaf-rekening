@@ -16,15 +16,20 @@ import tijd.IntervalDatums;
  */
 public class BewoonPeriode implements Iterable<BewoonPeriode.SubPeriode> {
 
-    final Persoon persoon;
-    final IntervalDatums interval;
+    final private Persoon persoon;
+    final private IntervalDatums interval;
+    final private int bedrag;
 
-    public BewoonPeriode(Persoon persoon, IntervalDatums interval) {
+    public BewoonPeriode(Persoon persoon, IntervalDatums interval, int bedrag) {
         this.persoon = persoon;
         if(interval.getBegin() == Datum.begin){
             throw new IllegalArgumentException("Kan niet zo");
         }
+        if(interval.isNegative()){
+            throw new IllegalArgumentException("Bewoon periode mag niet negatief zijn");
+        }
         this.interval = interval;
+        this.bedrag = bedrag;
     }
 
     @Override
@@ -40,17 +45,13 @@ public class BewoonPeriode implements Iterable<BewoonPeriode.SubPeriode> {
         return interval;
     }
 
+    public int getBedrag() {
+        return bedrag;
+    }
+
     @Override
     public Iterator<BewoonPeriode.SubPeriode> iterator() {
         return new SubPerIt();
-    }
-    
-    public static void main(String[] args) {
-        BewoonPeriode bp = new BewoonPeriode(new Persoon("Dennis test"), IntervalDatums.vanaf(new Datum(2012, 1, 1)));
-        System.out.println("per: "+bp);
-        for (SubPeriode bp1 : bp) {
-            System.out.println("sub: "+bp1);
-        }
     }
 
     private class SubPerIt implements Iterator<BewoonPeriode.SubPeriode> {
@@ -69,7 +70,7 @@ public class BewoonPeriode implements Iterable<BewoonPeriode.SubPeriode> {
 
     }
 
-    public class SubPeriode implements Referentie {
+    public class SubPeriode extends Referentie {
 
         final IntervalDatums subInterval;
 
